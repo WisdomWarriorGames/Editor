@@ -1,0 +1,21 @@
+<suki:SukiWindow xmlns="https://github.com/avaloniaui"
+                 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                 xmlns:dock="clr-namespace:Dock.Avalonia.Controls;assembly=Dock.Avalonia"
+                 xmlns:suki="clr-namespace:SukiUI.Controls;assembly=SukiUI"
+                 xmlns:viewModels="clr-namespace:WisdomWarrior.Editor.Shell.ViewModels"
+                 x:Class="WisdomWarrior.Editor.Shell.Views.MainWindow"
+                 x:DataType="viewModels:MainWindowViewModel"
+                 Title="WisdomWarrior Engine"
+                 WindowState="Maximized">
+                 
+    <suki:SukiWindow.LogoContent>
+        <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+            <PathIcon Data="{StaticResource WindowShieldRegular}" 
+                      Foreground="{DynamicResource SukiPrimaryColor}" />
+            <TextBlock Text="WisdomWarrior" FontWeight="DemiBold" FontSize="17" />
+        </StackPanel>
+    </suki:SukiWindow.LogoContent>
+
+    <dock:DockControl Layout="{Binding Layout}" />
+
+</suki:SukiWindow>
