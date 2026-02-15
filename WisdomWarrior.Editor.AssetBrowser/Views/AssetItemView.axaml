@@ -7,7 +7,7 @@
              x:DataType="models:AssetItem">
 
     <Grid>
-        <suki:GlassCard Width="100" Height="100" Margin="5" IsAnimated="False"
+        <suki:GlassCard Width="100" Height="120" Margin="5" IsAnimated="False"
                         Cursor="Hand"
                         PointerPressed="OnCardClicked"
                         Focusable="True"
@@ -26,11 +26,22 @@
             </suki:GlassCard.ContextMenu>
 
             <StackPanel VerticalAlignment="Center" Spacing="5">
-                <TextBlock Text="{Binding Icon}" FontSize="32" HorizontalAlignment="Center" />
+                <Panel Height="64" Width="64" HorizontalAlignment="Center">
+        
+                    <Image Source="{Binding Thumbnail}"
+                           IsVisible="{Binding Thumbnail, Converter={x:Static ObjectConverters.IsNotNull}}"
+                           Stretch="UniformToFill" />
+
+                    <TextBlock Text="{Binding Icon}" 
+                               FontSize="32" 
+                               VerticalAlignment="Center"
+                               HorizontalAlignment="Center"
+                               IsVisible="{Binding Thumbnail, Converter={x:Static ObjectConverters.IsNull}}" />
+                </Panel>
 
                 <TextBlock Text="{Binding Name}" IsVisible="{Binding !IsEditing}"
-                           TextWrapping="Wrap" HorizontalAlignment="Center"
-                           TextAlignment="Center" FontSize="11" />
+                           HorizontalAlignment="Center"
+                           TextAlignment="Center" FontSize="10" TextTrimming="CharacterEllipsis" />
 
                 <TextBox x:Name="NameTextBox" 
                          Text="{Binding Name}" 

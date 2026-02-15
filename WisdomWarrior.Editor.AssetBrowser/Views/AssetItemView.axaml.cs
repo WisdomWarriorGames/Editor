@@ -43,6 +43,15 @@ public partial class AssetItemView : UserControl
     private void OnCardClicked(object? sender, PointerPressedEventArgs e)
     {
         var properties = e.GetCurrentPoint(this).Properties;
+        
+        if (e.ClickCount == 2 && properties.IsLeftButtonPressed)
+        {
+            if (DataContext is AssetItem item)
+            {
+                item.DoubleClickCommand.Execute(null);
+                return;
+            }
+        }
     
         if (properties.IsLeftButtonPressed ||  properties.IsRightButtonPressed)
         {

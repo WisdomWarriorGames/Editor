@@ -1,5 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using Avalonia.Input;
+using Avalonia.Media.Imaging;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using WisdomWarrior.Editor.AssetBrowser.Models;
@@ -40,48 +41,56 @@ public partial class AssetBrowserViewModel : ObservableObject
 
         foreach (var item in rawItems)
         {
-            var viewModelItem = new AssetItem(OnCommitRename, OnCancelRename, OnItemSelected)
+            string displayName = item.IsFolder 
+                ? item.Name 
+                : Path.GetFileNameWithoutExtension(item.Name);
+            
+            var viewModelItem = new AssetItem(OnCommitRename, OnCancelRename, OnItemSelected, OnDeleteSelected, OnItemDoubleClicked)
             {
-                Name = item.Name,
+                Name = displayName,
                 FullPath = item.FullPath,
                 IsFolder = item.IsFolder,
                 Extension = item.Extension,
                 IsNew = false
             };
             Items.Add(viewModelItem);
+            
+            if (viewModelItem.IsImage)
+            {
+                LoadThumbnailAsync(viewModelItem);
+            }
+        }
+    }
+    
+    private async void LoadThumbnailAsync(AssetItem item)
+    {
+        try
+        {
+            await Task.Run(() =>
+            {
+                using var stream = File.OpenRead(item.FullPath);
+                var bitmap = Bitmap.DecodeToWidth(stream, 100);
+                
+                Avalonia.Threading.Dispatcher.UIThread.Post(() => item.Thumbnail = bitmap);
+            });
+        }
+        catch
+        {
         }
     }
 
-    [RelayCommand]
-    public void CreateFolder()
+    private void OnDeleteSelected(AssetItem item)
     {
-        var baseName = "New Folder";
-        var finalName = baseName;
-        var count = 1;
-
-        while (Items.Any(x => x.Name == finalName))
+        if (!item.IsNew)
         {
-            finalName = $"{baseName} ({count++})";
+            _contentService.DeleteItem(item.FullPath, item.IsFolder);
         }
 
-        var newItem = new AssetItem(OnCommitRename, OnCancelRename, OnItemSelected)
-        {
-            Name = finalName,
-            FullPath = Path.Combine(CurrentPath, finalName),
-            IsFolder = true,
-            IsNew = true
-        };
-
-        Items.Add(newItem);
-        newItem.BeginEdit();
+        Items.Remove(item);
     }
 
     private void OnCancelRename(AssetItem item)
     {
-        if (item.IsNew)
-        {
-            Items.Remove(item);
-        }
     }
 
     private void OnCommitRename(AssetItem item, string newName)
@@ -149,6 +158,82 @@ public partial class AssetBrowserViewModel : ObservableObject
             item.IsSelected = true;
             _lastSelectedItem = item;
         }
+    }
+    
+    private void OnItemDoubleClicked(AssetItem item)
+    {
+        if (item.IsFolder)
+        {
+            CurrentPath = item.FullPath;
+            Refresh();
+        }
+        else
+        {
+            // Future: Open file in editor
+            Console.WriteLine($"Opening file: {item.Name}");
+        }
+    }
+
+    [RelayCommand]
+    public void NavigateUp()
+    {
+        var parent = Directory.GetParent(CurrentPath);
+        if (parent != null && parent.FullName.StartsWith(_contentService.RootPath))
+        {
+            CurrentPath = parent.FullName;
+            Refresh();
+        }
+    }
+    
+    [RelayCommand]
+    public void CreateFolder()
+    {
+        var baseName = "New Folder";
+        var finalName = baseName;
+        var count = 1;
+
+        while (Items.Any(x => x.Name == finalName))
+        {
+            finalName = $"{baseName} ({count++})";
+        }
+
+        var newItem = new AssetItem(OnCommitRename, OnCancelRename, OnItemSelected, OnDeleteSelected, OnItemDoubleClicked)
+        {
+            Name = finalName,
+            FullPath = Path.Combine(CurrentPath, finalName),
+            IsFolder = true,
+            IsNew = true
+        };
+
+        Items.Add(newItem);
+        newItem.BeginEdit();
+    }
+
+    [RelayCommand]
+    public void DeleteSelected()
+    {
+        var selectedItems = Items.Where(x => x.IsSelected).ToList();
+
+        if (selectedItems.Count == 0) return;
+
+        foreach (var item in selectedItems)
+        {
+            try
+            {
+                if (!item.IsNew)
+                {
+                    _contentService.DeleteItem(item.FullPath, item.IsFolder);
+                }
+
+                Items.Remove(item);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to delete {item.Name}: {ex.Message}");
+            }
+        }
+
+        Refresh();
     }
 
     [RelayCommand]

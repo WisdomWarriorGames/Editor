@@ -113,6 +113,29 @@ public class ContentService
         return items;
     }
 
+    public void DeleteItem(string path, bool isFolder)
+    {
+        if (isFolder && Directory.Exists(path))
+        {
+            Directory.Delete(path, true); // 'true' deletes all sub-folders/files
+        }
+        else if (File.Exists(path))
+        {
+            File.Delete(path);
+        }
+    }
+
+    public string GetParentPath(string currentPath)
+    {
+        var parent = Directory.GetParent(currentPath);
+        if (parent == null || !parent.FullName.StartsWith(RootPath))
+        {
+            return RootPath;
+        }
+
+        return parent.FullName;
+    }
+
     private void SetupWatcher()
     {
         _watcher = new FileSystemWatcher(_rootPath)
