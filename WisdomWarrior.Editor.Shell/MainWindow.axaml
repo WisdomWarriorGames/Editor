@@ -6,7 +6,8 @@
                  x:Class="WisdomWarrior.Editor.Shell.MainWindow"
                  x:DataType="viewModels:MainWindowViewModel"
                  Title=""
-                 WindowState="Maximized">
+                 WindowState="Maximized"
+                 BackgroundAnimationEnabled="False">
 
     <suki:SukiWindow.LogoContent>
         <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
@@ -16,7 +17,7 @@
 
     <Grid ColumnDefinitions="4*, 4, 1*">
 
-        <Grid Grid.Column="0" RowDefinitions="4*, 4, 1*">
+        <Grid Grid.Column="0" RowDefinitions="8*, 8, 3*">
 
             <Border Grid.Row="0" Background="#050505" Margin="10" CornerRadius="15"
                     BorderBrush="{DynamicResource SukiBorderBrush}" BorderThickness="1">
@@ -31,13 +32,13 @@
 
             <Grid Grid.Row="2" ColumnDefinitions="1*, 4, 4*">
 
-                <suki:GlassCard Grid.Column="0" Margin="10,0,5,10">
+                <suki:GlassCard Grid.Column="0" Margin="10,0,5,10" IsAnimated="False">
                     <TextBlock Text="📚 Solution" VerticalAlignment="Center" HorizontalAlignment="Center" Opacity="0.6" />
                 </suki:GlassCard>
 
                 <GridSplitter Grid.Column="1" Background="Transparent" ResizeDirection="Columns" />
 
-                <suki:GlassCard Grid.Column="2" Margin="5,0,10,10">
+                <suki:GlassCard Grid.Column="2" Margin="5,0,10,10" IsAnimated="False">
                     <views:AssetBrowserView DataContext="{Binding AssetBrowser}" />
                 </suki:GlassCard>
             </Grid>
@@ -47,7 +48,7 @@
 
         <Grid Grid.Column="2" RowDefinitions="1*, 4, 2*">
 
-            <suki:GlassCard Grid.Row="0" Margin="0,10,10,5">
+            <suki:GlassCard Grid.Row="0" Margin="0,10,10,5" IsAnimated="False">
                 <DockPanel>
                     <TextBlock DockPanel.Dock="Top" Text="HIERARCHY" FontWeight="Bold" Opacity="0.5" Margin="0,0,0,10"
                                FontSize="11" />
@@ -57,7 +58,7 @@
 
             <GridSplitter Grid.Row="1" Background="Transparent" ResizeDirection="Rows" />
 
-            <suki:GlassCard Grid.Row="2" Margin="0,5,10,10">
+            <suki:GlassCard Grid.Row="2" Margin="0,5,10,10" IsAnimated="False">
                 <DockPanel>
                     <TextBlock DockPanel.Dock="Top" Text="INSPECTOR" FontWeight="Bold" Opacity="0.5" Margin="0,0,0,10"
                                FontSize="11" />

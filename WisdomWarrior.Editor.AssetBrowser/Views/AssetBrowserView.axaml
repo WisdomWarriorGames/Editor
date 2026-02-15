@@ -1,18 +1,61 @@
 ﻿<UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:suki="clr-namespace:SukiUI.Controls;assembly=SukiUI"
+             xmlns:icon="https://github.com/MahApps/IconPacks.Avalonia"
              xmlns:vm="clr-namespace:WisdomWarrior.Editor.AssetBrowser.ViewModels"
+             xmlns:views="clr-namespace:WisdomWarrior.Editor.AssetBrowser.Views"
              x:Class="WisdomWarrior.Editor.AssetBrowser.Views.AssetBrowserView"
              x:DataType="vm:AssetBrowserViewModel">
 
-    <Grid RowDefinitions="Auto, *">
-        <Border Grid.Row="0" Margin="0,0,0,10" Padding="10" Background="#111" CornerRadius="5">
-            <TextBlock Text="{Binding CurrentPath}" Foreground="#888" FontSize="12" />
-        </Border>
+    <Grid RowDefinitions="Auto, *" PointerPressed="OnBackgroundClicked">
 
-        <ScrollViewer Grid.Row="1">
+        <Grid Grid.Row="0" Height="32" Background="Transparent" Margin="5,0,5,5">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" /> <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                <TextBlock Text="📂" FontSize="14" VerticalAlignment="Center" Opacity="0.7" />
+                <TextBlock Text="ASSET BROWSER"
+                           FontSize="11"
+                           FontWeight="Bold"
+                           VerticalAlignment="Center"
+                           Opacity="0.5"
+                           LetterSpacing="1" />
+            </StackPanel>
+
+            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="5">
+
+                <Button Command="{Binding CreateFolderCommand}"
+                        Classes="Flat"
+                        Cursor="Hand"
+                        ToolTip.Tip="Create New Folder"
+                        Padding="5"
+                        CornerRadius="4"
+                        Background="Transparent">
+
+                    <icon:PackIconMaterial Kind="FolderPlus"
+                                           Width="16" Height="16"
+                                           Foreground="#CCC" />
+                </Button>
+
+            </StackPanel>
+        </Grid>
+
+        <ScrollViewer Grid.Row="1" Background="Transparent">
+
+            <ScrollViewer.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Create New Folder" Command="{Binding CreateFolderCommand}">
+                        <MenuItem.Icon>
+                            <TextBlock Text="📁" />
+                        </MenuItem.Icon>
+                    </MenuItem>
+                </ContextMenu>
+            </ScrollViewer.ContextMenu>
+
             <ItemsControl ItemsSource="{Binding Items}">
-
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
                         <WrapPanel />
@@ -21,16 +64,7 @@
 
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <suki:GlassCard Width="100" Height="100" Margin="5">
-                            <StackPanel VerticalAlignment="Center" Spacing="5">
-                                <TextBlock Text="{Binding Icon}" FontSize="32" HorizontalAlignment="Center" />
-                                <TextBlock Text="{Binding Name}"
-                                           TextWrapping="Wrap"
-                                           HorizontalAlignment="Center"
-                                           TextAlignment="Center"
-                                           FontSize="11" />
-                            </StackPanel>
-                        </suki:GlassCard>
+                        <views:AssetItemView />
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>

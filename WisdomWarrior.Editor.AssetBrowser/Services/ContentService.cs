@@ -43,6 +43,30 @@ public class ContentService
 
     public string RootPath => _rootPath;
 
+    public void CreateFolder(string parentPath, string folderName)
+    {
+        var fullPath = Path.Combine(parentPath, folderName);
+        if (!Directory.Exists(fullPath))
+        {
+            Directory.CreateDirectory(fullPath);
+        }
+    }
+
+    public void RenameItem(string sourcePath, string newName, bool isFolder)
+    {
+        var parent = Path.GetDirectoryName(sourcePath);
+        var destPath = Path.Combine(parent!, newName);
+
+        if (isFolder)
+        {
+            Directory.Move(sourcePath, destPath);
+        }
+        else
+        {
+            File.Move(sourcePath, destPath);
+        }
+    }
+
     public IEnumerable<AssetItem> GetItems(string path)
     {
         if (!Directory.Exists(path)) return Enumerable.Empty<AssetItem>();

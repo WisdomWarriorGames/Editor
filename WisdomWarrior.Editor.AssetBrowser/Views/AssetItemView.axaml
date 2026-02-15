@@ -1,0 +1,80 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:models="clr-namespace:WisdomWarrior.Editor.AssetBrowser.Models"
+             xmlns:suki="clr-namespace:SukiUI.Controls;assembly=SukiUI"
+             xmlns:icon="https://github.com/MahApps/IconPacks.Avalonia"
+             x:Class="WisdomWarrior.Editor.AssetBrowser.Views.AssetItemView"
+             x:DataType="models:AssetItem">
+
+    <Grid>
+        <suki:GlassCard Width="100" Height="100" Margin="5" IsAnimated="False"
+                        Cursor="Hand"
+                        PointerPressed="OnCardClicked"
+                        Focusable="True"
+                        Classes.selected="{Binding IsSelected}"
+                        ToolTip.Tip="{Binding Name}">
+            
+            <suki:GlassCard.KeyBindings>
+                <KeyBinding Gesture="F2" Command="{Binding BeginEditCommand}" />
+            </suki:GlassCard.KeyBindings>
+
+            <suki:GlassCard.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Rename" Command="{Binding BeginEditCommand}" />
+                    <MenuItem Header="Delete" Command="{Binding DeleteCommand}" />
+                </ContextMenu>
+            </suki:GlassCard.ContextMenu>
+
+            <StackPanel VerticalAlignment="Center" Spacing="5">
+                <TextBlock Text="{Binding Icon}" FontSize="32" HorizontalAlignment="Center" />
+
+                <TextBlock Text="{Binding Name}" IsVisible="{Binding !IsEditing}"
+                           TextWrapping="Wrap" HorizontalAlignment="Center"
+                           TextAlignment="Center" FontSize="11" />
+
+                <TextBox x:Name="NameTextBox" 
+                         Text="{Binding Name}" 
+                         IsVisible="{Binding IsEditing}"
+                         Classes.invalid="{Binding !IsValid}"
+                         MinWidth="80" HorizontalAlignment="Center"
+                         AttachedToVisualTree="OnTextBoxLoaded"
+                         TextAlignment="Center" FontSize="11" Padding="2">
+    
+                    <ToolTip.Tip>
+                        <TextBlock Text="A folder or file with this name already exists!" />
+                    </ToolTip.Tip>
+
+                    <TextBox.KeyBindings>
+                        <KeyBinding Gesture="Enter" Command="{Binding CommitRenameCommand}" />
+                        <KeyBinding Gesture="Escape" Command="{Binding CancelRenameCommand}" />
+                    </TextBox.KeyBindings>
+                </TextBox>
+            </StackPanel>
+        </suki:GlassCard>
+
+        <Border Background="#2196F3" CornerRadius="50"
+                HorizontalAlignment="Right" VerticalAlignment="Top"
+                Margin="0,0,0,0" Width="20" Height="20"
+                IsVisible="{Binding IsSelected}"
+                BoxShadow="0 2 4 0 #40000000">
+            <icon:PackIconMaterial Kind="Check" Foreground="White"
+                                   Width="10" Height="10"
+                                   HorizontalAlignment="Center" VerticalAlignment="Center" />
+        </Border>
+
+    </Grid>
+
+    <UserControl.Styles>
+        <Style Selector="suki|GlassCard.selected">
+            <Setter Property="BorderBrush" Value="#2196F3" />
+            <Setter Property="BorderThickness" Value="2" />
+        </Style>
+        <Style Selector="TextBox.invalid /template/ Border#PART_BorderElement">
+            <Setter Property="BorderBrush" Value="Red" />
+            <Setter Property="BorderThickness" Value="2" />
+        </Style>
+        <Style Selector="TextBox.invalid">
+            <Setter Property="Foreground" Value="Red" />
+        </Style>
+    </UserControl.Styles>
+</UserControl>
