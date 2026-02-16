@@ -13,4 +13,8 @@
       <PackageReference Include="SukiUI" Version="6.0.3" />
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\WisdomWarrior.Editor.FileSystem\WisdomWarrior.Editor.FileSystem.csproj" />
+    </ItemGroup>
+
 </Project>

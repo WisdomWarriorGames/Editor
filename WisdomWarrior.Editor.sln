@@ -4,6 +4,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WisdomWarrior.Editor.Shell"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WisdomWarrior.Editor.AssetBrowser", "WisdomWarrior.Editor.AssetBrowser\WisdomWarrior.Editor.AssetBrowser.csproj", "{48196ECF-930E-465A-9F25-468281F7A391}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WisdomWarrior.Editor.FileSystem", "WisdomWarrior.Editor.FileSystem\WisdomWarrior.Editor.FileSystem.csproj", "{C0DB4F33-8E14-41DC-9A3A-00CE69CC2BF2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WisdomWarrior.Editor.Core", "WisdomWarrior.Editor.Core\WisdomWarrior.Editor.Core.csproj", "{31254985-E833-4A9B-AD1C-4BD2942A2D98}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +22,13 @@ Global
 		{48196ECF-930E-465A-9F25-468281F7A391}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{48196ECF-930E-465A-9F25-468281F7A391}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{48196ECF-930E-465A-9F25-468281F7A391}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C0DB4F33-8E14-41DC-9A3A-00CE69CC2BF2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C0DB4F33-8E14-41DC-9A3A-00CE69CC2BF2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C0DB4F33-8E14-41DC-9A3A-00CE69CC2BF2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C0DB4F33-8E14-41DC-9A3A-00CE69CC2BF2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{31254985-E833-4A9B-AD1C-4BD2942A2D98}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{31254985-E833-4A9B-AD1C-4BD2942A2D98}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{31254985-E833-4A9B-AD1C-4BD2942A2D98}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{31254985-E833-4A9B-AD1C-4BD2942A2D98}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

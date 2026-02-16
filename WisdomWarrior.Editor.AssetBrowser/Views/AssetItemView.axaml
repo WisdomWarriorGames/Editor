@@ -1,6 +1,6 @@
 ﻿<UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:models="clr-namespace:WisdomWarrior.Editor.AssetBrowser.Models"
+             xmlns:models="clr-namespace:WisdomWarrior.Editor.AssetBrowser.ViewModels"
              xmlns:suki="clr-namespace:SukiUI.Controls;assembly=SukiUI"
              xmlns:icon="https://github.com/MahApps/IconPacks.Avalonia"
              x:Class="WisdomWarrior.Editor.AssetBrowser.Views.AssetItemView"
@@ -13,7 +13,7 @@
                         Focusable="True"
                         Classes.selected="{Binding IsSelected}"
                         ToolTip.Tip="{Binding Name}">
-            
+
             <suki:GlassCard.KeyBindings>
                 <KeyBinding Gesture="F2" Command="{Binding BeginEditCommand}" />
             </suki:GlassCard.KeyBindings>
@@ -27,13 +27,13 @@
 
             <StackPanel VerticalAlignment="Center" Spacing="5">
                 <Panel Height="64" Width="64" HorizontalAlignment="Center">
-        
+
                     <Image Source="{Binding Thumbnail}"
                            IsVisible="{Binding Thumbnail, Converter={x:Static ObjectConverters.IsNotNull}}"
                            Stretch="UniformToFill" />
 
-                    <TextBlock Text="{Binding Icon}" 
-                               FontSize="32" 
+                    <TextBlock Text="{Binding Icon}"
+                               FontSize="32"
                                VerticalAlignment="Center"
                                HorizontalAlignment="Center"
                                IsVisible="{Binding Thumbnail, Converter={x:Static ObjectConverters.IsNull}}" />
@@ -43,14 +43,14 @@
                            HorizontalAlignment="Center"
                            TextAlignment="Center" FontSize="10" TextTrimming="CharacterEllipsis" />
 
-                <TextBox x:Name="NameTextBox" 
-                         Text="{Binding Name}" 
+                <TextBox x:Name="NameTextBox"
+                         Text="{Binding Name}"
                          IsVisible="{Binding IsEditing}"
                          Classes.invalid="{Binding !IsValid}"
                          MinWidth="80" HorizontalAlignment="Center"
                          AttachedToVisualTree="OnTextBoxLoaded"
                          TextAlignment="Center" FontSize="11" Padding="2">
-    
+
                     <ToolTip.Tip>
                         <TextBlock Text="A folder or file with this name already exists!" />
                     </ToolTip.Tip>

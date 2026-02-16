@@ -1,136 +1,55 @@
 ﻿using System.Collections.ObjectModel;
 using Avalonia.Input;
-using Avalonia.Media.Imaging;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using WisdomWarrior.Editor.AssetBrowser.Models;
-using WisdomWarrior.Editor.AssetBrowser.Services;
+using WisdomWarrior.Editor.FileSystem;
 
 namespace WisdomWarrior.Editor.AssetBrowser.ViewModels;
 
-public partial class AssetBrowserViewModel : ObservableObject
+public partial class AssetBrowserViewModel : ObservableObject, IAssetHandler
 {
-    private readonly ContentService _contentService;
-
-    [ObservableProperty]
-    private string _currentPath;
-
-    private AssetItem? _lastSelectedItem;
+    private readonly FileSystemRegistry _registry;
+    private readonly FileSystemService _fileSystem;
 
     public ObservableCollection<AssetItem> Items { get; } = new();
+    private AssetItem? _lastSelectedItem;
 
-    public AssetBrowserViewModel(string projectPath)
+    public AssetBrowserViewModel(FileSystemRegistry registry, FileSystemService fileSystem)
     {
-        _contentService = new ContentService(projectPath);
-        _currentPath = _contentService.RootPath;
-        _contentService.RefreshRequested += OnRefreshRequested;
+        _registry = registry;
+        _fileSystem = fileSystem;
+
+        _registry.RegistryUpdated += OnRegistryChanged;
+
         Refresh();
     }
 
-    private void OnRefreshRequested()
+    private void OnRegistryChanged()
     {
-        if (Items.Any(i => i.IsEditing)) return;
-
         Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(Refresh);
     }
 
     public void Refresh()
     {
+        var activeNode = _registry.CurrentNode;
+        if (activeNode == null) return;
+
         Items.Clear();
-        var rawItems = _contentService.GetItems(CurrentPath);
-
-        foreach (var item in rawItems)
+        foreach (var childNode in activeNode.Children)
         {
-            string displayName = item.IsFolder 
-                ? item.Name 
-                : Path.GetFileNameWithoutExtension(item.Name);
-            
-            var viewModelItem = new AssetItem(OnCommitRename, OnCancelRename, OnItemSelected, OnDeleteSelected, OnItemDoubleClicked)
-            {
-                Name = displayName,
-                FullPath = item.FullPath,
-                IsFolder = item.IsFolder,
-                Extension = item.Extension,
-                IsNew = false
-            };
-            Items.Add(viewModelItem);
-            
-            if (viewModelItem.IsImage)
-            {
-                LoadThumbnailAsync(viewModelItem);
-            }
-        }
-    }
-    
-    private async void LoadThumbnailAsync(AssetItem item)
-    {
-        try
-        {
-            await Task.Run(() =>
-            {
-                using var stream = File.OpenRead(item.FullPath);
-                var bitmap = Bitmap.DecodeToWidth(stream, 100);
-                
-                Avalonia.Threading.Dispatcher.UIThread.Post(() => item.Thumbnail = bitmap);
-            });
-        }
-        catch
-        {
+            Items.Add(new AssetItem(this, childNode));
         }
     }
 
-    private void OnDeleteSelected(AssetItem item)
-    {
-        if (!item.IsNew)
-        {
-            _contentService.DeleteItem(item.FullPath, item.IsFolder);
-        }
-
-        Items.Remove(item);
-    }
-
-    private void OnCancelRename(AssetItem item)
-    {
-    }
-
-    private void OnCommitRename(AssetItem item, string newName)
-    {
-        if (string.IsNullOrWhiteSpace(newName)) return;
-
-        try
-        {
-            if (item.IsNew)
-            {
-                _contentService.CreateFolder(CurrentPath, newName);
-                item.IsNew = false;
-            }
-            else
-            {
-                var currentName = Path.GetFileName(item.FullPath);
-                if (currentName == newName) return;
-
-                _contentService.RenameItem(item.FullPath, newName, item.IsFolder);
-            }
-
-            item.FullPath = Path.Combine(CurrentPath, newName);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Operation failed: {ex.Message}");
-        }
-        finally
-        {
-            Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(Refresh);
-        }
-    }
-
-    private void OnItemSelected(AssetItem item, KeyModifiers modifiers)
+    public void OnSelected(AssetItem item, KeyModifiers modifiers)
     {
         if (modifiers.HasFlag(KeyModifiers.Control))
         {
             item.IsSelected = !item.IsSelected;
-
-            if (item.IsSelected) _lastSelectedItem = item;
+            if (item.IsSelected)
+            {
+                _lastSelectedItem = item;
+            }
         }
         else if (modifiers.HasFlag(KeyModifiers.Shift) && _lastSelectedItem != null)
         {
@@ -139,10 +58,6 @@ public partial class AssetBrowserViewModel : ObservableObject
 
             if (start != -1 && end != -1)
             {
-                // Clear others first? usually Shift+Click keeps previous selection in Windows Explorer
-                // but let's stick to simple range for now.
-                // ClearSelection(); // Optional: Uncomment if you want Shift to clear previous non-range selections
-
                 var lower = Math.Min(start, end);
                 var upper = Math.Max(start, end);
 
@@ -154,37 +69,56 @@ public partial class AssetBrowserViewModel : ObservableObject
         }
         else
         {
-            ClearSelection();
+            foreach (var i in Items) i.IsSelected = false;
             item.IsSelected = true;
             _lastSelectedItem = item;
         }
     }
-    
-    private void OnItemDoubleClicked(AssetItem item)
+
+    public void OnDoubleClicked(AssetItem item)
     {
         if (item.IsFolder)
         {
-            CurrentPath = item.FullPath;
-            Refresh();
+            _registry.SetCurrentNode(item.FullPath);
+        }
+    }
+
+    public void OnRenameCommitted(AssetItem item, string newName)
+    {
+        if (item.IsFolder)
+        {
+            _fileSystem.RenameFolder(item.FullPath, newName);
         }
         else
         {
-            // Future: Open file in editor
-            Console.WriteLine($"Opening file: {item.Name}");
+            _fileSystem.RenameFile(item.FullPath, newName);
+        }
+    }
+
+    public void OnDeleteRequested(AssetItem item)
+    {
+        if (item.IsEditing) return;
+
+        if (item.IsFolder)
+        {
+            _fileSystem.DeleteFolder(item.FullPath);
+        }
+        else
+        {
+            _fileSystem.DeleteFile(item.FullPath);
         }
     }
 
     [RelayCommand]
     public void NavigateUp()
     {
-        var parent = Directory.GetParent(CurrentPath);
-        if (parent != null && parent.FullName.StartsWith(_contentService.RootPath))
+        var parentPath = Path.GetDirectoryName(_registry.CurrentNode.FullPath);
+        if (parentPath != null)
         {
-            CurrentPath = parent.FullName;
-            Refresh();
+            _registry.SetCurrentNode(parentPath);
         }
     }
-    
+
     [RelayCommand]
     public void CreateFolder()
     {
@@ -192,57 +126,52 @@ public partial class AssetBrowserViewModel : ObservableObject
         var finalName = baseName;
         var count = 1;
 
-        while (Items.Any(x => x.Name == finalName))
+        while (_registry.CurrentNode.Children.Any(x => x.Name == finalName))
         {
             finalName = $"{baseName} ({count++})";
         }
 
-        var newItem = new AssetItem(OnCommitRename, OnCancelRename, OnItemSelected, OnDeleteSelected, OnItemDoubleClicked)
-        {
-            Name = finalName,
-            FullPath = Path.Combine(CurrentPath, finalName),
-            IsFolder = true,
-            IsNew = true
-        };
+        _fileSystem.CreateFolder(_registry.CurrentNode.FullPath, finalName);
 
-        Items.Add(newItem);
-        newItem.BeginEdit();
+        // 2. The FileSystemWatcher will trigger the Registry update.
+        // To make it feel "snappy," we can force a focus/edit on the new item
+        // once it appears in our 'Items' collection.
     }
 
     [RelayCommand]
     public void DeleteSelected()
     {
-        var selectedItems = Items.Where(x => x.IsSelected).ToList();
+        var pathsToDelete = Items.Where(x => x.IsSelected)
+            .Select(x => (x.FullPath, x.IsFolder))
+            .ToList();
 
-        if (selectedItems.Count == 0) return;
+        if (pathsToDelete.Count == 0) return;
 
-        foreach (var item in selectedItems)
+        foreach (var (path, isFolder) in pathsToDelete)
         {
             try
             {
-                if (!item.IsNew)
-                {
-                    _contentService.DeleteItem(item.FullPath, item.IsFolder);
-                }
-
-                Items.Remove(item);
+                if (isFolder) _fileSystem.DeleteFolder(path);
+                else _fileSystem.DeleteFile(path);
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Failed to delete {item.Name}: {ex.Message}");
+                // Log the error (maybe show a SukiUI Toast/Notification)
+                Console.WriteLine($"Delete failed: {ex.Message}");
             }
         }
-
-        Refresh();
     }
 
     [RelayCommand]
     public void ClearSelection()
     {
-        for (int i = 0; i < Items.Count; i++)
+        foreach (var item in Items)
         {
-            Items[i].IsSelected = false;
-            Items[i].CancelRenameCommand.Execute(null);
+            item.IsSelected = false;
+            if (item.IsEditing)
+            {
+                item.CancelRenameCommand.Execute(null);
+            }
         }
 
         _lastSelectedItem = null;

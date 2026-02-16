@@ -1,9 +1,8 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
-using Avalonia.Markup.Xaml;
 using Avalonia.Threading;
-using WisdomWarrior.Editor.AssetBrowser.Models;
+using WisdomWarrior.Editor.AssetBrowser.ViewModels;
 
 namespace WisdomWarrior.Editor.AssetBrowser.Views;
 
@@ -43,7 +42,7 @@ public partial class AssetItemView : UserControl
     private void OnCardClicked(object? sender, PointerPressedEventArgs e)
     {
         var properties = e.GetCurrentPoint(this).Properties;
-        
+
         if (e.ClickCount == 2 && properties.IsLeftButtonPressed)
         {
             if (DataContext is AssetItem item)
@@ -52,8 +51,8 @@ public partial class AssetItemView : UserControl
                 return;
             }
         }
-    
-        if (properties.IsLeftButtonPressed ||  properties.IsRightButtonPressed)
+
+        if (properties.IsLeftButtonPressed || properties.IsRightButtonPressed)
         {
             // 1. Capture the modifiers and item while we are on the event thread
             var modifiers = e.KeyModifiers;
@@ -68,13 +67,13 @@ public partial class AssetItemView : UserControl
                     {
                         c.Focus();
                     }
-                    
+
                     if (item.SelectCommand.CanExecute(modifiers))
                     {
                         item.SelectCommand.Execute(modifiers);
                     }
                 });
-            
+
                 e.Handled = true;
             }
         }
