@@ -10,6 +10,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WisdomWarrior.Editor.Core",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WisdomWarrior.Editor.MonoGame", "WisdomWarrior.Editor.MonoGame\WisdomWarrior.Editor.MonoGame.csproj", "{735F3DFE-A981-4CD6-8CDC-B2ADACABF598}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WisdomWarrior.Editor.SceneList", "WisdomWarrior.Editor.SceneList\WisdomWarrior.Editor.SceneList.csproj", "{55539CA0-C131-4A97-A1C4-17F6C76DBA95}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -36,5 +38,9 @@ Global
 		{735F3DFE-A981-4CD6-8CDC-B2ADACABF598}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{735F3DFE-A981-4CD6-8CDC-B2ADACABF598}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{735F3DFE-A981-4CD6-8CDC-B2ADACABF598}.Release|Any CPU.Build.0 = Release|Any CPU
+		{55539CA0-C131-4A97-A1C4-17F6C76DBA95}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{55539CA0-C131-4A97-A1C4-17F6C76DBA95}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{55539CA0-C131-4A97-A1C4-17F6C76DBA95}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{55539CA0-C131-4A97-A1C4-17F6C76DBA95}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

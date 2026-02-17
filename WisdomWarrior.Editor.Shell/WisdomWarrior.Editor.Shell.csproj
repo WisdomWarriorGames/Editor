@@ -27,5 +27,6 @@
       <ProjectReference Include="..\WisdomWarrior.Editor.Core\WisdomWarrior.Editor.Core.csproj" />
       <ProjectReference Include="..\WisdomWarrior.Editor.FileSystem\WisdomWarrior.Editor.FileSystem.csproj" />
       <ProjectReference Include="..\WisdomWarrior.Editor.MonoGame\WisdomWarrior.Editor.MonoGame.csproj" />
+      <ProjectReference Include="..\WisdomWarrior.Editor.SceneList\WisdomWarrior.Editor.SceneList.csproj" />
     </ItemGroup>
 </Project>

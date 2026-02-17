@@ -1,9 +1,10 @@
 <suki:SukiWindow xmlns="https://github.com/avaloniaui"
                  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                  xmlns:suki="clr-namespace:SukiUI.Controls;assembly=SukiUI"
-                 xmlns:views="clr-namespace:WisdomWarrior.Editor.AssetBrowser.Views;assembly=WisdomWarrior.Editor.AssetBrowser"
+                 xmlns:assetBrowser="clr-namespace:WisdomWarrior.Editor.AssetBrowser.Views;assembly=WisdomWarrior.Editor.AssetBrowser"
                  xmlns:viewModels="clr-namespace:WisdomWarrior.Editor.Shell.ViewModels"
                  xmlns:monogame="clr-namespace:WisdomWarrior.Editor.MonoGame.Views;assembly=WisdomWarrior.Editor.MonoGame"
+                 xmlns:sceneView="clr-namespace:WisdomWarrior.Editor.SceneList.Views;assembly=WisdomWarrior.Editor.SceneList"
                  x:Class="WisdomWarrior.Editor.Shell.MainWindow"
                  x:DataType="viewModels:MainWindowViewModel"
                  Title=""
@@ -38,7 +39,7 @@
                 <GridSplitter Grid.Column="1" Background="Transparent" ResizeDirection="Columns" />
 
                 <suki:GlassCard Grid.Column="2" Margin="5,0,10,10" IsAnimated="False">
-                    <views:AssetBrowserView DataContext="{Binding AssetBrowser}" />
+                    <assetBrowser:AssetBrowserView DataContext="{Binding AssetBrowser}" />
                 </suki:GlassCard>
             </Grid>
         </Grid>
@@ -48,11 +49,9 @@
         <Grid Grid.Column="2" RowDefinitions="1*, 4, 2*">
 
             <suki:GlassCard Grid.Row="0" Margin="0,10,10,5" IsAnimated="False">
-                <DockPanel>
-                    <TextBlock DockPanel.Dock="Top" Text="HIERARCHY" FontWeight="Bold" Opacity="0.5" Margin="0,0,0,10"
-                               FontSize="11" />
-                    <TextBlock Text="Scene List" VerticalAlignment="Center" HorizontalAlignment="Center" Opacity="0.6" />
-                </DockPanel>
+
+                <sceneView:SceneView DataContext="{Binding SceneListViewModel}" />
+
             </suki:GlassCard>
 
             <GridSplitter Grid.Row="1" Background="Transparent" ResizeDirection="Rows" />
