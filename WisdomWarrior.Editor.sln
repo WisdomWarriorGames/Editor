@@ -8,6 +8,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WisdomWarrior.Editor.FileSy
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WisdomWarrior.Editor.Core", "WisdomWarrior.Editor.Core\WisdomWarrior.Editor.Core.csproj", "{31254985-E833-4A9B-AD1C-4BD2942A2D98}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WisdomWarrior.Editor.MonoGame", "WisdomWarrior.Editor.MonoGame\WisdomWarrior.Editor.MonoGame.csproj", "{735F3DFE-A981-4CD6-8CDC-B2ADACABF598}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,5 +32,9 @@ Global
 		{31254985-E833-4A9B-AD1C-4BD2942A2D98}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{31254985-E833-4A9B-AD1C-4BD2942A2D98}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{31254985-E833-4A9B-AD1C-4BD2942A2D98}.Release|Any CPU.Build.0 = Release|Any CPU
+		{735F3DFE-A981-4CD6-8CDC-B2ADACABF598}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{735F3DFE-A981-4CD6-8CDC-B2ADACABF598}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{735F3DFE-A981-4CD6-8CDC-B2ADACABF598}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{735F3DFE-A981-4CD6-8CDC-B2ADACABF598}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

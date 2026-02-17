@@ -3,6 +3,7 @@
                  xmlns:suki="clr-namespace:SukiUI.Controls;assembly=SukiUI"
                  xmlns:views="clr-namespace:WisdomWarrior.Editor.AssetBrowser.Views;assembly=WisdomWarrior.Editor.AssetBrowser"
                  xmlns:viewModels="clr-namespace:WisdomWarrior.Editor.Shell.ViewModels"
+                 xmlns:monogame="clr-namespace:WisdomWarrior.Editor.MonoGame.Views;assembly=WisdomWarrior.Editor.MonoGame"
                  x:Class="WisdomWarrior.Editor.Shell.MainWindow"
                  x:DataType="viewModels:MainWindowViewModel"
                  Title=""
@@ -19,12 +20,10 @@
 
         <Grid Grid.Column="0" RowDefinitions="8*, 8, 3*">
 
-            <Border Grid.Row="0" Background="#050505" Margin="10" CornerRadius="15"
+            <Border Grid.Row="0" Background="#050505" Margin="10"
                     BorderBrush="{DynamicResource SukiBorderBrush}" BorderThickness="1">
                 <Grid>
-                    <TextBlock Text="🎮 MonoGame Viewport"
-                               VerticalAlignment="Center" HorizontalAlignment="Center"
-                               Foreground="#444" FontWeight="Bold" />
+                    <monogame:MonoGameView DataContext="{Binding MonoGameWindow}" />
                 </Grid>
             </Border>
 
