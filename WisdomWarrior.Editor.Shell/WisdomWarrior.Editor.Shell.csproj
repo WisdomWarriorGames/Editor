@@ -25,6 +25,7 @@
     <ItemGroup>
       <ProjectReference Include="..\WisdomWarrior.Editor.AssetBrowser\WisdomWarrior.Editor.AssetBrowser.csproj" />
       <ProjectReference Include="..\WisdomWarrior.Editor.FileSystem\WisdomWarrior.Editor.FileSystem.csproj" />
+      <ProjectReference Include="..\WisdomWarrior.Editor.Inspector\WisdomWarrior.Editor.Inspector.csproj" />
       <ProjectReference Include="..\WisdomWarrior.Editor.Menus\WisdomWarrior.Editor.Menus.csproj" />
       <ProjectReference Include="..\WisdomWarrior.Editor.MonoGame\WisdomWarrior.Editor.MonoGame.csproj" />
       <ProjectReference Include="..\WisdomWarrior.Editor.SceneList\WisdomWarrior.Editor.SceneList.csproj" />

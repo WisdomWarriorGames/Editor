@@ -1,0 +1,29 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:viewModels="clr-namespace:WisdomWarrior.Editor.Inspector.ViewModels"
+             x:Class="WisdomWarrior.Editor.Inspector.Views.Inspector"
+             x:DataType="viewModels:InspectorViewModel">
+    <DockPanel>
+        <TextBlock DockPanel.Dock="Top" Text="INSPECTOR TEST" FontWeight="Bold" Opacity="0.5" Margin="0,0,0,10"
+                   FontSize="11" />
+        <StackPanel>
+            <Button Content="Add Component" 
+                    HorizontalAlignment="Stretch"
+                    HorizontalContentAlignment="Center"
+                    Margin="0,20,0,0"
+                    IsVisible="{Binding SelectedEntity, Converter={x:Static ObjectConverters.IsNotNull}}">
+                <Button.Flyout>
+                    <MenuFlyout>
+                        <MenuItem Header="Transform" 
+                                  Command="{Binding AddComponentCommand}" 
+                                  CommandParameter="Transform" />
+                        <MenuItem Header="Physics Body (Future)" IsEnabled="False" />
+                        <MenuItem Header="Sprite Renderer (Future)" IsEnabled="False" />
+                    </MenuFlyout>
+                </Button.Flyout>
+            </Button>
+        </StackPanel>
+        <TextBlock Text="⚙️ Components" VerticalAlignment="Center" HorizontalAlignment="Center"
+                   Opacity="0.6" />
+    </DockPanel>
+</UserControl>

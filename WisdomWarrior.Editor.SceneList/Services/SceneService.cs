@@ -1,9 +1,11 @@
 ﻿using System.Collections.ObjectModel;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Avalonia.Threading;
 using WisdomWarrior.Editor.Core;
 using WisdomWarrior.Editor.FileSystem;
 using WisdomWarrior.Engine.Core;
+using WisdomWarrior.Engine.Core.Components;
 
 namespace WisdomWarrior.Editor.SceneList.Services;
 
@@ -16,7 +18,7 @@ public class SceneService
 
     public Scene ActiveScene { get; set; }
 
-    public SceneService(WorkspaceService workspaceService, FileSystemService fileSystemService)
+    public SceneService(WorkspaceService workspaceService)
     {
         _workspaceService = workspaceService;
         _workspaceService.WorkspaceInitialized += OnWorkspaceInitialized;
@@ -31,7 +33,16 @@ public class SceneService
 
     public void SaveScene()
     {
-        var json = JsonSerializer.Serialize(ActiveScene, new JsonSerializerOptions { WriteIndented = true });
+        var options = new JsonSerializerOptions
+        {
+            WriteIndented = true,
+            IncludeFields = true,
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+        };
+
+        options.Converters.Add(new ComponentConverter());
+
+        var json = JsonSerializer.Serialize(ActiveScene, options);
         File.WriteAllText(_workspaceService.ActiveScene, json);
     }
 
@@ -39,8 +50,11 @@ public class SceneService
     {
         if (_workspaceService.ActiveScene != null)
         {
+            var options = new JsonSerializerOptions();
+            options.Converters.Add(new ComponentConverter());
+
             var json = File.ReadAllText(_workspaceService.ActiveScene);
-            ActiveScene = JsonSerializer.Deserialize<Scene>(json);
+            ActiveScene = JsonSerializer.Deserialize<Scene>(json, options);
             ActiveScene.Initialize();
 
             WatchCollection(ActiveScene.Entities);
@@ -58,6 +72,7 @@ public class SceneService
                 foreach (GameEntity entity in e.NewItems)
                 {
                     WatchCollection(entity.Children);
+                    WatchComponents(entity.Components);
                 }
             }
         };
@@ -65,7 +80,13 @@ public class SceneService
         foreach (var entity in collection)
         {
             WatchCollection(entity.Children);
+            WatchComponents(entity.Components);
         }
+    }
+
+    private void WatchComponents(ObservableCollection<Component> components)
+    {
+        components.CollectionChanged += (s, e) => { _isDirty = true; };
     }
 
     private void CheckAndSave()

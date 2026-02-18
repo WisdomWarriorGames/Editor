@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using ReactiveUI;
+using WisdomWarrior.Editor.Core;
 using WisdomWarrior.Editor.FileSystem;
 using WisdomWarrior.Editor.SceneList.Services;
 using WisdomWarrior.Engine.Core;
@@ -12,17 +13,29 @@ public partial class SceneListViewModel : ObservableObject
 {
     private readonly SceneService _sceneService;
     private readonly WorkspaceService _workspaceService;
+    private readonly EditorContext _context;
 
-    [ObservableProperty] private object? _selectedObject;
+    public object? SelectedObject
+    {
+        get => _context.SelectedEntity;
+        set
+        {
+            if (value is GameEntity entity)
+                _context.SelectedEntity = entity;
+            else
+                _context.SelectedEntity = null;
+        }
+    }
 
     public IEnumerable<Scene> SceneRoot => _sceneService.ActiveScene != null
         ? new[] { _sceneService.ActiveScene }
         : Array.Empty<Scene>();
 
-    public SceneListViewModel(SceneService sceneService, WorkspaceService workspaceService)
+    public SceneListViewModel(SceneService sceneService, WorkspaceService workspaceService, EditorContext context)
     {
         _sceneService = sceneService;
         _workspaceService = workspaceService;
+        _context = context;
 
         _workspaceService.WorkspaceInitialized += OnWorkspaceInitialized;
     }

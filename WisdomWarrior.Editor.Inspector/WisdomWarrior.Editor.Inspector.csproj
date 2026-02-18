@@ -7,11 +7,12 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <PackageReference Include="Avalonia" Version="11.3.12" />
       <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\Engine\WisdomWarrior.Engine.Core\WisdomWarrior.Engine.Core.csproj" />
+      <ProjectReference Include="..\WisdomWarrior.Editor.Core\WisdomWarrior.Editor.Core.csproj" />
     </ItemGroup>
 
 </Project>

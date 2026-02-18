@@ -1,6 +1,8 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using WisdomWarrior.Editor.AssetBrowser.ViewModels;
+using WisdomWarrior.Editor.Core;
 using WisdomWarrior.Editor.FileSystem;
+using WisdomWarrior.Editor.Inspector.ViewModels;
 using WisdomWarrior.Editor.Menus.ViewModels;
 using WisdomWarrior.Editor.MonoGame.ViewModels;
 using WisdomWarrior.Editor.SceneList.Services;
@@ -25,6 +27,9 @@ public static class Configurations
         services.AddSingleton<MonoGameViewModel>();
         services.AddSingleton<SceneListViewModel>();
         services.AddSingleton<FileMenuViewModel>();
+        services.AddSingleton<InspectorViewModel>();
+
+        services.AddSingleton<EditorContext>();
 
         return services;
     }
