@@ -10,7 +10,7 @@ public class WorkspaceService(FileSystemRegistry registry)
     public Manifest? Project { get; private set; }
     public string ProjectRoot { get; private set; }
 
-    public event Action<FileSystemRegistry>? RegistryInitialized;
+    public event Action<FileSystemRegistry>? WorkspaceInitialized;
 
     public void Load(string pathToManifest)
     {
@@ -40,6 +40,6 @@ public class WorkspaceService(FileSystemRegistry registry)
     public void ChangeModule(string path)
     {
         _currentRegistry.Initialize(path);
-        RegistryInitialized?.Invoke(_currentRegistry);
+        WorkspaceInitialized?.Invoke(_currentRegistry);
     }
 }

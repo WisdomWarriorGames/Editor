@@ -20,7 +20,7 @@
 
             <suki:GlassCard.ContextMenu>
                 <ContextMenu>
-                    <MenuItem Header="Rename" Command="{Binding BeginEditCommand}" />
+                    <MenuItem Header="Rename (F2)" Command="{Binding BeginEditCommand}" />
                     <MenuItem Header="Delete" Command="{Binding DeleteCommand}" />
                 </ContextMenu>
             </suki:GlassCard.ContextMenu>

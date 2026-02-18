@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Text.Json;
 using WisdomWarrior.Editor.Core;
+using WisdomWarrior.Engine.Core;
 
 namespace WisdomWarrior.Editor.FileSystem;
 
@@ -31,12 +32,20 @@ public class ProjectService
         DeleteIfExists(Path.Combine(assetsPath, $"Class1.cs"));
         DeleteIfExists(Path.Combine(gameLogicPath, $"Class1.cs"));
 
+        var activeScene = SaveCurrentScene(gameLogicPath);
+        var manifest = SaveManifest(projectName, name, rootPath, gameLogicPath, assetsPath, activeScene);
+        return manifest;
+    }
+
+    private Manifest SaveManifest(string projectName, string name, string rootPath, string gameLogicPath, string assetsPath, string activeScene)
+    {
         var manifest = new Manifest
         {
             ProjectName = projectName,
             ProjectNameStripped = name,
             ProjectRoot = rootPath,
             GameProjectPath = gameLogicPath,
+            ActiveScene = activeScene,
             Modules =
             [
                 new ProjectModule
@@ -50,8 +59,22 @@ public class ProjectService
         var manifestPath = Path.Combine(rootPath, $"{name}.manifest.json");
         var json = JsonSerializer.Serialize(manifest, new JsonSerializerOptions { WriteIndented = true });
         File.WriteAllText(manifestPath, json);
-
         return manifest;
+    }
+
+    private string SaveCurrentScene(string gameLogicPath)
+    {
+        var scene = new Scene
+        {
+            Name = "Scene1",
+            Entities = []
+        };
+
+        var scenePath = Path.Combine(gameLogicPath, $"CurrentScene.scene.json");
+        var json = JsonSerializer.Serialize(scene, new JsonSerializerOptions { WriteIndented = true });
+        File.WriteAllText(scenePath, json);
+
+        return scenePath;
     }
 
     private void RunDotnetCommand(string workingDirectory, string arguments)

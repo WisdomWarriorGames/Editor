@@ -6,6 +6,7 @@ public class Manifest
     public string ProjectNameStripped { get; set; }
     public string GameProjectPath { get; set; }
     public string ProjectRoot { get; set; }
+    public string ActiveScene { get; set; }
     public List<ProjectModule> Modules { get; set; } = [];
 }
 

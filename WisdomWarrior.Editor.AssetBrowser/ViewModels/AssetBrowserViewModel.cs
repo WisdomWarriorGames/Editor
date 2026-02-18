@@ -22,7 +22,7 @@ public partial class AssetBrowserViewModel : ObservableObject, IAssetHandler
         _workspace = workspace;
         _fileSystem = fileSystem;
 
-        _workspace.RegistryInitialized += Initialize;
+        _workspace.WorkspaceInitialized += Initialize;
     }
 
     private void Initialize(FileSystemRegistry registry)
