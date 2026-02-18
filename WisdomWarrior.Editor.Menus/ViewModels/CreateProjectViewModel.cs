@@ -6,7 +6,7 @@ using WisdomWarrior.Editor.FileSystem;
 
 namespace WisdomWarrior.Editor.Menus.ViewModels;
 
-public partial class CreateProjectViewModel(ProjectService projectService) : ObservableObject
+public partial class CreateProjectViewModel(ProjectService projectService, WorkspaceService workspaceService) : ObservableObject
 {
     [ObservableProperty] private bool _isLoading;
     [ObservableProperty] private string _gameName = "MyNewGame";
@@ -32,14 +32,15 @@ public partial class CreateProjectViewModel(ProjectService projectService) : Obs
     {
         if (string.IsNullOrWhiteSpace(GameName) || !Directory.Exists(ProjectPath))
             return;
-        
+
         IsLoading = true;
-        
-        await Task.Run(() => 
+
+        await Task.Run(() =>
         {
-            projectService.CreateSolution(ProjectPath, GameName);
+            var manifest = projectService.CreateSolution(ProjectPath, GameName);
+            workspaceService.Load(manifest);
         });
-        
+
         IsLoading = false;
         window.Close(true);
     }

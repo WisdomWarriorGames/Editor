@@ -1,12 +1,12 @@
 ﻿using System.Diagnostics;
 using System.Text.Json;
-using WisdomWarrior.Editor.FileSystem.Models;
+using WisdomWarrior.Editor.Core;
 
 namespace WisdomWarrior.Editor.FileSystem;
 
 public class ProjectService
 {
-    public void CreateSolution(string projectPath, string projectName)
+    public Manifest CreateSolution(string projectPath, string projectName)
     {
         var name = projectName.Replace(" ", string.Empty);
         var rootPath = Path.Combine(projectPath, name);
@@ -33,8 +33,9 @@ public class ProjectService
 
         var manifest = new Manifest
         {
-            GameProjectName = projectName,
-            GameProjectNameStripped = name,
+            ProjectName = projectName,
+            ProjectNameStripped = name,
+            ProjectRoot = rootPath,
             GameProjectPath = gameLogicPath,
             Modules =
             [
@@ -49,6 +50,8 @@ public class ProjectService
         var manifestPath = Path.Combine(rootPath, $"{name}.manifest.json");
         var json = JsonSerializer.Serialize(manifest, new JsonSerializerOptions { WriteIndented = true });
         File.WriteAllText(manifestPath, json);
+
+        return manifest;
     }
 
     private void RunDotnetCommand(string workingDirectory, string arguments)

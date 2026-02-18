@@ -22,7 +22,7 @@ public class FileSystemRegistry(FileSystemService fileSystemService) : IDisposab
             RegistryUpdated?.Invoke();
         }
     }
-    
+
     public void SetCurrentNode(string path)
     {
         if (Nodes.TryGetValue(path, out var node) && node.IsFolder)
@@ -35,6 +35,7 @@ public class FileSystemRegistry(FileSystemService fileSystemService) : IDisposab
     {
         lock (_lock)
         {
+            StopWatcher();
             Nodes.Clear();
             Directories.Clear();
 
@@ -64,6 +65,15 @@ public class FileSystemRegistry(FileSystemService fileSystemService) : IDisposab
         _watcher.Created += (s, e) => HandleCreated(e.FullPath);
         _watcher.Deleted += (s, e) => HandleDeleted(e.FullPath);
         _watcher.Renamed += (s, e) => HandleRenamed(e.OldFullPath, e.FullPath);
+    }
+
+    private void StopWatcher()
+    {
+        if (_watcher != null)
+        {
+            _watcher.EnableRaisingEvents = false;
+            _watcher.Dispose();
+        }
     }
 
     private void PopulateDictionaryRecursive(FileSystemNode node)
@@ -143,10 +153,6 @@ public class FileSystemRegistry(FileSystemService fileSystemService) : IDisposab
 
     public void Dispose()
     {
-        if (_watcher != null)
-        {
-            _watcher.EnableRaisingEvents = false;
-            _watcher.Dispose();
-        }
+        StopWatcher();
     }
 }

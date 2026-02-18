@@ -36,6 +36,7 @@
                         Cursor="Hand"
                         ToolTip.Tip="Go Up One Level"
                         Padding="5"
+                        IsVisible="{Binding IsReady}"
                         Background="Transparent">
                     <icon:PackIconMaterial Kind="ArrowUp" Width="16" Height="16" Foreground="#CCC" />
                 </Button>
@@ -46,6 +47,7 @@
                         ToolTip.Tip="Create New Folder"
                         Padding="5"
                         CornerRadius="4"
+                        IsVisible="{Binding IsReady}"
                         Background="Transparent">
 
                     <icon:PackIconMaterial Kind="FolderPlus"

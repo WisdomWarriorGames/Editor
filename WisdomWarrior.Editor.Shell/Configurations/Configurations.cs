@@ -16,6 +16,7 @@ public static class Configurations
         services.AddTransient<ProjectService>();
 
         services.AddSingleton<FileSystemRegistry>();
+        services.AddSingleton<WorkspaceService>();
 
         services.AddSingleton<MainWindowViewModel>();
         services.AddSingleton<AssetBrowserViewModel>();

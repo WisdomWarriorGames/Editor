@@ -8,20 +8,30 @@ namespace WisdomWarrior.Editor.AssetBrowser.ViewModels;
 
 public partial class AssetBrowserViewModel : ObservableObject, IAssetHandler
 {
-    private readonly FileSystemRegistry _registry;
+    private FileSystemRegistry? _registry;
+    private readonly WorkspaceService _workspace;
     private readonly FileSystemService _fileSystem;
+
+    [ObservableProperty] private bool _isReady = false;
 
     public ObservableCollection<AssetItem> Items { get; } = new();
     private AssetItem? _lastSelectedItem;
 
-    public AssetBrowserViewModel(FileSystemRegistry registry, FileSystemService fileSystem)
+    public AssetBrowserViewModel(WorkspaceService workspace, FileSystemService fileSystem)
     {
-        _registry = registry;
+        _workspace = workspace;
         _fileSystem = fileSystem;
 
-        _registry.RegistryUpdated += OnRegistryChanged;
+        _workspace.RegistryInitialized += Initialize;
+    }
 
+    private void Initialize(FileSystemRegistry registry)
+    {
+        _registry = registry;
+        _registry.RegistryUpdated += OnRegistryChanged;
         Refresh();
+
+        IsReady = true;
     }
 
     private void OnRegistryChanged()
@@ -112,6 +122,11 @@ public partial class AssetBrowserViewModel : ObservableObject, IAssetHandler
     [RelayCommand]
     public void NavigateUp()
     {
+        if (!IsReady)
+        {
+            return;
+        }
+
         var parentPath = Path.GetDirectoryName(_registry.CurrentNode.FullPath);
         if (parentPath != null)
         {
@@ -122,6 +137,11 @@ public partial class AssetBrowserViewModel : ObservableObject, IAssetHandler
     [RelayCommand]
     public void CreateFolder()
     {
+        if (!IsReady)
+        {
+            return;
+        }
+
         var baseName = "New Folder";
         var finalName = baseName;
         var count = 1;

@@ -1,10 +1,11 @@
-﻿namespace WisdomWarrior.Editor.FileSystem.Models;
+﻿namespace WisdomWarrior.Editor.Core;
 
 public class Manifest
 {
-    public string GameProjectName { get; set; }
-    public string GameProjectNameStripped { get; set; }
+    public string ProjectName { get; set; }
+    public string ProjectNameStripped { get; set; }
     public string GameProjectPath { get; set; }
+    public string ProjectRoot { get; set; }
     public List<ProjectModule> Modules { get; set; } = [];
 }
 

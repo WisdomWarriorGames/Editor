@@ -10,7 +10,6 @@ namespace WisdomWarrior.Editor.Shell;
 
 public partial class App : Application
 {
-    private const string TEST_PROJECT_PATH = @"C:\Personal\GameDev\TestGame\TestGame";
     public static IServiceProvider ServiceProvider { get; private set; }
 
     public override void Initialize()
@@ -27,9 +26,6 @@ public partial class App : Application
 
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            var registry = ServiceProvider.GetRequiredService<FileSystemRegistry>();
-            registry.Initialize(TEST_PROJECT_PATH);
-
             desktop.MainWindow = new MainWindow
             {
                 DataContext = ServiceProvider.GetRequiredService<MainWindowViewModel>()

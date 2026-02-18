@@ -7,7 +7,7 @@ using WisdomWarrior.Editor.Menus.Views;
 
 namespace WisdomWarrior.Editor.Menus.ViewModels;
 
-public partial class FileMenuViewModel(ProjectService projectService) : ObservableObject
+public partial class FileMenuViewModel(ProjectService projectService, WorkspaceService workspaceService) : ObservableObject
 {
     [RelayCommand]
     private async Task OpenGameProject()
@@ -17,7 +17,7 @@ public partial class FileMenuViewModel(ProjectService projectService) : Observab
     [RelayCommand]
     private async Task CreateNewGame()
     {
-        var vm = new CreateProjectViewModel(projectService);
+        var vm = new CreateProjectViewModel(projectService, workspaceService);
         var view = new CreateProjectView { DataContext = vm };
 
         if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
