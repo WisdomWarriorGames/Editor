@@ -29,25 +29,6 @@ public partial class SceneListViewModel : ObservableObject
 
     private void OnWorkspaceInitialized(FileSystemRegistry registry)
     {
-        Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(Initialize);
-    }
-
-    private void Initialize()
-    {
-        _sceneService.ActiveScene?.Entities.Add(
-            new GameEntity
-            {
-                Name = "New Entity",
-                Children =
-                [
-                    new GameEntity
-                    {
-                        Name = "Child",
-                    }
-                ]
-            }
-        );
-
         OnPropertyChanged(nameof(SceneRoot));
     }
 
@@ -68,5 +49,26 @@ public partial class SceneListViewModel : ObservableObject
         {
             _sceneService.ActiveScene?.Entities.Add(newEntity);
         }
+    }
+
+    [RelayCommand]
+    private void DeleteEntity()
+    {
+        if (SelectedObject is GameEntity entity)
+        {
+            RemoveEntityRecursive(_sceneService.ActiveScene.Entities, entity);
+        }
+    }
+
+    private bool RemoveEntityRecursive(IList<GameEntity> list, GameEntity target)
+    {
+        if (list.Remove(target)) return true;
+
+        foreach (var entity in list)
+        {
+            if (RemoveEntityRecursive(entity.Children, target)) return true;
+        }
+
+        return false;
     }
 }

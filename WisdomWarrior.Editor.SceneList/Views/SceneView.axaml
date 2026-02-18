@@ -23,7 +23,7 @@
 
                     <MenuItem Header="Rename" InputGesture="F2" />
 
-                    <MenuItem Header="Delete" Foreground="Red">
+                    <MenuItem Header="Delete" Foreground="Red" Command="{Binding DeleteEntityCommand}">
                         <MenuItem.Icon>
                             <TextBlock Text="🗑️" Foreground="Red" VerticalAlignment="Center" />
                         </MenuItem.Icon>
