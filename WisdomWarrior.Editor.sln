@@ -6,11 +6,15 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WisdomWarrior.Editor.AssetB
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WisdomWarrior.Editor.FileSystem", "WisdomWarrior.Editor.FileSystem\WisdomWarrior.Editor.FileSystem.csproj", "{C0DB4F33-8E14-41DC-9A3A-00CE69CC2BF2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WisdomWarrior.Editor.Core", "WisdomWarrior.Editor.Core\WisdomWarrior.Editor.Core.csproj", "{31254985-E833-4A9B-AD1C-4BD2942A2D98}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WisdomWarrior.Editor.MonoGame", "WisdomWarrior.Editor.MonoGame\WisdomWarrior.Editor.MonoGame.csproj", "{735F3DFE-A981-4CD6-8CDC-B2ADACABF598}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WisdomWarrior.Editor.SceneList", "WisdomWarrior.Editor.SceneList\WisdomWarrior.Editor.SceneList.csproj", "{55539CA0-C131-4A97-A1C4-17F6C76DBA95}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Engine", "Engine", "{76284BEE-BAB2-4C7E-9F0F-79500D668425}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WisdomWarrior.Engine.Core", "..\Engine\WisdomWarrior.Engine.Core\WisdomWarrior.Engine.Core.csproj", "{D562A014-9773-4B46-8BCF-284F8597F8BE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WisdomWarrior.Editor.Menus", "WisdomWarrior.Editor.Menus\WisdomWarrior.Editor.Menus.csproj", "{26E96FFF-BC5F-4EBF-8EFB-7C4BF40CD53A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -30,10 +34,6 @@ Global
 		{C0DB4F33-8E14-41DC-9A3A-00CE69CC2BF2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C0DB4F33-8E14-41DC-9A3A-00CE69CC2BF2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C0DB4F33-8E14-41DC-9A3A-00CE69CC2BF2}.Release|Any CPU.Build.0 = Release|Any CPU
-		{31254985-E833-4A9B-AD1C-4BD2942A2D98}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{31254985-E833-4A9B-AD1C-4BD2942A2D98}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{31254985-E833-4A9B-AD1C-4BD2942A2D98}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{31254985-E833-4A9B-AD1C-4BD2942A2D98}.Release|Any CPU.Build.0 = Release|Any CPU
 		{735F3DFE-A981-4CD6-8CDC-B2ADACABF598}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{735F3DFE-A981-4CD6-8CDC-B2ADACABF598}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{735F3DFE-A981-4CD6-8CDC-B2ADACABF598}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -42,5 +42,16 @@ Global
 		{55539CA0-C131-4A97-A1C4-17F6C76DBA95}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{55539CA0-C131-4A97-A1C4-17F6C76DBA95}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{55539CA0-C131-4A97-A1C4-17F6C76DBA95}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D562A014-9773-4B46-8BCF-284F8597F8BE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D562A014-9773-4B46-8BCF-284F8597F8BE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D562A014-9773-4B46-8BCF-284F8597F8BE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D562A014-9773-4B46-8BCF-284F8597F8BE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{26E96FFF-BC5F-4EBF-8EFB-7C4BF40CD53A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{26E96FFF-BC5F-4EBF-8EFB-7C4BF40CD53A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{26E96FFF-BC5F-4EBF-8EFB-7C4BF40CD53A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{26E96FFF-BC5F-4EBF-8EFB-7C4BF40CD53A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{D562A014-9773-4B46-8BCF-284F8597F8BE} = {76284BEE-BAB2-4C7E-9F0F-79500D668425}
 	EndGlobalSection
 EndGlobal

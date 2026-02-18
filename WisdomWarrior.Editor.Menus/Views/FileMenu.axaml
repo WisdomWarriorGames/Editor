@@ -1,0 +1,12 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:WisdomWarrior.Editor.Menus.ViewModels"
+             x:Class="WisdomWarrior.Editor.Menus.Views.FileMenu"
+             x:DataType="vm:FileMenuViewModel">
+    <Menu Background="Transparent">
+        <MenuItem Header="File" Cursor="Hand">
+            <MenuItem Header="Create New Game" Command="{Binding CreateNewGameCommand}" />
+            <MenuItem Header="Open Game Project" Command="{Binding OpenGameProjectCommand}" />
+        </MenuItem>
+    </Menu>
+</UserControl>

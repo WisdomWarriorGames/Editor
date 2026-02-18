@@ -5,15 +5,22 @@
                  xmlns:viewModels="clr-namespace:WisdomWarrior.Editor.Shell.ViewModels"
                  xmlns:monogame="clr-namespace:WisdomWarrior.Editor.MonoGame.Views;assembly=WisdomWarrior.Editor.MonoGame"
                  xmlns:sceneView="clr-namespace:WisdomWarrior.Editor.SceneList.Views;assembly=WisdomWarrior.Editor.SceneList"
+                 xmlns:fileMenu="clr-namespace:WisdomWarrior.Editor.Menus.Views;assembly=WisdomWarrior.Editor.Menus"
                  x:Class="WisdomWarrior.Editor.Shell.MainWindow"
                  x:DataType="viewModels:MainWindowViewModel"
                  Title=""
                  WindowState="Maximized"
-                 BackgroundAnimationEnabled="False">
+                 TransparencyLevelHint="None"
+                 Background="{DynamicResource SukiBackground}"
+                 ExtendClientAreaToDecorationsHint="True"
+                 ExtendClientAreaTitleBarHeightHint="-1">
 
     <suki:SukiWindow.LogoContent>
-        <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
-            <TextBlock Text="⚔️ Wisdom Warrior Games Engine" FontSize="16" FontWeight="Bold" />
+        <StackPanel Orientation="Horizontal" Spacing="5" VerticalAlignment="Center">
+            <!-- <Panel VerticalAlignment="Center"> -->
+            <!--     <TextBlock Text="WWE" FontSize="16" FontWeight="Bold" /> -->
+            <!-- </Panel> -->
+            <fileMenu:FileMenu DataContext="{Binding FileMenuViewModel}" />
         </StackPanel>
     </suki:SukiWindow.LogoContent>
 
