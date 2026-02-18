@@ -43,7 +43,7 @@ public partial class SceneListViewModel : ObservableObject
         }
         else if (SelectedObject is GameEntity parent)
         {
-            parent.Children.Add(newEntity);
+            parent.AddEntity(newEntity);
         }
         else
         {

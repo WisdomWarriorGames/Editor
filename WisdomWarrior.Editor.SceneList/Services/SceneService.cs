@@ -41,6 +41,7 @@ public class SceneService
         {
             var json = File.ReadAllText(_workspaceService.ActiveScene);
             ActiveScene = JsonSerializer.Deserialize<Scene>(json);
+            ActiveScene.Initialize();
 
             WatchCollection(ActiveScene.Entities);
         }
