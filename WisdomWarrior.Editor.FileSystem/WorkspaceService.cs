@@ -6,34 +6,38 @@ namespace WisdomWarrior.Editor.FileSystem;
 public class WorkspaceService(FileSystemRegistry registry)
 {
     private FileSystemRegistry _currentRegistry = registry;
-
-    public Manifest? Project { get; private set; }
+    private Manifest? _project;
     public string ProjectRoot { get; private set; }
+    public string ActiveScene => Path.Combine(ProjectRoot, _project.ActiveScene);
 
     public event Action<FileSystemRegistry>? WorkspaceInitialized;
 
     public void Load(string pathToManifest)
     {
         var json = File.ReadAllText(pathToManifest);
-        Project = JsonSerializer.Deserialize<Manifest>(json);
-        Load(Project);
+        _project = JsonSerializer.Deserialize<Manifest>(json);
+
+        string baseDirectory = Path.GetDirectoryName(pathToManifest)!;
+        Load(_project, baseDirectory);
     }
 
-    public void Load(Manifest? manifest)
+    public void Load(Manifest? manifest, string rootPath)
     {
-        Project = manifest;
+        _project = manifest;
 
-        if (Project == null)
+        if (_project == null)
         {
             return;
         }
 
-        ProjectRoot = Project.ProjectRoot;
+        ProjectRoot = rootPath;
 
-        if (Project.Modules.Count > 0)
+        if (_project.Modules.Count > 0)
         {
-            var module = Project.Modules[0];
-            ChangeModule(module.Path);
+            var module = _project.Modules[0];
+
+            var path = Path.Combine(rootPath, module.Path);
+            ChangeModule(path);
         }
     }
 

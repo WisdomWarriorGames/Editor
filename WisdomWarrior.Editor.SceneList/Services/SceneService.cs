@@ -32,14 +32,14 @@ public class SceneService
     public void SaveScene()
     {
         var json = JsonSerializer.Serialize(ActiveScene, new JsonSerializerOptions { WriteIndented = true });
-        File.WriteAllText(_workspaceService.Project.ActiveScene, json);
+        File.WriteAllText(_workspaceService.ActiveScene, json);
     }
 
     private void OnWorkspaceInitialized(FileSystemRegistry registry)
     {
-        if (_workspaceService.Project?.ActiveScene != null)
+        if (_workspaceService.ActiveScene != null)
         {
-            var json = File.ReadAllText(_workspaceService.Project?.ActiveScene);
+            var json = File.ReadAllText(_workspaceService.ActiveScene);
             ActiveScene = JsonSerializer.Deserialize<Scene>(json);
 
             WatchCollection(ActiveScene.Entities);

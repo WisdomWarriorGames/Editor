@@ -10,7 +10,7 @@ public class ProjectService
     public Manifest CreateSolution(string projectPath, string projectName)
     {
         var name = projectName.Replace(" ", string.Empty);
-        var rootPath = Path.Combine(projectPath, name);
+        var rootPath = GetRootPath(projectPath, projectName);
 
         if (!Directory.Exists(rootPath))
             Directory.CreateDirectory(rootPath);
@@ -32,28 +32,31 @@ public class ProjectService
         DeleteIfExists(Path.Combine(assetsPath, $"Class1.cs"));
         DeleteIfExists(Path.Combine(gameLogicPath, $"Class1.cs"));
 
-        var activeScene = SaveCurrentScene(gameLogicPath);
-        var manifest = SaveManifest(projectName, name, rootPath, gameLogicPath, assetsPath, activeScene);
+        SaveCurrentScene(gameLogicPath);
+        var manifest = SaveManifest(projectName, name, rootPath);
         return manifest;
     }
 
-    private Manifest SaveManifest(string projectName, string name, string rootPath, string gameLogicPath, string assetsPath, string activeScene)
+    public string GetRootPath(string projectPath, string projectName)
+    {
+        var name = projectName.Replace(" ", string.Empty);
+        var rootPath = Path.Combine(projectPath, name);
+
+        return rootPath;
+    }
+
+    private Manifest SaveManifest(string projectName, string name, string rootPath)
     {
         var manifest = new Manifest
         {
             ProjectName = projectName,
-            ProjectNameStripped = name,
-            ProjectRoot = rootPath,
-            GameProjectPath = gameLogicPath,
-            ActiveScene = activeScene,
-            Modules =
-            [
-                new ProjectModule
-                {
-                    Name = name,
-                    Path = assetsPath
-                }
-            ]
+            ProjectNameStripped = projectName.Replace(" ", ""),
+            GameProjectPath = $"{projectName}.Game",
+            ActiveScene = $"{projectName}.Game/CurrentScene.scene.json",
+            Modules = new List<ProjectModule>
+            {
+                new() { Name = projectName, Path = projectName }
+            }
         };
 
         var manifestPath = Path.Combine(rootPath, $"{name}.manifest.json");

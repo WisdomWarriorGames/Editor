@@ -38,7 +38,8 @@ public partial class CreateProjectViewModel(ProjectService projectService, Works
         await Task.Run(() =>
         {
             var manifest = projectService.CreateSolution(ProjectPath, GameName);
-            workspaceService.Load(manifest);
+            var root = projectService.GetRootPath(ProjectPath, GameName);
+            workspaceService.Load(manifest, root);
         });
 
         IsLoading = false;
