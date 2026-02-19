@@ -1,32 +1,57 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using WisdomWarrior.Editor.AssetBrowser.ViewModels;
+using WisdomWarrior.Editor.FileSystem;
 using WisdomWarrior.Editor.Inspector.ViewModels;
 using WisdomWarrior.Editor.Menus.ViewModels;
 using WisdomWarrior.Editor.MonoGame.ViewModels;
 using WisdomWarrior.Editor.SceneList.ViewModels;
+using WisdomWarrior.Engine.Core;
 
 namespace WisdomWarrior.Editor.Shell.ViewModels;
 
-public partial class MainWindowViewModel(
-    AssetBrowserViewModel assetBrowser,
-    MonoGameViewModel monoGameViewModel,
-    SceneListViewModel sceneListViewModel,
-    FileMenuViewModel fileMenuViewModel,
-    InspectorViewModel inspectorViewModel
-) : ObservableObject
+public partial class MainWindowViewModel : ObservableObject
 {
     [ObservableProperty]
-    private AssetBrowserViewModel _assetBrowser = assetBrowser;
+    private AssetBrowserViewModel _assetBrowser;
 
     [ObservableProperty]
-    private MonoGameViewModel _monoGameWindow = monoGameViewModel;
+    private MonoGameViewModel _monoGameWindow;
 
     [ObservableProperty]
-    private SceneListViewModel _sceneListViewModel = sceneListViewModel;
+    private SceneListViewModel _sceneListViewModel;
 
     [ObservableProperty]
-    private FileMenuViewModel _fileMenuViewModel = fileMenuViewModel;
+    private FileMenuViewModel _fileMenuViewModel;
 
     [ObservableProperty]
-    private InspectorViewModel _inspectorViewModel = inspectorViewModel;
+    private InspectorViewModel _inspectorViewModel;
+
+    private readonly WorkspaceService _workspaceService;
+    private readonly CurrentSceneManager _currentSceneManager;
+
+    public MainWindowViewModel(
+        AssetBrowserViewModel assetBrowser,
+        MonoGameViewModel monoGameViewModel,
+        SceneListViewModel sceneListViewModel,
+        FileMenuViewModel fileMenuViewModel,
+        InspectorViewModel inspectorViewModel,
+        WorkspaceService workspaceService,
+        CurrentSceneManager currentSceneManager)
+    {
+        _assetBrowser = assetBrowser;
+        _monoGameWindow = monoGameViewModel;
+        _sceneListViewModel = sceneListViewModel;
+        _fileMenuViewModel = fileMenuViewModel;
+        _inspectorViewModel = inspectorViewModel;
+
+        _workspaceService = workspaceService;
+        _currentSceneManager = currentSceneManager;
+
+        _workspaceService.WorkspaceInitialized += OnWorkspaceInitialized;
+    }
+
+    private void OnWorkspaceInitialized(FileSystemRegistry obj)
+    {
+        _currentSceneManager.Initialized(_workspaceService.ActiveScene);
+    }
 }

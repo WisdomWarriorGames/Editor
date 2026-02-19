@@ -1,18 +1,14 @@
-﻿using System.Collections.ObjectModel;
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using ReactiveUI;
 using WisdomWarrior.Editor.Core;
 using WisdomWarrior.Editor.FileSystem;
-using WisdomWarrior.Editor.SceneList.Services;
 using WisdomWarrior.Engine.Core;
 
 namespace WisdomWarrior.Editor.SceneList.ViewModels;
 
 public partial class SceneListViewModel : ObservableObject
 {
-    private readonly SceneService _sceneService;
-    private readonly WorkspaceService _workspaceService;
+    private readonly CurrentSceneManager _sceneService;
     private readonly EditorContext _context;
 
     public object? SelectedObject
@@ -31,16 +27,15 @@ public partial class SceneListViewModel : ObservableObject
         ? new[] { _sceneService.ActiveScene }
         : Array.Empty<Scene>();
 
-    public SceneListViewModel(SceneService sceneService, WorkspaceService workspaceService, EditorContext context)
+    public SceneListViewModel(CurrentSceneManager sceneService, EditorContext context)
     {
         _sceneService = sceneService;
-        _workspaceService = workspaceService;
         _context = context;
 
-        _workspaceService.WorkspaceInitialized += OnWorkspaceInitialized;
+        _sceneService.CurrentSceneReady += OnSceneReady;
     }
 
-    private void OnWorkspaceInitialized(FileSystemRegistry registry)
+    private void OnSceneReady()
     {
         OnPropertyChanged(nameof(SceneRoot));
     }
