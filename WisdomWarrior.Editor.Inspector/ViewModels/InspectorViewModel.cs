@@ -15,6 +15,7 @@ public partial class InspectorViewModel : ObservableObject
 
     public GameEntity? SelectedEntity => _context.SelectedEntity;
     public ObservableCollection<Component> Components => SelectedEntity?.Components ?? new();
+    public IEnumerable<string> AvailableComponentNames => ComponentRegistry.GetRegisteredKeys();
 
     public InspectorViewModel(EditorContext context)
     {
@@ -36,13 +37,11 @@ public partial class InspectorViewModel : ObservableObject
     private void AddComponent(string typeName)
     {
         if (SelectedEntity == null) return;
-
-        if (typeName == "Transform")
+        
+        var newComponent = ComponentRegistry.CreateComponent(typeName);
+        if (newComponent != null)
         {
-            if (!SelectedEntity.Components.Any(c => c is Transform))
-            {
-                SelectedEntity.AddComponent<Transform>();
-            }
+            SelectedEntity.AddComponent(newComponent);
         }
 
         OnPropertyChanged(nameof(Components));

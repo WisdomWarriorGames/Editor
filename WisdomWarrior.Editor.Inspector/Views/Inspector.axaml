@@ -66,15 +66,18 @@
 
                 <StackPanel>
                     <Button Content="Add Component"
+                            Classes="Flat Primary"
                             HorizontalAlignment="Stretch"
-                            HorizontalContentAlignment="Center"
-                            Margin="0,5,0,0"
                             IsVisible="{Binding SelectedEntity, Converter={x:Static ObjectConverters.IsNotNull}}">
                         <Button.Flyout>
-                            <MenuFlyout>
-                                <MenuItem Header="Transform"
-                                          Command="{Binding AddComponentCommand}"
-                                          CommandParameter="Transform" />
+                            <MenuFlyout ItemsSource="{Binding AvailableComponentNames}">
+                                <MenuFlyout.ItemContainerTheme>
+                                    <ControlTheme TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
+                                        <Setter Property="Header" Value="{Binding}" />
+                                        <Setter Property="Command" Value="{Binding $parent[UserControl].DataContext.AddComponentCommand}" />
+                                        <Setter Property="CommandParameter" Value="{Binding}" />
+                                    </ControlTheme>
+                                </MenuFlyout.ItemContainerTheme>
                             </MenuFlyout>
                         </Button.Flyout>
                     </Button>
