@@ -39,7 +39,6 @@ public partial class InspectorViewModel : ObservableObject
 
         if (typeName == "Transform")
         {
-            // Check if it already has one (most engines only allow one Transform)
             if (!SelectedEntity.Components.Any(c => c is Transform))
             {
                 SelectedEntity.AddComponent<Transform>();

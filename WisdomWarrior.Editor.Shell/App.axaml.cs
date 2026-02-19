@@ -5,6 +5,7 @@ using Avalonia.Markup.Xaml;
 using Microsoft.Extensions.DependencyInjection;
 using WisdomWarrior.Editor.FileSystem;
 using WisdomWarrior.Editor.Shell.ViewModels;
+using WisdomWarrior.Engine.Core.Components;
 
 namespace WisdomWarrior.Editor.Shell;
 
@@ -23,6 +24,8 @@ public partial class App : Application
         Configurations.Configurations.Configure(services);
 
         ServiceProvider = services.BuildServiceProvider();
+
+        ComponentRegistry.Bootstrap();
 
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {

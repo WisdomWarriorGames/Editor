@@ -50,7 +50,10 @@ public class SceneService
     {
         if (_workspaceService.ActiveScene != null)
         {
-            var options = new JsonSerializerOptions();
+            var options = new JsonSerializerOptions
+            {
+                IncludeFields = true
+            };
             options.Converters.Add(new ComponentConverter());
 
             var json = File.ReadAllText(_workspaceService.ActiveScene);
@@ -86,7 +89,20 @@ public class SceneService
 
     private void WatchComponents(ObservableCollection<Component> components)
     {
-        components.CollectionChanged += (s, e) => { _isDirty = true; };
+        components.CollectionChanged += (s, e) =>
+        {
+            _isDirty = true; // Component added/removed
+            if (e.NewItems != null)
+            {
+                foreach (Component c in e.NewItems)
+                    c.OnComponentChanged += () => _isDirty = true;
+            }
+        };
+
+        foreach (var component in components)
+        {
+            component.OnComponentChanged += () => _isDirty = true;
+        }
     }
 
     private void CheckAndSave()
