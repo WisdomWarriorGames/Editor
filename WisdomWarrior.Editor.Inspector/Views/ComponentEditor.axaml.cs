@@ -6,6 +6,7 @@ using Avalonia.Data;
 using Avalonia.Markup.Xaml;
 using Avalonia.Markup.Xaml.Templates;
 using Avalonia.Media;
+using Avalonia.Threading;
 using WisdomWarrior.Editor.Inspector.Models;
 using WisdomWarrior.Engine.Core;
 using WisdomWarrior.Engine.Core.Attributes;
@@ -38,6 +39,21 @@ public partial class ComponentEditor : UserControl
 
             var row = CreatePropertyRow(prop, component);
             PropertiesStack.Children.Add(row);
+        }
+
+        component.OnComponentChanged += () =>
+        {
+            // Jump to the UI thread to update the view
+            Dispatcher.UIThread.Post(RefreshAllProperties);
+        };
+    }
+
+    private void RefreshAllProperties()
+    {
+        foreach (var panel in PropertiesStack.Children.OfType<StackPanel>())
+        {
+            var editor = panel.Children.OfType<ContentControl>().FirstOrDefault();
+            if (editor?.Tag is Action refresh) refresh.Invoke();
         }
     }
 
@@ -74,11 +90,15 @@ public partial class ComponentEditor : UserControl
             }
         });
 
-        return new ContentControl
+        var editor = new ContentControl
         {
-            DataContext = vectorVM, // The template now binds to the VM, not the struct
+            DataContext = vectorVM,
             Content = vectorVM,
             ContentTemplate = this.FindResource("Vector2Template") as DataTemplate
         };
+
+        editor.Tag = new Action(() => { vectorVM.UpdateFromEngine((Vector2)prop.GetValue(target)!); });
+
+        return editor;
     }
 }

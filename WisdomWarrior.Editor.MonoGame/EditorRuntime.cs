@@ -73,7 +73,7 @@ public class EditorRuntime : Game
                 transform.Position = new System.Numerics.Vector2(position.X, position.Y);
 
                 // // Trigger the "Dirty" flag so the scene saves!
-                // transform.NotifyChanged();
+                transform.NotifyChanged();
             }
         }
 

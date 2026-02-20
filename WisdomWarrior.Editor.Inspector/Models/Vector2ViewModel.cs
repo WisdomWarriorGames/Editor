@@ -14,14 +14,25 @@ public class Vector2ViewModel : ObservableObject
         _onChanged = onChanged;
     }
 
+    public void UpdateFromEngine(Vector2 newValue)
+    {
+        if (_value == newValue) return;
+
+        _value = newValue;
+
+        OnPropertyChanged(nameof(X));
+        OnPropertyChanged(nameof(Y));
+    }
+
     public float X
     {
         get => _value.X;
         set
         {
+            if (_value.X == value) return;
             _value.X = value;
             OnPropertyChanged();
-            _onChanged(_value);
+            _onChanged.Invoke(_value);
         }
     }
 
@@ -30,9 +41,10 @@ public class Vector2ViewModel : ObservableObject
         get => _value.Y;
         set
         {
+            if (_value.Y == value) return;
             _value.Y = value;
             OnPropertyChanged();
-            _onChanged(_value);
+            _onChanged.Invoke(_value);
         }
     }
 }
