@@ -20,7 +20,7 @@ public class PropertyWrapper : ObservableObject
         set
         {
             _property.SetValue(_target, value);
-            OnPropertyChanged(nameof(Value));
+            OnPropertyChanged();
         }
     }
 }

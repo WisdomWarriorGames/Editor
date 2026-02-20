@@ -20,7 +20,7 @@ public class Vector2ViewModel : ObservableObject
         set
         {
             _value.X = value;
-            OnPropertyChanged(nameof(X));
+            OnPropertyChanged();
             _onChanged(_value);
         }
     }
@@ -31,7 +31,7 @@ public class Vector2ViewModel : ObservableObject
         set
         {
             _value.Y = value;
-            OnPropertyChanged(nameof(Y));
+            OnPropertyChanged();
             _onChanged(_value);
         }
     }
