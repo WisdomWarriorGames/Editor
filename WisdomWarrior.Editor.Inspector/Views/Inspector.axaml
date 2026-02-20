@@ -9,7 +9,8 @@
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceInclude Source="avares://WisdomWarrior.Editor.Inspector/Resources/EditorTemplates.axaml" />
+                <ResourceInclude Source="avares://WisdomWarrior.Editor.Inspector/Resources/Vector2Template.axaml" />
+                <ResourceInclude Source="avares://WisdomWarrior.Editor.Inspector/Resources/FloatTemplate.axaml" />
             </ResourceDictionary.MergedDictionaries>
 
             <conv:TypeToNameConverter x:Key="TypeToNameConverter" />
@@ -39,14 +40,14 @@
                             <suki:GlassCard Margin="0,0,0,15" IsAnimated="False">
                                 <StackPanel>
                                     <Grid ColumnDefinitions="Auto, *, Auto" Margin="0,0,0,10">
-                                        <CheckBox Grid.Column="0" 
-                                                  IsChecked="{Binding Active}" 
+                                        <CheckBox Grid.Column="0"
+                                                  IsChecked="{Binding Active}"
                                                   Margin="0,0,8,0"
                                                   Command="{Binding #InspectorRoot.DataContext.ComponentToggledCommand}"
                                                   CommandParameter="{Binding}"
-                                                  VerticalAlignment="Center"/>
-                        
-                                        <TextBlock Grid.Column="1" 
+                                                  VerticalAlignment="Center" />
+
+                                        <TextBlock Grid.Column="1"
                                                    Text="{Binding Converter={StaticResource TypeToNameConverter}}"
                                                    FontWeight="Bold"
                                                    FontSize="12"
@@ -55,7 +56,7 @@
 
                                     <Border Height="1" Background="{DynamicResource SukiBorderBrush}" Opacity="0.5"
                                             Margin="0,0,0,12" />
-                                    
+
                                     <views:ComponentEditor DataContext="{Binding}" />
 
                                 </StackPanel>
@@ -74,7 +75,8 @@
                                 <MenuFlyout.ItemContainerTheme>
                                     <ControlTheme TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
                                         <Setter Property="Header" Value="{Binding}" />
-                                        <Setter Property="Command" Value="{Binding $parent[UserControl].DataContext.AddComponentCommand}" />
+                                        <Setter Property="Command"
+                                                Value="{Binding $parent[UserControl].DataContext.AddComponentCommand}" />
                                         <Setter Property="CommandParameter" Value="{Binding}" />
                                     </ControlTheme>
                                 </MenuFlyout.ItemContainerTheme>
