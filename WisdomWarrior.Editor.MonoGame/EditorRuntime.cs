@@ -100,7 +100,7 @@ public class EditorRuntime : Game
 
         _spriteBatch.Begin(blendState: BlendState.NonPremultiplied);
         _editorViewportRenderer?.Draw(_spriteBatch, SelectedEntity);
-        _editorViewportRenderer?.Draw(_spriteBatch, LocalMousePosition, IsHovering, CursorScale);
+        // _editorViewportRenderer?.Draw(_spriteBatch, LocalMousePosition, IsHovering, CursorScale);
         _spriteBatch.End();
 
         _spriteBatch.Begin(blendState: BlendState.AlphaBlend);

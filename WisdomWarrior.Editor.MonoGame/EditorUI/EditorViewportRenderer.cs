@@ -50,25 +50,25 @@ public class EditorViewportRenderer
         return Vector2.Distance(mousePos, orbPos) < 15f;
     }
 
-    public void Draw(SpriteBatch spriteBatch, Vector2? localMousePos, bool isHovering, float scale)
-    {
-        if (localMousePos == null) return;
-
-        var activeCursor = isHovering ? _handTexture : _cursorTexture;
-        var position = isHovering ? localMousePos.Value - new Vector2(_handTexture.Width / 2, 0) : localMousePos.Value;
-        
-        spriteBatch.Draw(
-            activeCursor,
-            position,
-            null,
-            Color.White,
-            0f,
-            Vector2.Zero,
-            scale / 4, // <-- The magic happens here!
-            SpriteEffects.None,
-            0f
-        );
-    }
+    // public void Draw(SpriteBatch spriteBatch, Vector2? localMousePos, bool isHovering, float scale)
+    // {
+    //     if (localMousePos == null) return;
+    //
+    //     var activeCursor = isHovering ? _handTexture : _cursorTexture;
+    //     var position = isHovering ? localMousePos.Value - new Vector2(_handTexture.Width / 2, 0) : localMousePos.Value;
+    //     
+    //     spriteBatch.Draw(
+    //         activeCursor,
+    //         position,
+    //         null,
+    //         Color.White,
+    //         0f,
+    //         Vector2.Zero,
+    //         scale / 4, // <-- The magic happens here!
+    //         SpriteEffects.None,
+    //         0f
+    //     );
+    // }
 
     public void Draw(SpriteBatch spriteBatch, GameEntity? selectedEntity)
     {

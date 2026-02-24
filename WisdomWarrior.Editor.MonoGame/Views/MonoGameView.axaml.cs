@@ -48,8 +48,6 @@ public partial class MonoGameView : UserControl
 
     private void UpdateEditorCursor(MonoGameViewModel viewModel)
     {
-        Cursor = new Cursor(StandardCursorType.None);
-
         if (viewModel.CurrentGame.IsHovering)
         {
             this.Cursor = new Cursor(StandardCursorType.Hand);
