@@ -14,4 +14,8 @@
       <ProjectReference Include="..\..\Engine\WisdomWarrior.Engine.Core\WisdomWarrior.Engine.Core.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Tracking\" />
+    </ItemGroup>
+
 </Project>

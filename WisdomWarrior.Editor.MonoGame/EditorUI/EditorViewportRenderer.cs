@@ -8,28 +8,34 @@ namespace WisdomWarrior.Editor.MonoGame.EditorUI;
 
 public class EditorViewportRenderer
 {
-    private readonly Texture2D _circleTexture;
+    private Texture2D? _gizmoTexture;
+    private Texture2D? _cursorTexture;
+    private Texture2D? _handTexture;
+    private Vector2 _origin;
 
     public EditorViewportRenderer(GraphicsDevice graphicsDevice)
     {
-        int size = 64;
-        _circleTexture = new Texture2D(graphicsDevice, size, size);
-        Color[] data = new Color[size * size];
-        float center = size / 2f;
-        float radius = size / 2f;
-
-        for (int y = 0; y < size; y++)
+        var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Gizmos/point-gizmo.png");
+        if (File.Exists(path))
         {
-            for (int x = 0; x < size; x++)
-            {
-                float distance = Vector2.Distance(new Vector2(x, y), new Vector2(center, center));
-                // Anti-aliasing math: make the edges soft
-                float alpha = MathHelper.Clamp((radius - distance) / 2f, 0, 1);
-                data[y * size + x] = Color.White * alpha;
-            }
+            using var stream = File.OpenRead(path);
+            _gizmoTexture = Texture2D.FromStream(graphicsDevice, stream);
+            _origin = new Vector2(_gizmoTexture.Width / 2f, _gizmoTexture.Height / 2f);
         }
 
-        _circleTexture.SetData(data);
+        var cursorPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Gizmos/cursor.png");
+        if (File.Exists(cursorPath))
+        {
+            using var stream = File.OpenRead(cursorPath);
+            _cursorTexture = Texture2D.FromStream(graphicsDevice, stream);
+        }
+
+        var handPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Gizmos/hand.png");
+        if (File.Exists(handPath))
+        {
+            using var stream = File.OpenRead(handPath);
+            _handTexture = Texture2D.FromStream(graphicsDevice, stream);
+        }
     }
 
     public bool IsMouseOver(Vector2 mousePos, GameEntity? entity, float totalSeconds)
@@ -39,16 +45,34 @@ public class EditorViewportRenderer
         var transform = entity.Components.OfType<Transform>().FirstOrDefault();
         if (transform == null) return false;
 
-        // Calculate the exact same bobbing position we use in Draw
-        var bob = MathF.Sin(totalSeconds * 3f) * 5f;
-        var orbPos = new Vector2(transform.Position.X, transform.Position.Y + bob);
+        var orbPos = new Vector2(transform.Position.X, transform.Position.Y);
 
-        // Check distance (15 pixels is a good 'hitbox' for a 16px circle)
         return Vector2.Distance(mousePos, orbPos) < 15f;
     }
 
-    public void Draw(SpriteBatch spriteBatch, GameEntity? selectedEntity, GameTime gameTime)
+    public void Draw(SpriteBatch spriteBatch, Vector2? localMousePos, bool isHovering, float scale)
     {
+        if (localMousePos == null) return;
+
+        var activeCursor = isHovering ? _handTexture : _cursorTexture;
+        var position = isHovering ? localMousePos.Value - new Vector2(_handTexture.Width / 2, 0) : localMousePos.Value;
+        
+        spriteBatch.Draw(
+            activeCursor,
+            position,
+            null,
+            Color.White,
+            0f,
+            Vector2.Zero,
+            scale / 4, // <-- The magic happens here!
+            SpriteEffects.None,
+            0f
+        );
+    }
+
+    public void Draw(SpriteBatch spriteBatch, GameEntity? selectedEntity)
+    {
+        if (_gizmoTexture == null) return;
         if (selectedEntity == null) return;
 
         var transform = selectedEntity.Components.OfType<Transform>().FirstOrDefault();
@@ -57,13 +81,13 @@ public class EditorViewportRenderer
         var position = new Vector2(transform.Position.X, transform.Position.Y);
 
         spriteBatch.Draw(
-            _circleTexture,
+            _gizmoTexture,
             position,
             null,
-            Color.Yellow,
-            0f, // Rotation
-            new Vector2(32, 32),
-            0.25f,
+            Color.White,
+            0f,
+            _origin,
+            0.3f, // Drawn at full 32x32 size
             SpriteEffects.None,
             0f
         );

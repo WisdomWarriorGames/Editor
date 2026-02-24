@@ -1,7 +1,6 @@
 ﻿using FontStashSharp;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
 using WisdomWarrior.Editor.MonoGame.EditorUI;
 using WisdomWarrior.Engine.Core;
 using WisdomWarrior.Engine.Core.Components;
@@ -16,8 +15,10 @@ public class EditorRuntime : Game
     private FontSystem _fontSystem;
 
     public bool IsHovering { get; private set; }
-    public Vector2 LocalMousePosition { get; set; }
+    public System.Numerics.Vector2 LocalMousePosition { get; set; }
     public GameEntity? SelectedEntity { get; set; }
+    public bool RequestHideCursor { get; private set; }
+    public float CursorScale { get; set; } = 1f;
 
     public bool IsDragging { get; private set; }
     private Vector2 _grabOffset;
@@ -52,16 +53,18 @@ public class EditorRuntime : Game
         if (transform == null) return;
 
         IsDragging = true;
+        RequestHideCursor = true;
 
-        _grabOffset = transform.Position - LocalMousePosition;
+        // _grabOffset = transform.Position - LocalMousePosition;
     }
 
     public void StopDragging()
     {
         IsDragging = false;
+        RequestHideCursor = false;
     }
 
-    protected override void Update(GameTime gameTime)
+    public void UpdateObjectPosition()
     {
         if (IsDragging && SelectedEntity != null)
         {
@@ -76,6 +79,11 @@ public class EditorRuntime : Game
                 transform.NotifyChanged();
             }
         }
+    }
+
+    protected override void Update(GameTime gameTime)
+    {
+        UpdateObjectPosition();
 
         IsHovering = _editorViewportRenderer?.IsMouseOver(
             LocalMousePosition,
@@ -90,13 +98,22 @@ public class EditorRuntime : Game
     {
         GraphicsDevice.Clear(Color.CornflowerBlue);
 
-        _spriteBatch.Begin();
+        _spriteBatch.Begin(blendState: BlendState.NonPremultiplied);
+        _editorViewportRenderer?.Draw(_spriteBatch, SelectedEntity);
+        _editorViewportRenderer?.Draw(_spriteBatch, LocalMousePosition, IsHovering, CursorScale);
+        _spriteBatch.End();
 
+        _spriteBatch.Begin(blendState: BlendState.AlphaBlend);
         var font = _fontSystem.GetFont(18); // Get a font at size 18
         _spriteBatch.DrawString(font, $"Mouse: {LocalMousePosition.ToString()}", new Vector2(10, 10), Color.White);
-
-        // Editor UI
-        _editorViewportRenderer?.Draw(_spriteBatch, SelectedEntity, gameTime);
+        if (SelectedEntity != null)
+        {
+            var transform = SelectedEntity.Components.OfType<Transform>().FirstOrDefault();
+            var vec = new Vector2(transform.Position.X, transform.Position.Y);
+            _spriteBatch.DrawString(font, $"Entity: {vec.ToString()}", new Vector2(10, 30), Color.White);
+            var diff = LocalMousePosition - vec;
+            _spriteBatch.DrawString(font, $"Difference: {diff.ToString()}", new Vector2(10, 50), Color.White);
+        }
 
         _spriteBatch.End();
 
