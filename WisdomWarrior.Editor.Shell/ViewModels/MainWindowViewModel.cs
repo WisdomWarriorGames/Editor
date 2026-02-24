@@ -12,7 +12,7 @@ namespace WisdomWarrior.Editor.Shell.ViewModels;
 public partial class MainWindowViewModel : ObservableObject
 {
     [ObservableProperty]
-    private AssetBrowserViewModel _assetBrowser;
+    private AssetBrowserViewModel _assetBrowserViewModel;
 
     [ObservableProperty]
     private MonoGameViewModel _monoGameWindow;
@@ -30,7 +30,7 @@ public partial class MainWindowViewModel : ObservableObject
     private readonly CurrentSceneManager _currentSceneManager;
 
     public MainWindowViewModel(
-        AssetBrowserViewModel assetBrowser,
+        AssetBrowserViewModel assetBrowserViewModel,
         MonoGameViewModel monoGameViewModel,
         SceneListViewModel sceneListViewModel,
         FileMenuViewModel fileMenuViewModel,
@@ -38,7 +38,7 @@ public partial class MainWindowViewModel : ObservableObject
         WorkspaceService workspaceService,
         CurrentSceneManager currentSceneManager)
     {
-        _assetBrowser = assetBrowser;
+        _assetBrowserViewModel = assetBrowserViewModel;
         _monoGameWindow = monoGameViewModel;
         _sceneListViewModel = sceneListViewModel;
         _fileMenuViewModel = fileMenuViewModel;

@@ -4,8 +4,8 @@
              xmlns:icon="https://github.com/MahApps/IconPacks.Avalonia"
              xmlns:vm="clr-namespace:WisdomWarrior.Editor.AssetBrowser.ViewModels"
              xmlns:views="clr-namespace:WisdomWarrior.Editor.AssetBrowser.Views"
-             x:Class="WisdomWarrior.Editor.AssetBrowser.Views.AssetBrowserView"
-             x:DataType="vm:AssetBrowserViewModel">
+             x:Class="WisdomWarrior.Editor.AssetBrowser.Views.AssetBrowserViewOld"
+             x:DataType="vm:AssetBrowserViewModelOld">
 
     <UserControl.KeyBindings>
         <KeyBinding Gesture="Delete" Command="{Binding DeleteSelectedCommand}" />

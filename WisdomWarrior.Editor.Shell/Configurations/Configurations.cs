@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using WisdomWarrior.Editor.AssetBrowser.Configurations;
 using WisdomWarrior.Editor.AssetBrowser.ViewModels;
 using WisdomWarrior.Editor.Core;
 using WisdomWarrior.Editor.FileSystem;
@@ -22,7 +23,6 @@ public static class Configurations
         services.AddSingleton<WorkspaceService>();
 
         services.AddSingleton<MainWindowViewModel>();
-        services.AddSingleton<AssetBrowserViewModel>();
         services.AddSingleton<MonoGameViewModel>();
         services.AddSingleton<SceneListViewModel>();
         services.AddSingleton<FileMenuViewModel>();
@@ -31,6 +31,8 @@ public static class Configurations
         services.AddSingleton<EditorContext>();
 
         services.AddSingleton<CurrentSceneManager>();
+
+        services.ConfigureAssetBrowser();
 
         return services;
     }

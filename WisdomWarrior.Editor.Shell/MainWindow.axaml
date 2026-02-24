@@ -18,9 +18,6 @@
 
     <suki:SukiWindow.LogoContent>
         <StackPanel Orientation="Horizontal" Spacing="5" VerticalAlignment="Center">
-            <!-- <Panel VerticalAlignment="Center"> -->
-            <!--     <TextBlock Text="WWE" FontSize="16" FontWeight="Bold" /> -->
-            <!-- </Panel> -->
             <fileMenu:FileMenu DataContext="{Binding FileMenuViewModel}" />
         </StackPanel>
     </suki:SukiWindow.LogoContent>
@@ -29,8 +26,8 @@
 
         <Grid Grid.Column="0" RowDefinitions="8*, 8, 3*">
 
-            <Border Grid.Row="0" Background="#050505" Margin="10"
-                    BorderBrush="{DynamicResource SukiBorderBrush}" BorderThickness="1">
+            <Border Grid.Row="0" Background="#050505" Margin="10" BorderBrush="{DynamicResource SukiBorderBrush}"
+                    BorderThickness="1">
                 <Grid>
                     <monogame:MonoGameView DataContext="{Binding MonoGameWindow}" />
                 </Grid>
@@ -38,17 +35,9 @@
 
             <GridSplitter Grid.Row="1" Background="Transparent" ResizeDirection="Rows" />
 
-            <Grid Grid.Row="2" ColumnDefinitions="1*, 4, 4*">
 
-                <suki:GlassCard Grid.Column="0" Margin="10,0,5,10" IsAnimated="False">
-                    <TextBlock Text="📚 Solution" VerticalAlignment="Center" HorizontalAlignment="Center" Opacity="0.6" />
-                </suki:GlassCard>
-
-                <GridSplitter Grid.Column="1" Background="Transparent" ResizeDirection="Columns" />
-
-                <suki:GlassCard Grid.Column="2" Margin="5,0,10,10" IsAnimated="False">
-                    <assetBrowser:AssetBrowserView DataContext="{Binding AssetBrowser}" />
-                </suki:GlassCard>
+            <Grid Grid.Row="2">
+                <assetBrowser:AssetBrowser DataContext="{Binding AssetBrowserViewModel}" />
             </Grid>
         </Grid>
 

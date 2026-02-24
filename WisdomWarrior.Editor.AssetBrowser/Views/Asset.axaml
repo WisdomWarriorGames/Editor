@@ -1,0 +1,28 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:viewModels="clr-namespace:WisdomWarrior.Editor.AssetBrowser.ViewModels"
+             xmlns:suki="https://github.com/kikipoulet/SukiUI"
+             x:DataType="viewModels:AssetViewModel"
+             x:Class="WisdomWarrior.Editor.AssetBrowser.Views.Asset">
+    <Grid>
+        <suki:GlassCard Width="100" Height="120" Margin="5" IsAnimated="False"
+                        Cursor="Hand"
+                        Focusable="True"
+                        ToolTip.Tip="{Binding Name}">
+            <StackPanel VerticalAlignment="Center" Spacing="5">
+                <Panel Height="64" Width="64" HorizontalAlignment="Center">
+                    <TextBlock Text="{Binding Icon}"
+                               FontSize="32"
+                               VerticalAlignment="Center"
+                               HorizontalAlignment="Center" />
+                </Panel>
+
+                <TextBlock Text="{Binding Name}"
+                           HorizontalAlignment="Center"
+                           TextAlignment="Center" 
+                           FontSize="10" 
+                           TextTrimming="CharacterEllipsis" />
+            </StackPanel>
+        </suki:GlassCard>
+    </Grid>
+</UserControl>

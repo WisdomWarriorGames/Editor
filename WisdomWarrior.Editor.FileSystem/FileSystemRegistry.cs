@@ -9,6 +9,7 @@ public class FileSystemRegistry(FileSystemService fileSystemService) : IDisposab
     private FileSystemNode _currentNode;
 
     public string RootDir { get; private set; }
+    public string RootName { get; private set; }
     public Dictionary<string, FileSystemNode> Nodes { get; } = new();
     public Dictionary<string, FileSystemNode> Directories { get; } = new();
     public event Action? RegistryUpdated;
@@ -40,6 +41,7 @@ public class FileSystemRegistry(FileSystemService fileSystemService) : IDisposab
             Directories.Clear();
 
             RootDir = projectPath;
+            RootName = Path.GetFileName(projectPath);
             var rootNode = fileSystemService.GetFileSystemTree(projectPath);
 
             if (rootNode != null)
