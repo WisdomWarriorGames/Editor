@@ -44,7 +44,39 @@ public class FileSystemService
         var parent = Path.GetDirectoryName(dir);
         var destPath = Path.Combine(parent!, newName);
 
+        if (!FolderExists(dir))
+        {
+            CreateFolder(parent, newName);
+            return;
+        }
+
         Directory.Move(dir, destPath);
+    }
+
+    public bool FolderExists(string dir, string newName)
+    {
+        var parent = Path.GetDirectoryName(dir);
+        var destPath = Path.Combine(parent!, newName);
+
+        return FolderExists(destPath);
+    }
+
+    public bool FolderExists(string dir)
+    {
+        return Directory.Exists(dir);
+    }
+
+    public bool FileExists(string path, string newName)
+    {
+        var parent = Path.GetDirectoryName(path);
+        var destPath = Path.Combine(parent!, newName);
+
+        return FileExists(destPath);
+    }
+
+    public bool FileExists(string path)
+    {
+        return File.Exists(path);
     }
 
     public void DeleteFile(string fileFullPath)
@@ -67,7 +99,7 @@ public class FileSystemService
         if (ShouldIgnore(path)) return null;
         return BuildNodeRecursive(path);
     }
-    
+
     public bool ShouldIgnore(string path)
     {
         var name = Path.GetFileName(path);

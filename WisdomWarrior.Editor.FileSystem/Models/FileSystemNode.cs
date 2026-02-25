@@ -13,7 +13,7 @@ public class FileSystemNode
 
     public FileSystemNode(string path, bool isFolder)
     {
-        Name = Path.GetFileName(path);
+        Name = Path.GetFileNameWithoutExtension(path);
         FullPath = path;
         IsFolder = isFolder;
 

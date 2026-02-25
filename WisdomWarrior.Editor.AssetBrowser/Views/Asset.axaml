@@ -5,10 +5,23 @@
              x:DataType="viewModels:AssetViewModel"
              x:Class="WisdomWarrior.Editor.AssetBrowser.Views.Asset">
     <Grid>
-        <suki:GlassCard Width="100" Height="120" Margin="5" IsAnimated="False"
+        <suki:GlassCard Width="100" Height="130" Margin="5" IsAnimated="False"
                         Cursor="Hand"
                         Focusable="True"
+                        Classes.selected="{Binding IsSelected}"
                         ToolTip.Tip="{Binding Name}">
+
+            <suki:GlassCard.KeyBindings>
+                <KeyBinding Gesture="F2" Command="{Binding BeginEditCommand}" />
+            </suki:GlassCard.KeyBindings>
+
+            <suki:GlassCard.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Rename (F2)" Command="{Binding BeginEditCommand}" />
+                    <MenuItem Header="Delete" Command="{Binding DeleteCommand}" />
+                </ContextMenu>
+            </suki:GlassCard.ContextMenu>
+
             <StackPanel VerticalAlignment="Center" Spacing="5">
                 <Panel Height="64" Width="64" HorizontalAlignment="Center">
                     <TextBlock Text="{Binding Icon}"
@@ -18,11 +31,38 @@
                 </Panel>
 
                 <TextBlock Text="{Binding Name}"
+                           IsVisible="{Binding !IsEditing}"
                            HorizontalAlignment="Center"
-                           TextAlignment="Center" 
-                           FontSize="10" 
-                           TextTrimming="CharacterEllipsis" />
+                           TextAlignment="Center"
+                           FontSize="10"
+                           TextTrimming="None" />
+
+                <TextBox x:Name="NameTextBox"
+                         Text="{Binding TempName}"
+                         IsVisible="{Binding IsEditing}"
+                         Classes.invalid="{Binding !IsValid}"
+                         AttachedToVisualTree="OnTextBoxLoaded"
+                         MinWidth="80"
+                         HorizontalAlignment="Center"
+                         TextAlignment="Center" FontSize="10" Padding="1">
+
+                    <TextBox.KeyBindings>
+                        <KeyBinding Gesture="Escape" Command="{Binding CancelEditCommand}" />
+                        <KeyBinding Gesture="Enter" Command="{Binding CommitEditCommand}" />
+                    </TextBox.KeyBindings>
+
+                </TextBox>
             </StackPanel>
         </suki:GlassCard>
     </Grid>
+
+    <UserControl.Styles>
+        <Style Selector="TextBox.invalid /template/ Border#PART_BorderElement">
+            <Setter Property="BorderBrush" Value="Red" />
+            <Setter Property="BorderThickness" Value="2" />
+        </Style>
+        <Style Selector="TextBox.invalid">
+            <Setter Property="Foreground" Value="Red" />
+        </Style>
+    </UserControl.Styles>
 </UserControl>
