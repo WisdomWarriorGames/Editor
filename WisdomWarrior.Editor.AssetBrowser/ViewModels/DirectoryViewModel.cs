@@ -1,4 +1,6 @@
 ﻿using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.Runtime.InteropServices;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -148,5 +150,20 @@ public partial class DirectoryViewModel : ObservableObject
 
         var dir = Path.Combine(_registry.CurrentNode.FullPath, finalName);
         Assets.Add(new AssetViewModel(dir, finalName, _fileSystemService));
+    }
+
+    [RelayCommand]
+    public void OpenFolder()
+    {
+        var path = _registry.CurrentNode.FullPath;
+
+        if (string.IsNullOrEmpty(path) || !Directory.Exists(path)) return;
+
+        Process.Start(new ProcessStartInfo
+        {
+            FileName = path,
+            UseShellExecute = true,
+            Verb = "open"
+        });
     }
 }

@@ -20,23 +20,23 @@
                         <StackPanel Orientation="Horizontal" Spacing="2" />
                     </ItemsPanelTemplate>
                 </ItemsControl.ItemsPanel>
-    
+
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
                         <StackPanel Orientation="Horizontal" Spacing="2">
-                
-                            <Button Classes="Basic" 
+
+                            <Button Classes="Basic"
                                     Cursor="Hand"
                                     Content="{Binding Name}"
                                     Command="{Binding $parent[UserControl].DataContext.NavigateCommand}"
                                     CommandParameter="{Binding FullPath}" />
-                            
-                            <TextBlock Text="›" 
-                                       VerticalAlignment="Center" 
-                                       Opacity="0.5" 
+
+                            <TextBlock Text="›"
+                                       VerticalAlignment="Center"
+                                       Opacity="0.5"
                                        Margin="2,0,2,0"
                                        FontSize="16" />
-                           
+
                         </StackPanel>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
@@ -53,6 +53,7 @@
                 <ListBox.ContextMenu>
                     <ContextMenu>
                         <MenuItem Header="Create New Folder" Command="{Binding CreateFolderCommand}" />
+                        <MenuItem Header="Open in Explorer" Command="{Binding OpenFolderCommand}" />
                     </ContextMenu>
                 </ListBox.ContextMenu>
 

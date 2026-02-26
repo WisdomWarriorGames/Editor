@@ -19,6 +19,7 @@
                 <ContextMenu>
                     <MenuItem Header="Rename (F2)" Command="{Binding BeginEditCommand}" />
                     <MenuItem Header="Delete" Command="{Binding DeleteCommand}" />
+                    <MenuItem Header="Open in Explorer" Command="{Binding OpenInExplorerCommand}" />
                 </ContextMenu>
             </suki:GlassCard.ContextMenu>
 

@@ -1,4 +1,5 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using System.Diagnostics;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using WisdomWarrior.Editor.FileSystem;
 using WisdomWarrior.Editor.FileSystem.Models;
@@ -126,5 +127,25 @@ public partial class AssetViewModel : ObservableObject
         {
             _fileSystemService.DeleteFile(FullPath);
         }
+    }
+
+    [RelayCommand]
+    public void OpenInExplorer()
+    {
+        var path = FullPath;
+
+        if (!IsFolder)
+        {
+            path = Path.GetDirectoryName(path);
+        }
+
+        if (string.IsNullOrEmpty(path) || !Directory.Exists(path)) return;
+
+        Process.Start(new ProcessStartInfo
+        {
+            FileName = path,
+            UseShellExecute = true,
+            Verb = "open"
+        });
     }
 }
