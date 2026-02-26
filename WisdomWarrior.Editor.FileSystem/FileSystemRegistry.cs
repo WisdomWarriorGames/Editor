@@ -89,6 +89,7 @@ public class FileSystemRegistry(FileSystemService fileSystemService) : IDisposab
 
         foreach (var child in node.Children)
         {
+            child.Parent = node;
             PopulateDictionaryRecursive(child);
         }
     }
@@ -110,6 +111,7 @@ public class FileSystemRegistry(FileSystemService fileSystemService) : IDisposab
             {
                 if (parentNode.Children.All(c => c.FullPath != path))
                 {
+                    newNode.Parent = parentNode;
                     parentNode.Children.Add(newNode);
                 }
             }
@@ -149,8 +151,57 @@ public class FileSystemRegistry(FileSystemService fileSystemService) : IDisposab
 
     private void HandleRenamed(string oldPath, string newPath)
     {
-        HandleDeleted(oldPath);
-        HandleCreated(newPath);
+        lock (_lock)
+        {
+            if (!Nodes.TryGetValue(oldPath, out var node))
+            {
+                HandleCreated(newPath);
+                return;
+            }
+            
+            UpdatePathsRecursive(node, oldPath, newPath);
+            
+            node.FullPath = newPath;
+            node.Name = Path.GetFileName(newPath);
+            
+            var oldParentPath = Path.GetDirectoryName(oldPath);
+            var newParentPath = Path.GetDirectoryName(newPath);
+
+            if (oldParentPath != newParentPath)
+            {
+                if (oldParentPath != null && Nodes.TryGetValue(oldParentPath, out var oldParent))
+                {
+                    oldParent.Children.Remove(node);
+                }
+                
+                if (newParentPath != null && Nodes.TryGetValue(newParentPath, out var newParent))
+                {
+                    node.Parent = newParent;
+                    newParent.Children.Add(node);
+                }
+            }
+        }
+
+        RegistryUpdated?.Invoke();
+    }
+
+    private void UpdatePathsRecursive(FileSystemNode node, string oldRoot, string newRoot)
+    {
+        Nodes.Remove(node.FullPath);
+        if (node.IsFolder) Directories.Remove(node.FullPath);
+        
+        var relative = Path.GetRelativePath(oldRoot, node.FullPath);
+        var updatedPath = relative == "." ? newRoot : Path.Combine(newRoot, relative);
+        
+        node.FullPath = updatedPath;
+        
+        Nodes[updatedPath] = node;
+        if (node.IsFolder) Directories[updatedPath] = node;
+        
+        foreach (var child in node.Children)
+        {
+            UpdatePathsRecursive(child, oldRoot, newRoot);
+        }
     }
 
     public void Dispose()

@@ -7,6 +7,8 @@ public class FileSystemNode
     public string Extension { get; set; } = string.Empty;
     public bool IsFolder { get; set; }
 
+    public FileSystemNode? Parent { get; set; } = null;
+
     public string FileNameWithExtension => IsFolder ? Name : $"{Name}{Extension}";
 
     public List<FileSystemNode> Children { get; set; } = [];

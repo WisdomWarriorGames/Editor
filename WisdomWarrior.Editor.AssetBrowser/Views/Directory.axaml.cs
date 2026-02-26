@@ -1,7 +1,6 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
-using Avalonia.Markup.Xaml;
 using Avalonia.VisualTree;
 using WisdomWarrior.Editor.AssetBrowser.ViewModels;
 
@@ -36,6 +35,15 @@ public partial class Directory : UserControl
             {
                 viewModel.ResetChanges();
             }
+        }
+    }
+
+    private void OnDoubleTapped(object? sender, TappedEventArgs e)
+    {
+        var visual = e.Source as Visual;
+        if (visual.DataContext is AssetViewModel assetViewModel && DataContext is DirectoryViewModel viewModel)
+        {
+            viewModel.Navigate(assetViewModel);
         }
     }
 }
