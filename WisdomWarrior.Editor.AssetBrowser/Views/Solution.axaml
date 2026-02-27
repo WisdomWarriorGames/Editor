@@ -2,6 +2,8 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              x:Class="WisdomWarrior.Editor.AssetBrowser.Views.Solution">
 
-    <TextBlock Text="Solution" VerticalAlignment="Center" HorizontalAlignment="Center" Opacity="0.6" />
+    <Panel DragDrop.AllowDrop="True">
+        <TextBlock Text="Solution" VerticalAlignment="Center" HorizontalAlignment="Center" Opacity="0.6" />
+    </Panel>
 
 </UserControl>

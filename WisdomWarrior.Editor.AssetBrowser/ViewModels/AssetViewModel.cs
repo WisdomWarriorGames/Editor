@@ -81,6 +81,22 @@ public partial class AssetViewModel : ObservableObject
         IsValid = !(exists && isDifferentFile);
     }
 
+    private bool CanAcceptDrop(object? droppedItem)
+    {
+        if (!IsFolder || droppedItem == this) return false;
+
+        return droppedItem is AssetViewModel;
+    }
+    
+    [RelayCommand(CanExecute = nameof(CanAcceptDrop))]
+    private void AcceptDrop(object? droppedItem)
+    {
+        if (droppedItem is AssetViewModel sourceAsset)
+        {
+            _fileSystemService.Move(FullPath, sourceAsset.FullPath);
+        }
+    }
+
     [RelayCommand]
     public void BeginEdit()
     {

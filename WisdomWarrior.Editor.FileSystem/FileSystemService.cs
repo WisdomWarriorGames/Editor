@@ -94,6 +94,37 @@ public class FileSystemService
         File.Move(fileFullPath, destPath);
     }
 
+    public void Move(string targetDirectory, string sourceAssetPath)
+    {
+        var isFile = File.Exists(sourceAssetPath);
+        var isDir = Directory.Exists(sourceAssetPath);
+
+        if (!isFile && !isDir) return;
+
+        var assetName = Path.GetFileName(sourceAssetPath);
+        var destinationPath = Path.Combine(targetDirectory, assetName);
+
+        if (isDir && targetDirectory.StartsWith(sourceAssetPath, StringComparison.OrdinalIgnoreCase))
+        {
+            return;
+        }
+
+        if (isFile)
+        {
+            if (!File.Exists(destinationPath))
+            {
+                File.Move(sourceAssetPath, destinationPath);
+            }
+        }
+        else if (isDir)
+        {
+            if (!Directory.Exists(destinationPath))
+            {
+                Directory.Move(sourceAssetPath, destinationPath);
+            }
+        }
+    }
+
     public FileSystemNode? GetFileSystemTree(string path)
     {
         if (ShouldIgnore(path)) return null;

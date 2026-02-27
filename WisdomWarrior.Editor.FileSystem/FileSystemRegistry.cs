@@ -100,12 +100,14 @@ public class FileSystemRegistry(FileSystemService fileSystemService) : IDisposab
 
         lock (_lock)
         {
+            if (Nodes.ContainsKey(path)) return;
+
             var isDir = Directory.Exists(path);
-            var newNode = new FileSystemNode(path, isDir);
-
-            Nodes[path] = newNode;
-            if (isDir) Directories[path] = newNode;
-
+            var newNode = isDir ? fileSystemService.GetFileSystemTree(path) : new FileSystemNode(path, false);
+            if (newNode == null) return; 
+            
+            PopulateDictionaryRecursive(newNode);
+            
             var parentPath = Path.GetDirectoryName(path);
             if (parentPath != null && Nodes.TryGetValue(parentPath, out var parentNode))
             {

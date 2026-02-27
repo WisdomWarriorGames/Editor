@@ -1,0 +1,33 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:dragAndDrop="clr-namespace:WisdomWarrior.Editor.Core.DragAndDrop;assembly=WisdomWarrior.Editor.Core"
+             x:Class="WisdomWarrior.Editor.AssetBrowser.Views.Breadcrumb">
+    <Border dragAndDrop:DropTarget.DropCommand="{Binding AcceptDropCommand}"
+            Background="Transparent" 
+            BorderThickness="2"
+            CornerRadius="4"
+            Padding="4">
+        <StackPanel Orientation="Horizontal" Spacing="2">
+
+            <Button Classes="Basic"
+                    Cursor="Hand"
+                    Content="{Binding Name}"
+                    Command="{Binding NavigateCommand}"
+                    CommandParameter="{Binding FullPath}" />
+
+            <TextBlock Text="›"
+                       VerticalAlignment="Center"
+                       Opacity="0.5"
+                       Margin="2,0,2,0"
+                       FontSize="16" />
+
+        </StackPanel>
+    </Border>
+    
+    <UserControl.Styles>
+        <Style Selector="Border:dragover">
+            <Setter Property="BorderBrush" Value="#2196F3" />
+        </Style>
+    </UserControl.Styles>
+</UserControl>

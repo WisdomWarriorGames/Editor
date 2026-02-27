@@ -4,7 +4,6 @@ using System.Runtime.InteropServices;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using WisdomWarrior.Editor.AssetBrowser.Models;
 using WisdomWarrior.Editor.FileSystem;
 
 namespace WisdomWarrior.Editor.AssetBrowser.ViewModels;
@@ -20,7 +19,7 @@ public partial class DirectoryViewModel : ObservableObject
 
     public ObservableCollection<AssetViewModel> SelectedItems { get; } = [];
     public ObservableCollection<AssetViewModel> Assets { get; } = [];
-    public ObservableCollection<BreadcrumbItem> Breadcrumbs { get; set; } = new();
+    public ObservableCollection<BreadcrumbViewModel> Breadcrumbs { get; set; } = new();
 
     public DirectoryViewModel(FileSystemService fileSystemService)
     {
@@ -64,13 +63,13 @@ public partial class DirectoryViewModel : ObservableObject
 
         Breadcrumbs.Clear();
 
-        var breadcrumbs = new List<BreadcrumbItem>();
-        breadcrumbs.Add(new BreadcrumbItem(activeNode.Name, activeNode.FullPath));
+        var breadcrumbs = new List<BreadcrumbViewModel>();
+        breadcrumbs.Add(new BreadcrumbViewModel(activeNode.Name, activeNode.FullPath, _fileSystemService, _registry));
 
         while (activeNode.Parent != null)
         {
             activeNode = activeNode.Parent;
-            breadcrumbs.Add(new BreadcrumbItem(activeNode.Name, activeNode.FullPath));
+            breadcrumbs.Add(new BreadcrumbViewModel(activeNode.Name, activeNode.FullPath, _fileSystemService, _registry));
         }
 
         breadcrumbs.Reverse();
@@ -84,7 +83,7 @@ public partial class DirectoryViewModel : ObservableObject
 
         Breadcrumbs.Add(breadcrumbs[0]);
         var b3 = breadcrumbs[^3];
-        Breadcrumbs.Add(new BreadcrumbItem("...", b3.FullPath));
+        Breadcrumbs.Add(new BreadcrumbViewModel("...", b3.FullPath, _fileSystemService, _registry));
 
         for (int i = breadcrumbs.Count - (MAX_BREADCRUMBS - 1); i < breadcrumbs.Count; i++)
         {
@@ -99,10 +98,9 @@ public partial class DirectoryViewModel : ObservableObject
         _registry.SetCurrentNode(asset.FullPath);
     }
 
-    [RelayCommand]
-    public void Navigate(string fullPath)
+    public void RemoveNew(AssetViewModel asset)
     {
-        _registry.SetCurrentNode(fullPath);
+        Assets.Remove(asset);
     }
 
     [RelayCommand]
@@ -153,11 +151,6 @@ public partial class DirectoryViewModel : ObservableObject
 
         var dir = Path.Combine(_registry.CurrentNode.FullPath, finalName);
         Assets.Add(new AssetViewModel(dir, finalName, _fileSystemService, RemoveNew));
-    }
-
-    public void RemoveNew(AssetViewModel asset)
-    {
-        Assets.Remove(asset);
     }
 
     [RelayCommand]
