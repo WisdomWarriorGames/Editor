@@ -124,8 +124,8 @@ public class FileSystemService
             }
         }
     }
-    
-    public void CopyAsset(string targetDirectory, string sourceAssetPath)
+
+    public void CopyAsset(string targetDirectory, string sourceAssetPath, IProgress<string>? progress = null)
     {
         var isFile = File.Exists(sourceAssetPath);
         var isDir = Directory.Exists(sourceAssetPath);
@@ -133,8 +133,10 @@ public class FileSystemService
         if (!isFile && !isDir) return;
 
         var assetName = Path.GetFileName(sourceAssetPath);
+        progress?.Report($"Copying: {assetName}");
+
         var destinationPath = Path.Combine(targetDirectory, assetName);
-        
+
         if (isDir && targetDirectory.StartsWith(sourceAssetPath, StringComparison.OrdinalIgnoreCase))
         {
             return;
@@ -159,7 +161,7 @@ public class FileSystemService
         {
             Directory.CreateDirectory(destDir);
         }
-        
+
         foreach (var file in Directory.GetFiles(sourceDir))
         {
             if (ShouldIgnore(file)) continue;
@@ -170,7 +172,7 @@ public class FileSystemService
                 File.Copy(file, destFile);
             }
         }
-        
+
         foreach (var dir in Directory.GetDirectories(sourceDir))
         {
             if (ShouldIgnore(dir)) continue;

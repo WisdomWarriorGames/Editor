@@ -50,20 +50,41 @@ public class DropTarget : AvaloniaObject
         if (e.Data.Contains("EntityData"))
         {
             var draggedItem = e.Data.Get("EntityData");
-            if (command.CanExecute(draggedItem))
+            
+            if (draggedItem is System.Collections.IEnumerable list && draggedItem is not string)
             {
-                e.DragEffects = DragDropEffects.Move;
+                foreach (var item in list)
+                {
+                    if (command.CanExecute(item))
+                    {
+                        isAccepted = true;
+                        break;
+                    }
+                }
+            }
+            else if (command.CanExecute(draggedItem))
+            {
                 isAccepted = true;
             }
+
+            if (isAccepted) e.DragEffects = DragDropEffects.Move;
         }
         else if (e.Data.Contains(DataFormats.Files))
         {
             var files = e.Data.GetFiles();
-            if (files != null && command.CanExecute(files))
+            if (files != null)
             {
-                e.DragEffects = DragDropEffects.Copy;
-                isAccepted = true;
+                // UNPACK OS FILES
+                foreach (var file in files)
+                {
+                    if (command.CanExecute(file))
+                    {
+                        isAccepted = true;
+                        break;
+                    }
+                }
             }
+            if (isAccepted) e.DragEffects = DragDropEffects.Copy;
         }
 
         if (isAccepted)
@@ -93,23 +114,47 @@ public class DropTarget : AvaloniaObject
         var command = GetDropCommand(control);
         if (command == null) return;
 
-        var isAccepted = false;
-        object? payload = null;
+        bool handledDrop = false;
 
         if (e.Data.Contains("EntityData"))
         {
-            payload = e.Data.Get("EntityData");
-            if (command.CanExecute(payload)) isAccepted = true;
+            var payload = e.Data.Get("EntityData");
+            
+            if (payload is System.Collections.IEnumerable list && payload is not string)
+            {
+                foreach (var item in list)
+                {
+                    if (command.CanExecute(item))
+                    {
+                        command.Execute(item);
+                        handledDrop = true;
+                    }
+                }
+            }
+            else if (command.CanExecute(payload))
+            {
+                command.Execute(payload);
+                handledDrop = true;
+            }
         }
         else if (e.Data.Contains(DataFormats.Files))
         {
-            payload = e.Data.GetFiles();
-            if (command.CanExecute(payload)) isAccepted = true;
+            var files = e.Data.GetFiles();
+            if (files != null)
+            {
+                foreach (var file in files)
+                {
+                    if (command.CanExecute(file))
+                    {
+                        command.Execute(file);
+                        handledDrop = true;
+                    }
+                }
+            }
         }
 
-        if (isAccepted && payload != null)
+        if (handledDrop)
         {
-            command.Execute(payload);
             e.Handled = true;
         }
     }

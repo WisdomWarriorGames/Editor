@@ -106,7 +106,7 @@ public partial class DirectoryViewModel : ObservableObject
 
     private bool CanAcceptDrop(object? droppedItem)
     {
-        if (droppedItem is IEnumerable<IStorageItem>)
+        if (droppedItem is IStorageItem)
         {
             return true;
         }
@@ -119,15 +119,12 @@ public partial class DirectoryViewModel : ObservableObject
     {
         if (_fileSystemService == null) return;
 
-        if (droppedItem is IEnumerable<IStorageItem> externalFiles)
+        if (droppedItem is IStorageItem file)
         {
-            foreach (var file in externalFiles)
+            var localPath = file.TryGetLocalPath();
+            if (localPath != null)
             {
-                var localPath = file.TryGetLocalPath();
-                if (localPath != null)
-                {
-                    _fileSystemService.CopyAsset(_registry.CurrentNode.FullPath, localPath);
-                }
+                _fileSystemService.CopyAsset(_registry.CurrentNode.FullPath, localPath);
             }
         }
     }

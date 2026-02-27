@@ -1,6 +1,7 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.VisualTree;
 
 namespace WisdomWarrior.Editor.Core.DragAndDrop;
 
@@ -26,11 +27,33 @@ public class DragSource : AvaloniaObject
         {
             if (isEnabled)
             {
+                control.PointerPressed += OnPointerPressed;
                 control.PointerMoved += OnPointerMoved;
             }
             else
             {
+                control.PointerPressed -= OnPointerPressed;
                 control.PointerMoved -= OnPointerMoved;
+            }
+        }
+    }
+
+    private static void OnPointerPressed(object? sender, PointerPressedEventArgs e)
+    {
+        if (sender is Control control && e.GetCurrentPoint(control).Properties.IsLeftButtonPressed)
+        {
+            var listBox = FindAncestorOfType<ListBox>(control);
+            if (listBox?.SelectedItems != null && control.DataContext != null)
+            {
+                var selectedItems = listBox.SelectedItems.Cast<object>().ToList();
+
+                if (selectedItems.Count > 1 && selectedItems.Contains(control.DataContext))
+                {
+                    if ((e.KeyModifiers & (KeyModifiers.Control | KeyModifiers.Shift)) == 0)
+                    {
+                        e.Handled = true;
+                    }
+                }
             }
         }
     }
@@ -44,12 +67,35 @@ public class DragSource : AvaloniaObject
             var data = new DataObject();
             if (control.DataContext != null)
             {
-                data.Set("EntityData", control.DataContext);
+                object payload = control.DataContext;
+                var listBox = FindAncestorOfType<ListBox>(control);
 
+                if (listBox != null && listBox.SelectedItems != null)
+                {
+                    var selectedItems = listBox.SelectedItems.Cast<object>().ToList();
+
+                    if (selectedItems.Contains(control.DataContext))
+                    {
+                        payload = selectedItems;
+                    }
+                }
+
+                data.Set("EntityData", payload);
                 await DragDrop.DoDragDrop(e, data, DragDropEffects.Move);
             }
 
             control.PointerMoved += OnPointerMoved;
         }
+    }
+
+    private static T? FindAncestorOfType<T>(Visual? visual) where T : Visual
+    {
+        while (visual != null)
+        {
+            if (visual is T ancestor) return ancestor;
+            visual = visual.GetVisualParent();
+        }
+
+        return null;
     }
 }
