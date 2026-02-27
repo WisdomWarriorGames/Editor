@@ -124,6 +124,61 @@ public class FileSystemService
             }
         }
     }
+    
+    public void CopyAsset(string targetDirectory, string sourceAssetPath)
+    {
+        var isFile = File.Exists(sourceAssetPath);
+        var isDir = Directory.Exists(sourceAssetPath);
+
+        if (!isFile && !isDir) return;
+
+        var assetName = Path.GetFileName(sourceAssetPath);
+        var destinationPath = Path.Combine(targetDirectory, assetName);
+        
+        if (isDir && targetDirectory.StartsWith(sourceAssetPath, StringComparison.OrdinalIgnoreCase))
+        {
+            return;
+        }
+
+        if (isFile)
+        {
+            if (!File.Exists(destinationPath))
+            {
+                File.Copy(sourceAssetPath, destinationPath);
+            }
+        }
+        else if (isDir)
+        {
+            CopyDirectoryRecursive(sourceAssetPath, destinationPath);
+        }
+    }
+
+    private void CopyDirectoryRecursive(string sourceDir, string destDir)
+    {
+        if (!Directory.Exists(destDir))
+        {
+            Directory.CreateDirectory(destDir);
+        }
+        
+        foreach (var file in Directory.GetFiles(sourceDir))
+        {
+            if (ShouldIgnore(file)) continue;
+
+            var destFile = Path.Combine(destDir, Path.GetFileName(file));
+            if (!File.Exists(destFile))
+            {
+                File.Copy(file, destFile);
+            }
+        }
+        
+        foreach (var dir in Directory.GetDirectories(sourceDir))
+        {
+            if (ShouldIgnore(dir)) continue;
+
+            var destSubDir = Path.Combine(destDir, Path.GetFileName(dir));
+            CopyDirectoryRecursive(dir, destSubDir);
+        }
+    }
 
     public FileSystemNode? GetFileSystemTree(string path)
     {

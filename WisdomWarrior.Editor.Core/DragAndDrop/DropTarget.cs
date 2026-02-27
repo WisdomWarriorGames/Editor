@@ -10,10 +10,10 @@ public class DropTarget : AvaloniaObject
     public static readonly AttachedProperty<ICommand?> DropCommandProperty =
         AvaloniaProperty.RegisterAttached<DropTarget, Control, ICommand?>("DropCommand");
 
-    public static void SetDropCommand(AvaloniaObject element, ICommand? value) => 
+    public static void SetDropCommand(AvaloniaObject element, ICommand? value) =>
         element.SetValue(DropCommandProperty, value);
 
-    public static ICommand? GetDropCommand(AvaloniaObject element) => 
+    public static ICommand? GetDropCommand(AvaloniaObject element) =>
         element.GetValue(DropCommandProperty);
 
     static DropTarget()
@@ -41,27 +41,42 @@ public class DropTarget : AvaloniaObject
 
     private static void OnDragOver(object? sender, DragEventArgs e)
     {
-        if (sender is Control control && e.Data.Contains("EntityData"))
-        {
-            var command = GetDropCommand(control);
-            var draggedItem = e.Data.Get("EntityData");
+        if (sender is not Control control) return;
+        var command = GetDropCommand(control);
+        if (command == null) return;
 
-            if (command != null && command.CanExecute(draggedItem))
+        var isAccepted = false;
+
+        if (e.Data.Contains("EntityData"))
+        {
+            var draggedItem = e.Data.Get("EntityData");
+            if (command.CanExecute(draggedItem))
             {
                 e.DragEffects = DragDropEffects.Move;
-                e.Handled = true;
-                
-                ((IPseudoClasses)control.Classes).Add(":dragover");
-                return;
+                isAccepted = true;
             }
         }
-        
-        e.DragEffects = DragDropEffects.None;
-        e.Handled = true;
-        
-        if (sender is Control c) ((IPseudoClasses)c.Classes).Remove(":dragover");
+        else if (e.Data.Contains(DataFormats.Files))
+        {
+            var files = e.Data.GetFiles();
+            if (files != null && command.CanExecute(files))
+            {
+                e.DragEffects = DragDropEffects.Copy;
+                isAccepted = true;
+            }
+        }
+
+        if (isAccepted)
+        {
+            e.Handled = true;
+            ((IPseudoClasses)control.Classes).Add(":dragover");
+        }
+        else
+        {
+            ((IPseudoClasses)control.Classes).Remove(":dragover");
+        }
     }
-    
+
     private static void OnDragLeave(object? sender, DragEventArgs e)
     {
         if (sender is Control control)
@@ -72,21 +87,30 @@ public class DropTarget : AvaloniaObject
 
     private static void OnDrop(object? sender, DragEventArgs e)
     {
-        if (sender is Control control)
+        if (sender is not Control control) return;
+        ((IPseudoClasses)control.Classes).Remove(":dragover");
+
+        var command = GetDropCommand(control);
+        if (command == null) return;
+
+        var isAccepted = false;
+        object? payload = null;
+
+        if (e.Data.Contains("EntityData"))
         {
-            ((IPseudoClasses)control.Classes).Remove(":dragover");
+            payload = e.Data.Get("EntityData");
+            if (command.CanExecute(payload)) isAccepted = true;
+        }
+        else if (e.Data.Contains(DataFormats.Files))
+        {
+            payload = e.Data.GetFiles();
+            if (command.CanExecute(payload)) isAccepted = true;
+        }
 
-            if (e.Data.Contains("EntityData"))
-            {
-                var command = GetDropCommand(control);
-                var draggedItem = e.Data.Get("EntityData");
-
-                if (command != null && command.CanExecute(draggedItem))
-                {
-                    command.Execute(draggedItem);
-                    e.Handled = true;
-                }
-            }
+        if (isAccepted && payload != null)
+        {
+            command.Execute(payload);
+            e.Handled = true;
         }
     }
 }

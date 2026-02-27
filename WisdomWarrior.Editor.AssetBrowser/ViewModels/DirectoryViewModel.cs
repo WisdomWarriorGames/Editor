@@ -1,6 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using Avalonia.Platform.Storage;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -101,6 +102,32 @@ public partial class DirectoryViewModel : ObservableObject
     public void RemoveNew(AssetViewModel asset)
     {
         Assets.Remove(asset);
+    }
+
+    private bool CanAcceptDrop(object? droppedItem)
+    {
+        if (droppedItem is IEnumerable<IStorageItem>)
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    [RelayCommand(CanExecute = nameof(CanAcceptDrop))]
+    private void AcceptDrop(object? droppedItem)
+    {
+        if (droppedItem is IEnumerable<IStorageItem> externalFiles)
+        {
+            foreach (var file in externalFiles)
+            {
+                var localPath = file.TryGetLocalPath();
+                if (localPath != null)
+                {
+                    _fileSystemService.CopyAsset(_registry.CurrentNode.FullPath, localPath);
+                }
+            }
+        }
     }
 
     [RelayCommand]

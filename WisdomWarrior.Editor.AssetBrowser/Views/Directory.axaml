@@ -3,6 +3,7 @@
              xmlns:viewModels="clr-namespace:WisdomWarrior.Editor.AssetBrowser.ViewModels"
              xmlns:views="clr-namespace:WisdomWarrior.Editor.AssetBrowser.Views"
              xmlns:suki="https://github.com/kikipoulet/SukiUI"
+             xmlns:dragAndDrop="clr-namespace:WisdomWarrior.Editor.Core.DragAndDrop;assembly=WisdomWarrior.Editor.Core"
              x:DataType="viewModels:DirectoryViewModel"
              x:Class="WisdomWarrior.Editor.AssetBrowser.Views.Directory">
 
@@ -28,69 +29,97 @@
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
         </Grid>
+        <Grid Grid.Row="1"
+              Classes="DropZone"
+              Background="Transparent"
+              dragAndDrop:DropTarget.DropCommand="{Binding AcceptDropCommand}">
 
-        <ScrollViewer Grid.Row="1" Background="Transparent">
-            <ListBox ItemsSource="{Binding Assets}"
-                     SelectedItems="{Binding SelectedItems}"
-                     SelectionMode="Multiple"
-                     PointerPressed="OnBackgroundClicked"
-                     DoubleTapped="OnDoubleTapped"
-                     DragDrop.AllowDrop="True">
+            <ScrollViewer Background="Transparent">
+                <ListBox ItemsSource="{Binding Assets}"
+                         SelectedItems="{Binding SelectedItems}"
+                         SelectionMode="Multiple"
+                         PointerPressed="OnBackgroundClicked"
+                         DoubleTapped="OnDoubleTapped">
 
-                <ListBox.ContextMenu>
-                    <ContextMenu>
-                        <MenuItem Header="Create New Folder" Command="{Binding CreateFolderCommand}" />
-                        <MenuItem Header="Open in Explorer" Command="{Binding OpenFolderCommand}" />
-                    </ContextMenu>
-                </ListBox.ContextMenu>
+                    <ListBox.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="Create New Folder" Command="{Binding CreateFolderCommand}" />
+                            <MenuItem Header="Open in Explorer" Command="{Binding OpenFolderCommand}" />
+                        </ContextMenu>
+                    </ListBox.ContextMenu>
 
-                <ListBox.KeyBindings>
-                    <KeyBinding Gesture="Delete" Command="{Binding DeleteSelectedCommand}" />
-                    <KeyBinding Gesture="Escape" Command="{Binding ResetChangesCommand}" />
-                </ListBox.KeyBindings>
+                    <ListBox.KeyBindings>
+                        <KeyBinding Gesture="Delete" Command="{Binding DeleteSelectedCommand}" />
+                        <KeyBinding Gesture="Escape" Command="{Binding ResetChangesCommand}" />
+                    </ListBox.KeyBindings>
 
-                <ListBox.Styles>
-                    <Style Selector="ListBoxItem">
-                        <Setter Property="Padding" Value="0" />
-                        <Setter Property="Margin" Value="0" />
-                        <Setter Property="Template">
-                            <ControlTemplate>
-                                <ContentPresenter Content="{TemplateBinding Content}"
-                                                  ContentTemplate="{TemplateBinding ContentTemplate}" />
-                            </ControlTemplate>
-                        </Setter>
-                    </Style>
+                    <ListBox.Styles>
+                        <Style Selector="ListBoxItem">
+                            <Setter Property="Padding" Value="0" />
+                            <Setter Property="Margin" Value="0" />
+                            <Setter Property="Template">
+                                <ControlTemplate>
+                                    <ContentPresenter Content="{TemplateBinding Content}"
+                                                      ContentTemplate="{TemplateBinding ContentTemplate}" />
+                                </ControlTemplate>
+                            </Setter>
+                        </Style>
 
-                    <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter">
-                        <Setter Property="Background" Value="Transparent" />
-                    </Style>
+                        <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter">
+                            <Setter Property="Background" Value="Transparent" />
+                        </Style>
 
-                    <Style Selector="ListBoxItem:selected /template/ ContentPresenter">
-                        <Setter Property="Background" Value="Transparent" />
-                    </Style>
+                        <Style Selector="ListBoxItem:selected /template/ ContentPresenter">
+                            <Setter Property="Background" Value="Transparent" />
+                        </Style>
 
-                    <Style Selector="ListBoxItem:selected suki|GlassCard">
-                        <Setter Property="BorderBrush" Value="#2196F3" />
-                        <Setter Property="BorderThickness" Value="2" />
-                    </Style>
+                        <Style Selector="ListBoxItem:selected suki|GlassCard">
+                            <Setter Property="BorderBrush" Value="#2196F3" />
+                            <Setter Property="BorderThickness" Value="2" />
+                        </Style>
 
-                    <Style Selector="ListBoxItem:selected Path#SelectionTick">
-                        <Setter Property="Opacity" Value="1" />
-                    </Style>
-                </ListBox.Styles>
+                        <Style Selector="ListBoxItem:selected Path#SelectionTick">
+                            <Setter Property="Opacity" Value="1" />
+                        </Style>
+                    </ListBox.Styles>
 
-                <ListBox.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <WrapPanel />
-                    </ItemsPanelTemplate>
-                </ListBox.ItemsPanel>
-                <ListBox.ItemTemplate>
-                    <DataTemplate>
-                        <views:Asset />
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox>
-        </ScrollViewer>
+                    <ListBox.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel />
+                        </ItemsPanelTemplate>
+                    </ListBox.ItemsPanel>
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <views:Asset />
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </ScrollViewer>
+            <Border x:Name="DragOverlay"
+                    Background="#AA000000"
+                    IsHitTestVisible="False"
+                    CornerRadius="8"
+                    Margin="4">
+
+                <Path Data="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z"
+                      Fill="#2196F3"
+                      Width="64" Height="64"
+                      Stretch="Uniform"
+                      Opacity="0.8"
+                      HorizontalAlignment="Center"
+                      VerticalAlignment="Center" />
+            </Border>
+
+            <Grid.Styles>
+                <Style Selector="Border#DragOverlay">
+                    <Setter Property="IsVisible" Value="False" />
+                </Style>
+
+                <Style Selector="Grid.DropZone:dragover Border#DragOverlay">
+                    <Setter Property="IsVisible" Value="True" />
+                </Style>
+            </Grid.Styles>
+        </Grid>
     </Grid>
 
 </UserControl>
