@@ -117,6 +117,8 @@ public partial class DirectoryViewModel : ObservableObject
     [RelayCommand(CanExecute = nameof(CanAcceptDrop))]
     private void AcceptDrop(object? droppedItem)
     {
+        if (_fileSystemService == null) return;
+
         if (droppedItem is IEnumerable<IStorageItem> externalFiles)
         {
             foreach (var file in externalFiles)
