@@ -9,6 +9,7 @@ namespace WisdomWarrior.Editor.AssetBrowser.ViewModels;
 public partial class AssetViewModel : ObservableObject
 {
     private readonly FileSystemService _fileSystemService;
+    private readonly Action<AssetViewModel> _cancelEdit;
 
     [ObservableProperty] private bool _isSelected = false;
 
@@ -35,13 +36,14 @@ public partial class AssetViewModel : ObservableObject
         FullPath = node.FullPath;
     }
 
-    public AssetViewModel(string directory, string name, FileSystemService fileSystemService)
+    public AssetViewModel(string directory, string name, FileSystemService fileSystemService, Action<AssetViewModel> cancelEdit)
     {
         TempName = name;
         IsFolder = true;
         IsEditing = true;
         FullPath = directory;
         _fileSystemService = fileSystemService;
+        _cancelEdit = cancelEdit;
         IsNew = true;
 
         ValidateName(name);
@@ -91,6 +93,11 @@ public partial class AssetViewModel : ObservableObject
     {
         IsEditing = false;
         TempName = string.Empty;
+
+        if (IsNew)
+        {
+            _cancelEdit?.Invoke(this);
+        }
     }
 
     [RelayCommand]

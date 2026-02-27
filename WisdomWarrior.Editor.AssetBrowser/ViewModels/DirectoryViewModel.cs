@@ -112,6 +112,7 @@ public partial class DirectoryViewModel : ObservableObject
         {
             if (asset.IsValid)
             {
+                asset.IsNew = false;
                 asset.CommitEdit();
                 asset.CancelEdit();
             }
@@ -139,6 +140,8 @@ public partial class DirectoryViewModel : ObservableObject
     [RelayCommand]
     public void CreateFolder()
     {
+        if (_registry == null || _registry.CurrentNode == null) return;
+
         var baseName = "New Folder";
         var finalName = baseName;
         var count = 1;
@@ -149,12 +152,19 @@ public partial class DirectoryViewModel : ObservableObject
         }
 
         var dir = Path.Combine(_registry.CurrentNode.FullPath, finalName);
-        Assets.Add(new AssetViewModel(dir, finalName, _fileSystemService));
+        Assets.Add(new AssetViewModel(dir, finalName, _fileSystemService, RemoveNew));
+    }
+
+    public void RemoveNew(AssetViewModel asset)
+    {
+        Assets.Remove(asset);
     }
 
     [RelayCommand]
     public void OpenFolder()
     {
+        if (_registry == null || _registry.CurrentNode == null) return;
+
         var path = _registry.CurrentNode.FullPath;
 
         if (string.IsNullOrEmpty(path) || !Directory.Exists(path)) return;
