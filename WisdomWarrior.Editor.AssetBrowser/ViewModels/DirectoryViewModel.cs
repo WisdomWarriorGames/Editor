@@ -1,10 +1,11 @@
 ﻿using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.Runtime.InteropServices;
 using Avalonia.Platform.Storage;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using SukiUI.Toasts;
+using WisdomWarrior.Editor.Core;
 using WisdomWarrior.Editor.FileSystem;
 
 namespace WisdomWarrior.Editor.AssetBrowser.ViewModels;
@@ -106,27 +107,47 @@ public partial class DirectoryViewModel : ObservableObject
 
     private bool CanAcceptDrop(object? droppedItem)
     {
-        if (droppedItem is IStorageItem)
-        {
-            return true;
-        }
+        if (droppedItem is IStorageItem) return true;
+        if (droppedItem is IEnumerable<IStorageItem>) return true;
 
         return false;
     }
 
     [RelayCommand(CanExecute = nameof(CanAcceptDrop))]
-    private void AcceptDrop(object? droppedItem)
+    private async Task AcceptDropAsync(object? droppedItem)
     {
         if (_fileSystemService == null) return;
 
-        if (droppedItem is IStorageItem file)
+        var loadingToast = EditorUI.ToastManager.CreateToast()
+            .WithTitle("Importing Assets")
+            .WithContent("Copying files into your project...")
+            .WithLoadingState(true)
+            .Queue();
+
+        await Task.Run(() =>
         {
-            var localPath = file.TryGetLocalPath();
-            if (localPath != null)
+            if (droppedItem is IStorageItem file)
             {
-                _fileSystemService.CopyAsset(_registry.CurrentNode.FullPath, localPath);
+                var localPath = file.TryGetLocalPath();
+                if (localPath != null)
+                {
+                    _fileSystemService.CopyAsset(_registry.CurrentNode.FullPath, localPath);
+                }
             }
-        }
+            else if (droppedItem is IEnumerable<IStorageItem> files)
+            {
+                foreach (var f in files)
+                {
+                    var localPath = f.TryGetLocalPath();
+                    if (localPath != null)
+                    {
+                        _fileSystemService.CopyAsset(_registry.CurrentNode.FullPath, localPath);
+                    }
+                }
+            }
+        });
+
+        EditorUI.ToastManager.Dismiss(loadingToast);
     }
 
     [RelayCommand]

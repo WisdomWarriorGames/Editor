@@ -50,7 +50,7 @@ public class DropTarget : AvaloniaObject
         if (e.Data.Contains("EntityData"))
         {
             var draggedItem = e.Data.Get("EntityData");
-            
+
             if (draggedItem is System.Collections.IEnumerable list && draggedItem is not string)
             {
                 foreach (var item in list)
@@ -84,6 +84,7 @@ public class DropTarget : AvaloniaObject
                     }
                 }
             }
+
             if (isAccepted) e.DragEffects = DragDropEffects.Copy;
         }
 
@@ -119,19 +120,7 @@ public class DropTarget : AvaloniaObject
         if (e.Data.Contains("EntityData"))
         {
             var payload = e.Data.Get("EntityData");
-            
-            if (payload is System.Collections.IEnumerable list && payload is not string)
-            {
-                foreach (var item in list)
-                {
-                    if (command.CanExecute(item))
-                    {
-                        command.Execute(item);
-                        handledDrop = true;
-                    }
-                }
-            }
-            else if (command.CanExecute(payload))
+            if (command.CanExecute(payload))
             {
                 command.Execute(payload);
                 handledDrop = true;
@@ -140,22 +129,13 @@ public class DropTarget : AvaloniaObject
         else if (e.Data.Contains(DataFormats.Files))
         {
             var files = e.Data.GetFiles();
-            if (files != null)
+            if (files != null && command.CanExecute(files))
             {
-                foreach (var file in files)
-                {
-                    if (command.CanExecute(file))
-                    {
-                        command.Execute(file);
-                        handledDrop = true;
-                    }
-                }
+                command.Execute(files);
+                handledDrop = true;
             }
         }
 
-        if (handledDrop)
-        {
-            e.Handled = true;
-        }
+        if (handledDrop) e.Handled = true;
     }
 }

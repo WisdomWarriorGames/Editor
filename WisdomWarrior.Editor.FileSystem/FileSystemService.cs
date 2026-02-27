@@ -104,7 +104,7 @@ public class FileSystemService
         var assetName = Path.GetFileName(sourceAssetPath);
         var destinationPath = Path.Combine(targetDirectory, assetName);
 
-        if (isDir && targetDirectory.StartsWith(sourceAssetPath, StringComparison.OrdinalIgnoreCase))
+        if (isDir && targetDirectory.Equals(sourceAssetPath, StringComparison.OrdinalIgnoreCase))
         {
             return;
         }
@@ -137,7 +137,7 @@ public class FileSystemService
 
         var destinationPath = Path.Combine(targetDirectory, assetName);
 
-        if (isDir && targetDirectory.StartsWith(sourceAssetPath, StringComparison.OrdinalIgnoreCase))
+        if (isDir && targetDirectory.Equals(sourceAssetPath, StringComparison.OrdinalIgnoreCase))
         {
             return;
         }

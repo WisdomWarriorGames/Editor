@@ -6,7 +6,6 @@
              xmlns:dragAndDrop="clr-namespace:WisdomWarrior.Editor.Core.DragAndDrop;assembly=WisdomWarrior.Editor.Core"
              x:DataType="viewModels:DirectoryViewModel"
              x:Class="WisdomWarrior.Editor.AssetBrowser.Views.Directory">
-
     <Grid RowDefinitions="Auto, *">
         <Grid Grid.Row="0" Height="50" Background="Transparent" Margin="1,0,1,1">
 

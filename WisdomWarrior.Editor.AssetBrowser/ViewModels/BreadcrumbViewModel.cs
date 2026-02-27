@@ -1,5 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using SukiUI.Toasts;
+using WisdomWarrior.Editor.Core;
 using WisdomWarrior.Editor.FileSystem;
 
 namespace WisdomWarrior.Editor.AssetBrowser.ViewModels;
@@ -23,18 +25,49 @@ public partial class BreadcrumbViewModel : ObservableObject
 
     private bool CanAcceptDrop(object? droppedItem)
     {
-        return droppedItem is AssetViewModel;
+        if (droppedItem is AssetViewModel)
+        {
+            return true;
+        }
+
+        if (droppedItem is IEnumerable<object> internalList)
+        {
+            return internalList.All(item => item is AssetViewModel);
+        }
+
+        return false;
     }
 
     [RelayCommand(CanExecute = nameof(CanAcceptDrop))]
-    private void AcceptDrop(object? droppedItem)
+    private async Task AcceptDrop(object? droppedItem)
     {
-        if (droppedItem is AssetViewModel sourceAsset)
+        var loadingToast = EditorUI.ToastManager.CreateToast()
+            .WithTitle("Moving Assets")
+            .WithContent("Processing files...")
+            .WithLoadingState(true)
+            .Queue();
+
+        await Task.Run(() =>
         {
-            _fileSystemService.Move(FullPath, sourceAsset.FullPath);
-        }
+            if (droppedItem is AssetViewModel singleAsset)
+            {
+                _fileSystemService.Move(FullPath, singleAsset.FullPath);
+            }
+            else if (droppedItem is IEnumerable<object> internalList)
+            {
+                foreach (var item in internalList)
+                {
+                    if (item is AssetViewModel assetToMove)
+                    {
+                        _fileSystemService.Move(FullPath, assetToMove.FullPath);
+                    }
+                }
+            }
+        });
+
+        EditorUI.ToastManager.Dismiss(loadingToast);
     }
-    
+
     [RelayCommand]
     public void Navigate(string fullPath)
     {

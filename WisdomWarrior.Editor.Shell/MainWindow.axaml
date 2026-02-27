@@ -7,6 +7,7 @@
                  xmlns:sceneView="clr-namespace:WisdomWarrior.Editor.SceneList.Views;assembly=WisdomWarrior.Editor.SceneList"
                  xmlns:fileMenu="clr-namespace:WisdomWarrior.Editor.Menus.Views;assembly=WisdomWarrior.Editor.Menus"
                  xmlns:inspector="clr-namespace:WisdomWarrior.Editor.Inspector.Views;assembly=WisdomWarrior.Editor.Inspector"
+                 xmlns:core="clr-namespace:WisdomWarrior.Editor.Core;assembly=WisdomWarrior.Editor.Core"
                  x:Class="WisdomWarrior.Editor.Shell.MainWindow"
                  x:DataType="viewModels:MainWindowViewModel"
                  Title=""
@@ -15,7 +16,9 @@
                  Background="{DynamicResource SukiBackground}"
                  ExtendClientAreaToDecorationsHint="True"
                  ExtendClientAreaTitleBarHeightHint="-1">
-
+    <suki:SukiWindow.Hosts>
+        <suki:SukiToastHost Manager="{x:Static core:EditorUI.ToastManager}" />
+    </suki:SukiWindow.Hosts>
     <suki:SukiWindow.LogoContent>
         <StackPanel Orientation="Horizontal" Spacing="5" VerticalAlignment="Center">
             <fileMenu:FileMenu DataContext="{Binding FileMenuViewModel}" />

@@ -1,6 +1,9 @@
 ﻿using System.Diagnostics;
+using Avalonia.Platform.Storage;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using SukiUI.Toasts;
+using WisdomWarrior.Editor.Core;
 using WisdomWarrior.Editor.FileSystem;
 using WisdomWarrior.Editor.FileSystem.Models;
 
@@ -83,18 +86,49 @@ public partial class AssetViewModel : ObservableObject
 
     private bool CanAcceptDrop(object? droppedItem)
     {
-        if (!IsFolder || droppedItem == this) return false;
+        if (!IsFolder) return false;
 
-        return droppedItem is AssetViewModel;
-    }
-    
-    [RelayCommand(CanExecute = nameof(CanAcceptDrop))]
-    private void AcceptDrop(object? droppedItem)
-    {
-        if (droppedItem is AssetViewModel sourceAsset)
+        if (droppedItem is AssetViewModel singleAsset)
         {
-            _fileSystemService.Move(FullPath, sourceAsset.FullPath);
+            return singleAsset != this;
         }
+
+        if (droppedItem is IEnumerable<object> internalList)
+        {
+            return internalList.All(item => item is AssetViewModel a && a != this);
+        }
+
+        return false;
+    }
+
+    [RelayCommand(CanExecute = nameof(CanAcceptDrop))]
+    private async Task AcceptDrop(object? droppedItem)
+    {
+        var loadingToast = EditorUI.ToastManager.CreateToast()
+            .WithTitle("Moving Assets")
+            .WithContent("Processing files...")
+            .WithLoadingState(true)
+            .Queue();
+
+        await Task.Run(() =>
+        {
+            if (droppedItem is AssetViewModel singleAsset)
+            {
+                _fileSystemService.Move(FullPath, singleAsset.FullPath);
+            }
+            else if (droppedItem is IEnumerable<object> internalList)
+            {
+                foreach (var item in internalList)
+                {
+                    if (item is AssetViewModel assetToMove)
+                    {
+                        _fileSystemService.Move(FullPath, assetToMove.FullPath);
+                    }
+                }
+            }
+        });
+
+        EditorUI.ToastManager.Dismiss(loadingToast);
     }
 
     [RelayCommand]
