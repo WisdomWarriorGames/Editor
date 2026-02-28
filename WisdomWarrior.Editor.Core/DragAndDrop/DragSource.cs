@@ -15,6 +15,9 @@ public class DragSource : AvaloniaObject
 
     public static bool GetIsEnabled(AvaloniaObject element) =>
         element.GetValue(IsEnabledProperty);
+    
+    private static Point _dragStartPoint;
+    private const double DragThreshold = 3.0;
 
     static DragSource()
     {
@@ -42,6 +45,8 @@ public class DragSource : AvaloniaObject
     {
         if (sender is Control control && e.GetCurrentPoint(control).Properties.IsLeftButtonPressed)
         {
+            _dragStartPoint = e.GetPosition(null);
+            
             var listBox = FindAncestorOfType<ListBox>(control);
             if (listBox?.SelectedItems != null && control.DataContext != null)
             {
@@ -62,7 +67,16 @@ public class DragSource : AvaloniaObject
     {
         if (sender is Control control && e.GetCurrentPoint(control).Properties.IsLeftButtonPressed)
         {
-            control.PointerMoved -= OnPointerMoved;
+            // 2. CALCULATE DISTANCE
+            var currentPoint = e.GetPosition(null);
+            var diff = _dragStartPoint - currentPoint;
+            var distance = Math.Sqrt(diff.X * diff.X + diff.Y * diff.Y);
+
+            // 3. ONLY START DRAG IF WE MOVED PAST THE THRESHOLD
+            if (distance < DragThreshold)
+            {
+                return; 
+            }
 
             var data = new DataObject();
             if (control.DataContext != null)
@@ -83,8 +97,6 @@ public class DragSource : AvaloniaObject
                 data.Set("EntityData", payload);
                 await DragDrop.DoDragDrop(e, data, DragDropEffects.Move);
             }
-
-            control.PointerMoved += OnPointerMoved;
         }
     }
 
