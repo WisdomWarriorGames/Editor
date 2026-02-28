@@ -6,7 +6,12 @@
              x:DataType="viewModels:AssetViewModel"
              x:Class="WisdomWarrior.Editor.AssetBrowser.Views.Asset">
     <Grid>
-        <suki:GlassCard Width="100" Height="130" Margin="5" IsAnimated="False"
+        <suki:GlassCard Width="80" 
+                        Height="65"
+                        Padding="5" 
+                        Margin="2" 
+                        IsAnimated="False"
+                        CornerRadius="4"
                         Cursor="Hand"
                         Focusable="True"
                         Classes.selected="{Binding IsSelected}"
@@ -26,8 +31,8 @@
                 </ContextMenu>
             </suki:GlassCard.ContextMenu>
 
-            <StackPanel VerticalAlignment="Center" Spacing="5">
-                <Panel Height="64" Width="64" HorizontalAlignment="Center">
+            <StackPanel VerticalAlignment="Top" Spacing="2">
+                <Panel Height="32" Width="48" HorizontalAlignment="Center" VerticalAlignment="Top">
                     <TextBlock Text="{Binding Icon}"
                                FontSize="32"
                                VerticalAlignment="Center"
@@ -38,8 +43,10 @@
                            IsVisible="{Binding !IsEditing}"
                            HorizontalAlignment="Center"
                            TextAlignment="Center"
-                           FontSize="10"
-                           TextTrimming="None" />
+                           FontSize="8"
+                           TextWrapping="Wrap"
+                           TextTrimming="CharacterEllipsis"
+                           MaxHeight="20"/>
 
                 <TextBox x:Name="NameTextBox"
                          Text="{Binding TempName}"
@@ -48,7 +55,7 @@
                          AttachedToVisualTree="OnTextBoxLoaded"
                          MinWidth="80"
                          HorizontalAlignment="Center"
-                         TextAlignment="Center" FontSize="10" Padding="1">
+                         TextAlignment="Center" FontSize="8" Padding="1">
 
                     <TextBox.KeyBindings>
                         <KeyBinding Gesture="Escape" Command="{Binding CancelEditCommand}" />

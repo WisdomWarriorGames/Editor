@@ -6,12 +6,13 @@
     <Border dragAndDrop:DropTarget.DropCommand="{Binding AcceptDropCommand}"
             Background="Transparent" 
             BorderThickness="2"
-            CornerRadius="4"
-            Padding="4">
+            CornerRadius="4">
         <StackPanel Orientation="Horizontal" Spacing="2">
 
             <Button Classes="Basic"
                     Cursor="Hand"
+                    FontSize="12"
+                    Padding="2"
                     Content="{Binding Name}"
                     Command="{Binding NavigateCommand}"
                     CommandParameter="{Binding FullPath}" />
@@ -19,8 +20,7 @@
             <TextBlock Text="›"
                        VerticalAlignment="Center"
                        Opacity="0.5"
-                       Margin="2,0,2,0"
-                       FontSize="16" />
+                       FontSize="12" />
 
         </StackPanel>
     </Border>

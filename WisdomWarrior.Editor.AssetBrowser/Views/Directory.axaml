@@ -7,7 +7,10 @@
              x:DataType="viewModels:DirectoryViewModel"
              x:Class="WisdomWarrior.Editor.AssetBrowser.Views.Directory">
     <Grid RowDefinitions="Auto, *">
-        <Grid Grid.Row="0" Height="50" Background="Transparent" Margin="1,0,1,1">
+        <Grid Grid.Row="0" 
+              Height="30"
+              Margin="5,0,0,0"
+              Background="Transparent">
 
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" /> <ColumnDefinition Width="*" />
