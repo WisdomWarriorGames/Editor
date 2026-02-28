@@ -6,7 +6,9 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using SukiUI.Toasts;
 using WisdomWarrior.Editor.Core;
+using WisdomWarrior.Editor.Core.Helpers;
 using WisdomWarrior.Editor.FileSystem;
+using WisdomWarrior.Editor.FileSystem.Helpers;
 
 namespace WisdomWarrior.Editor.AssetBrowser.ViewModels;
 
@@ -107,47 +109,13 @@ public partial class DirectoryViewModel : ObservableObject
 
     private bool CanAcceptDrop(object? droppedItem)
     {
-        if (droppedItem is IStorageItem) return true;
-        if (droppedItem is IEnumerable<IStorageItem>) return true;
-
-        return false;
+        return droppedItem.CanAccept<IStorageItem>();
     }
 
     [RelayCommand(CanExecute = nameof(CanAcceptDrop))]
     private async Task AcceptDropAsync(object? droppedItem)
     {
-        if (_fileSystemService == null) return;
-
-        var loadingToast = EditorUI.ToastManager.CreateToast()
-            .WithTitle("Importing Assets")
-            .WithContent("Copying files into your project...")
-            .WithLoadingState(true)
-            .Queue();
-
-        await Task.Run(() =>
-        {
-            if (droppedItem is IStorageItem file)
-            {
-                var localPath = file.TryGetLocalPath();
-                if (localPath != null)
-                {
-                    _fileSystemService.CopyAsset(_registry.CurrentNode.FullPath, localPath);
-                }
-            }
-            else if (droppedItem is IEnumerable<IStorageItem> files)
-            {
-                foreach (var f in files)
-                {
-                    var localPath = f.TryGetLocalPath();
-                    if (localPath != null)
-                    {
-                        _fileSystemService.CopyAsset(_registry.CurrentNode.FullPath, localPath);
-                    }
-                }
-            }
-        });
-
-        EditorUI.ToastManager.Dismiss(loadingToast);
+        droppedItem.ProcessDropAsync(_registry.CurrentNode.FullPath, _fileSystemService);
     }
 
     [RelayCommand]

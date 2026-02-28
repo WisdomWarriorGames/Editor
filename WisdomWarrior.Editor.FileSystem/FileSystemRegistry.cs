@@ -1,9 +1,11 @@
-﻿using WisdomWarrior.Editor.FileSystem.Models;
+﻿using WisdomWarrior.Editor.Core.Models;
+using WisdomWarrior.Editor.FileSystem.Models;
 
 namespace WisdomWarrior.Editor.FileSystem;
 
-public class FileSystemRegistry(FileSystemService fileSystemService) : IDisposable
+public class FileSystemRegistry : IDisposable
 {
+    private readonly FileSystemService _fileSystemService;
     private readonly object _lock = new();
     private FileSystemWatcher? _watcher;
     private FileSystemNode _currentNode;
@@ -14,14 +16,31 @@ public class FileSystemRegistry(FileSystemService fileSystemService) : IDisposab
     public Dictionary<string, FileSystemNode> Directories { get; } = new();
     public event Action? RegistryUpdated;
 
+    private readonly System.Timers.Timer _updateTimer;
+
     public FileSystemNode CurrentNode
     {
         get => _currentNode;
         private set
         {
             _currentNode = value;
-            RegistryUpdated?.Invoke();
+            RequestUIUpdate();
         }
+    }
+
+    public FileSystemRegistry(FileSystemService fileSystemService)
+    {
+        _fileSystemService = fileSystemService;
+
+        _updateTimer = new System.Timers.Timer(100);
+        _updateTimer.AutoReset = false;
+        _updateTimer.Elapsed += (s, e) => RegistryUpdated?.Invoke();
+    }
+
+    private void RequestUIUpdate()
+    {
+        _updateTimer.Stop();
+        _updateTimer.Start();
     }
 
     public void SetCurrentNode(string path)
@@ -42,7 +61,7 @@ public class FileSystemRegistry(FileSystemService fileSystemService) : IDisposab
 
             RootDir = projectPath;
             RootName = Path.GetFileName(projectPath);
-            var rootNode = fileSystemService.GetFileSystemTree(projectPath);
+            var rootNode = _fileSystemService.GetFileSystemTree(projectPath);
 
             if (rootNode != null)
             {
@@ -96,18 +115,18 @@ public class FileSystemRegistry(FileSystemService fileSystemService) : IDisposab
 
     private void HandleCreated(string path)
     {
-        if (fileSystemService.ShouldIgnore(path)) return;
+        if (_fileSystemService.ShouldIgnore(path)) return;
 
         lock (_lock)
         {
             if (Nodes.ContainsKey(path)) return;
 
             var isDir = Directory.Exists(path);
-            var newNode = isDir ? fileSystemService.GetFileSystemTree(path) : new FileSystemNode(path, false);
-            if (newNode == null) return; 
-            
+            var newNode = isDir ? _fileSystemService.GetFileSystemTree(path) : new FileSystemNode(path, false);
+            if (newNode == null) return;
+
             PopulateDictionaryRecursive(newNode);
-            
+
             var parentPath = Path.GetDirectoryName(path);
             if (parentPath != null && Nodes.TryGetValue(parentPath, out var parentNode))
             {
@@ -119,7 +138,7 @@ public class FileSystemRegistry(FileSystemService fileSystemService) : IDisposab
             }
         }
 
-        RegistryUpdated?.Invoke();
+        RequestUIUpdate();
     }
 
     private void HandleDeleted(string path)
@@ -137,7 +156,7 @@ public class FileSystemRegistry(FileSystemService fileSystemService) : IDisposab
             RemoveRecursive(node);
         }
 
-        RegistryUpdated?.Invoke();
+        RequestUIUpdate();
     }
 
     private void RemoveRecursive(FileSystemNode node)
@@ -160,12 +179,12 @@ public class FileSystemRegistry(FileSystemService fileSystemService) : IDisposab
                 HandleCreated(newPath);
                 return;
             }
-            
+
             UpdatePathsRecursive(node, oldPath, newPath);
-            
+
             node.FullPath = newPath;
             node.Name = Path.GetFileName(newPath);
-            
+
             var oldParentPath = Path.GetDirectoryName(oldPath);
             var newParentPath = Path.GetDirectoryName(newPath);
 
@@ -175,7 +194,7 @@ public class FileSystemRegistry(FileSystemService fileSystemService) : IDisposab
                 {
                     oldParent.Children.Remove(node);
                 }
-                
+
                 if (newParentPath != null && Nodes.TryGetValue(newParentPath, out var newParent))
                 {
                     node.Parent = newParent;
@@ -184,22 +203,22 @@ public class FileSystemRegistry(FileSystemService fileSystemService) : IDisposab
             }
         }
 
-        RegistryUpdated?.Invoke();
+        RequestUIUpdate();
     }
 
     private void UpdatePathsRecursive(FileSystemNode node, string oldRoot, string newRoot)
     {
         Nodes.Remove(node.FullPath);
         if (node.IsFolder) Directories.Remove(node.FullPath);
-        
+
         var relative = Path.GetRelativePath(oldRoot, node.FullPath);
         var updatedPath = relative == "." ? newRoot : Path.Combine(newRoot, relative);
-        
+
         node.FullPath = updatedPath;
-        
+
         Nodes[updatedPath] = node;
         if (node.IsFolder) Directories[updatedPath] = node;
-        
+
         foreach (var child in node.Children)
         {
             UpdatePathsRecursive(child, oldRoot, newRoot);
@@ -209,5 +228,6 @@ public class FileSystemRegistry(FileSystemService fileSystemService) : IDisposab
     public void Dispose()
     {
         StopWatcher();
+        _updateTimer.Dispose();
     }
 }

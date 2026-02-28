@@ -4,12 +4,15 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using SukiUI.Toasts;
 using WisdomWarrior.Editor.Core;
+using WisdomWarrior.Editor.Core.Helpers;
+using WisdomWarrior.Editor.Core.Models;
 using WisdomWarrior.Editor.FileSystem;
+using WisdomWarrior.Editor.FileSystem.Helpers;
 using WisdomWarrior.Editor.FileSystem.Models;
 
 namespace WisdomWarrior.Editor.AssetBrowser.ViewModels;
 
-public partial class AssetViewModel : ObservableObject
+public partial class AssetViewModel : ObservableObject, IDroppableAsset
 {
     private readonly FileSystemService _fileSystemService;
     private readonly Action<AssetViewModel> _cancelEdit;
@@ -23,6 +26,8 @@ public partial class AssetViewModel : ObservableObject
     [ObservableProperty] private string _tempName;
     [ObservableProperty] private bool _isEditing = false;
     [ObservableProperty] private bool _isValid = true;
+
+    public string DisplayName => Name;
 
     public bool IsNew = false;
     public string FullPath;
@@ -88,15 +93,7 @@ public partial class AssetViewModel : ObservableObject
     {
         if (!IsFolder) return false;
 
-        if (droppedItem is AssetViewModel singleAsset)
-        {
-            return singleAsset != this;
-        }
-
-        if (droppedItem is IEnumerable<object> internalList)
-        {
-            return internalList.All(item => item is AssetViewModel a && a != this);
-        }
+        if (droppedItem.CanAccept(this)) return true;
 
         return false;
     }
@@ -104,31 +101,12 @@ public partial class AssetViewModel : ObservableObject
     [RelayCommand(CanExecute = nameof(CanAcceptDrop))]
     private async Task AcceptDrop(object? droppedItem)
     {
-        var loadingToast = EditorUI.ToastManager.CreateToast()
-            .WithTitle("Moving Assets")
-            .WithContent("Processing files...")
-            .WithLoadingState(true)
-            .Queue();
+        droppedItem.ProcessDropAsync(FullPath, _fileSystemService);
+    }
 
-        await Task.Run(() =>
-        {
-            if (droppedItem is AssetViewModel singleAsset)
-            {
-                _fileSystemService.Move(FullPath, singleAsset.FullPath);
-            }
-            else if (droppedItem is IEnumerable<object> internalList)
-            {
-                foreach (var item in internalList)
-                {
-                    if (item is AssetViewModel assetToMove)
-                    {
-                        _fileSystemService.Move(FullPath, assetToMove.FullPath);
-                    }
-                }
-            }
-        });
-
-        EditorUI.ToastManager.Dismiss(loadingToast);
+    public async Task ProcessAsync(string destinationDirectory, IProgress<string>? progress = null)
+    {
+        _fileSystemService.Move(destinationDirectory, FullPath, progress);
     }
 
     [RelayCommand]

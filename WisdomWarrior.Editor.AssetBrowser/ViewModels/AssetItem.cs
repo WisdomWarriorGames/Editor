@@ -2,6 +2,7 @@
 using Avalonia.Media.Imaging;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using WisdomWarrior.Editor.Core.Models;
 using WisdomWarrior.Editor.FileSystem.Models;
 
 namespace WisdomWarrior.Editor.AssetBrowser.ViewModels;

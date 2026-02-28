@@ -1,4 +1,5 @@
-﻿using WisdomWarrior.Editor.FileSystem.Models;
+﻿using WisdomWarrior.Editor.Core.Models;
+using WisdomWarrior.Editor.FileSystem.Models;
 
 namespace WisdomWarrior.Editor.FileSystem;
 
@@ -94,7 +95,7 @@ public class FileSystemService
         File.Move(fileFullPath, destPath);
     }
 
-    public void Move(string targetDirectory, string sourceAssetPath)
+    public void Move(string targetDirectory, string sourceAssetPath, IProgress<string>? progress = null)
     {
         var isFile = File.Exists(sourceAssetPath);
         var isDir = Directory.Exists(sourceAssetPath);
@@ -102,6 +103,8 @@ public class FileSystemService
         if (!isFile && !isDir) return;
 
         var assetName = Path.GetFileName(sourceAssetPath);
+        progress?.Report($"Copying: {assetName}");
+
         var destinationPath = Path.Combine(targetDirectory, assetName);
 
         if (isDir && targetDirectory.Equals(sourceAssetPath, StringComparison.OrdinalIgnoreCase))
@@ -125,7 +128,7 @@ public class FileSystemService
         }
     }
 
-    public void CopyAsset(string targetDirectory, string sourceAssetPath, IProgress<string>? progress = null)
+    public async Task CopyAsset(string targetDirectory, string sourceAssetPath, IProgress<string>? progress = null)
     {
         var isFile = File.Exists(sourceAssetPath);
         var isDir = Directory.Exists(sourceAssetPath);
@@ -135,50 +138,53 @@ public class FileSystemService
         var assetName = Path.GetFileName(sourceAssetPath);
         progress?.Report($"Copying: {assetName}");
 
-        var destinationPath = Path.Combine(targetDirectory, assetName);
-
         if (isDir && targetDirectory.Equals(sourceAssetPath, StringComparison.OrdinalIgnoreCase))
         {
             return;
         }
 
-        if (isFile)
+        var destinationPath = Path.Combine(targetDirectory, Path.GetFileName(sourceAssetPath));
+
+        if (File.Exists(sourceAssetPath))
         {
-            if (!File.Exists(destinationPath))
-            {
-                File.Copy(sourceAssetPath, destinationPath);
-            }
+            await CopyFileAsync(sourceAssetPath, destinationPath, progress);
         }
-        else if (isDir)
+        else if (Directory.Exists(sourceAssetPath))
         {
-            CopyDirectoryRecursive(sourceAssetPath, destinationPath);
+            await CopyDirectoryRecursive(sourceAssetPath, destinationPath, progress);
         }
     }
 
-    private void CopyDirectoryRecursive(string sourceDir, string destDir)
+    private async Task CopyFileAsync(string source, string destination, IProgress<string>? progress)
     {
-        if (!Directory.Exists(destDir))
-        {
-            Directory.CreateDirectory(destDir);
-        }
+        if (File.Exists(destination)) return;
+
+        progress?.Report($"Copying: {Path.GetFileName(source)}");
+
+        await using var sourceStream = new FileStream(source, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, true);
+        await using var destinationStream = new FileStream(destination, FileMode.Create, FileAccess.Write, FileShare.None, 4096, true);
+
+        await sourceStream.CopyToAsync(destinationStream);
+    }
+
+    private async Task CopyDirectoryRecursive(string sourceDir, string destDir, IProgress<string>? progress = null)
+    {
+        Directory.CreateDirectory(destDir);
 
         foreach (var file in Directory.GetFiles(sourceDir))
         {
             if (ShouldIgnore(file)) continue;
-
             var destFile = Path.Combine(destDir, Path.GetFileName(file));
-            if (!File.Exists(destFile))
-            {
-                File.Copy(file, destFile);
-            }
+
+            await CopyFileAsync(file, destFile, progress);
+            await Task.Delay(5);
         }
 
         foreach (var dir in Directory.GetDirectories(sourceDir))
         {
             if (ShouldIgnore(dir)) continue;
-
             var destSubDir = Path.Combine(destDir, Path.GetFileName(dir));
-            CopyDirectoryRecursive(dir, destSubDir);
+            await CopyDirectoryRecursive(dir, destSubDir, progress);
         }
     }
 
