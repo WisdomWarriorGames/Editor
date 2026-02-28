@@ -5,14 +5,24 @@
              x:Class="WisdomWarrior.Editor.AssetBrowser.Views.AssetBrowser">
 
     <Grid ColumnDefinitions="1*, 4, 4*">
-        <suki:GlassCard Grid.Column="0" Margin="10,0,5,10" IsAnimated="False">
-            <views:Solution DataContext="{Binding SolutionViewModel}" />
+        <suki:GlassCard Grid.Column="0"
+                        Padding="0"
+                        CornerRadius="4"
+                        IsAnimated="False">
+            <views:Solution HorizontalAlignment="Stretch"
+                            VerticalAlignment="Stretch"
+                            DataContext="{Binding SolutionViewModel}" />
         </suki:GlassCard>
 
         <GridSplitter Grid.Column="1" Background="Transparent" ResizeDirection="Columns" />
 
-        <suki:GlassCard Grid.Column="2" Margin="5,0,10,10" IsAnimated="False">
-            <views:Directory DataContext="{Binding DirectoryViewModel}" />
+        <suki:GlassCard Grid.Column="2"
+                        Padding="0"
+                        CornerRadius="4"
+                        IsAnimated="False">
+            <views:Directory HorizontalAlignment="Stretch"
+                             VerticalAlignment="Stretch"
+                             DataContext="{Binding DirectoryViewModel}" />
         </suki:GlassCard>
     </Grid>
 
