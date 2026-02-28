@@ -32,7 +32,7 @@ public class FileSystemRegistry : IDisposable
     {
         _fileSystemService = fileSystemService;
 
-        _updateTimer = new System.Timers.Timer(100);
+        _updateTimer = new System.Timers.Timer(50);
         _updateTimer.AutoReset = false;
         _updateTimer.Elapsed += (s, e) => RegistryUpdated?.Invoke();
     }

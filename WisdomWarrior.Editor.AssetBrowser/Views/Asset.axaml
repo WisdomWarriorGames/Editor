@@ -35,8 +35,17 @@
                 <Panel Height="32" Width="48" HorizontalAlignment="Center" VerticalAlignment="Top">
                     <TextBlock Text="{Binding Icon}"
                                FontSize="32"
+                               IsVisible="{Binding !HasThumbnail}"
                                VerticalAlignment="Center"
                                HorizontalAlignment="Center" />
+                    
+                    <Image Source="{Binding Thumbnail}"
+                           IsVisible="{Binding HasThumbnail}"
+                           Width="32"
+                           Height="32"
+                           VerticalAlignment="Center"
+                           HorizontalAlignment="Center"
+                           RenderOptions.BitmapInterpolationMode="LowQuality" />
                 </Panel>
 
                 <TextBlock Text="{Binding Name}"

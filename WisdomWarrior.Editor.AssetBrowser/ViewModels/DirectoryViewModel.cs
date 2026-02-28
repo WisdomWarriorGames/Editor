@@ -45,19 +45,34 @@ public partial class DirectoryViewModel : ObservableObject
         Dispatcher.UIThread.InvokeAsync(Refresh);
     }
 
-    private void Refresh()
+    private async void Refresh()
     {
         var activeNode = _registry.CurrentNode;
         if (activeNode == null) return;
-
-        var sortedChildren = _registry.CurrentNode.Children.OrderByDescending(a => a.IsFolder).ThenBy(a => a.Name);
+        
         Assets.Clear();
-        foreach (var child in sortedChildren)
-        {
-            Assets.Add(new AssetViewModel(child, _fileSystemService));
-        }
-
         SetupBreadcrumbs();
+        
+        await Task.Run(() =>
+        {
+            var sortedChildren = activeNode.Children
+                .OrderByDescending(a => a.IsFolder)
+                .ThenBy(a => a.Name)
+                .ToList();
+
+            foreach (var child in sortedChildren)
+            {
+                var vm = new AssetViewModel(child, _fileSystemService);
+                
+                Dispatcher.UIThread.Post(() => 
+                {
+                    if (_registry.CurrentNode == activeNode)
+                    {
+                        Assets.Add(vm);
+                    }
+                });
+            }
+        });
     }
 
     private void SetupBreadcrumbs()

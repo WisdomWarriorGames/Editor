@@ -1,8 +1,11 @@
 ﻿using System.Diagnostics;
+using Avalonia.Media.Imaging;
 using Avalonia.Platform.Storage;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using SukiUI.Toasts;
+using WisdomWarrior.Editor.AssetBrowser.Helpers;
 using WisdomWarrior.Editor.Core;
 using WisdomWarrior.Editor.Core.Helpers;
 using WisdomWarrior.Editor.Core.Models;
@@ -27,12 +30,30 @@ public partial class AssetViewModel : ObservableObject, IDroppableAsset
     [ObservableProperty] private bool _isEditing = false;
     [ObservableProperty] private bool _isValid = true;
 
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasThumbnail))]
+    private Bitmap? _thumbnail;
+
+    public bool HasThumbnail => Thumbnail != null;
+
     public string DisplayName => Name;
 
     public bool IsNew = false;
     public string FullPath;
 
     public string Icon => IsFolder ? "📁" : "📄";
+
+    public bool IsImage => Extension.ToLower() switch
+    {
+        ".png" or ".jpg" or ".jpeg" or ".bmp" or ".gif" => true,
+        _ => false
+    };
+
+    public bool IsAudio => Extension.ToLower() switch
+    {
+        ".wav" or ".mp3" or ".ogg" or ".flac" or ".m4a" or ".wma" => true,
+        _ => false
+    };
 
     public AssetViewModel(FileSystemNode node, FileSystemService fileSystemService)
     {
@@ -42,6 +63,8 @@ public partial class AssetViewModel : ObservableObject, IDroppableAsset
         Extension = node.Extension;
         IsFolder = node.IsFolder;
         FullPath = node.FullPath;
+
+        InitializeThumbnail();
     }
 
     public AssetViewModel(string directory, string name, FileSystemService fileSystemService, Action<AssetViewModel> cancelEdit)
@@ -55,6 +78,65 @@ public partial class AssetViewModel : ObservableObject, IDroppableAsset
         IsNew = true;
 
         ValidateName(name);
+    }
+
+    private void InitializeThumbnail()
+    {
+        Task.Run(async () =>
+        {
+            if (IsFolder)
+            {
+                await SetBitmap(ThumbnailHelper.FOLDER_ICON);
+            }
+            else if (IsImage)
+            {
+                await SetBitmap(FullPath);
+            }
+            else if (IsAudio)
+            {
+                await SetBitmap(ThumbnailHelper.SOUND_ICON);
+            }
+            else
+            {
+                await SetBitmap(ThumbnailHelper.FILE_ICON);
+            }
+        });
+    }
+
+    private async Task SetBitmap(string path)
+    {
+        var bitmap = await LoadThumbnailAsync(path, 32);
+        if (bitmap != null)
+        {
+            Dispatcher.UIThread.Invoke(() => Thumbnail = bitmap);
+        }
+    }
+
+    public async Task<Bitmap?> LoadThumbnailAsync(string path, int width = 128)
+    {
+        int attempts = 0;
+        while (attempts < 5)
+        {
+            try
+            {
+                return await Task.Run(() =>
+                {
+                    using var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
+                    return Bitmap.DecodeToWidth(stream, width);
+                });
+            }
+            catch (IOException)
+            {
+                attempts++;
+                await Task.Delay(100);
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+
+        return null;
     }
 
     partial void OnTempNameChanged(string value)

@@ -25,4 +25,16 @@
       </Compile>
     </ItemGroup>
 
+    <ItemGroup>
+      <None Update="Icons\folder.png">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="Icons\sound-icon.png">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="Icons\file-icon.png">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+
 </Project>
