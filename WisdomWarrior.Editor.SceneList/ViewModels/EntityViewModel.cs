@@ -2,12 +2,16 @@
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using WisdomWarrior.Editor.Core.Models;
 using WisdomWarrior.Editor.Core.ShadowTree;
+using WisdomWarrior.Engine.Core;
 
 namespace WisdomWarrior.Editor.SceneList.ViewModels;
 
 public partial class EntityViewModel : ObservableObject
 {
+    private readonly SceneTracker _sceneTracker;
+
     public EntityTracker Tracker { get; }
 
     [ObservableProperty] private string _name;
@@ -19,10 +23,18 @@ public partial class EntityViewModel : ObservableObject
 
     public ObservableCollection<EntityViewModel> Children { get; } = new();
 
-    public EntityViewModel(EntityTracker tracker)
+    public EntityViewModel(EntityTracker tracker, SceneTracker sceneTracker)
     {
+        _sceneTracker = sceneTracker;
         Tracker = tracker;
         Name = tracker.EngineEntity.Name;
+
+        if (string.IsNullOrEmpty(Name))
+        {
+            Name = "GameEntity";
+            IsSelected = true;
+            BeginEdit();
+        }
 
         Tracker.OnStructureChanged += OnTrackerStructureChanged;
 
@@ -53,7 +65,7 @@ public partial class EntityViewModel : ObservableObject
             }
             else
             {
-                Children.Insert(i, new EntityViewModel(childTracker));
+                Children.Insert(i, new EntityViewModel(childTracker, _sceneTracker));
             }
         }
 
@@ -98,5 +110,46 @@ public partial class EntityViewModel : ObservableObject
         Name = TempName;
 
         CancelEdit();
+    }
+
+    [RelayCommand]
+    public void Delete()
+    {
+        _sceneTracker.RemoveEntity(Tracker.EngineEntity);
+    }
+
+    [RelayCommand]
+    public void AddEntity()
+    {
+        Tracker.AddEntity(new GameEntity());
+    }
+
+    [RelayCommand]
+    public void AcceptDrop(object? droppedObject)
+    {
+        if (droppedObject is not EntityViewModel draggedVm) return;
+        if (draggedVm == this) return;
+        if (IsDescendantOf(draggedVm)) return;
+
+        if (draggedVm.Tracker.EngineEntity.Parent == null)
+        {
+            _sceneTracker.RemoveEntity(draggedVm.Tracker.EngineEntity);
+        }
+
+        draggedVm.Tracker.EngineEntity.SetParent(Tracker.EngineEntity);
+
+        IsExpanded = true;
+    }
+
+    private bool IsDescendantOf(EntityViewModel potentialParent)
+    {
+        var current = Tracker.EngineEntity.Parent;
+        while (current != null)
+        {
+            if (current == potentialParent.Tracker.EngineEntity) return true;
+            current = current.Parent;
+        }
+
+        return false;
     }
 }

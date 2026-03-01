@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using WisdomWarrior.Editor.Core.ShadowTree;
+using WisdomWarrior.Engine.Core;
 
 namespace WisdomWarrior.Editor.SceneList.ViewModels;
 
@@ -64,5 +65,11 @@ public partial class SceneNodeViewModel : ObservableObject
         Name = TempName;
 
         CancelEdit();
+    }
+
+    [RelayCommand]
+    public void AddEntity()
+    {
+        _tracker.AddEntity(new GameEntity());
     }
 }

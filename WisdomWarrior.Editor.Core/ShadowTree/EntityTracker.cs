@@ -26,6 +26,13 @@ public class EntityTracker
         SyncChildren();
     }
 
+    public void AddEntity(GameEntity entity)
+    {
+        _entity.AddEntity(entity);
+
+        Update();
+    }
+
     public bool Update()
     {
         var isDirty = false;

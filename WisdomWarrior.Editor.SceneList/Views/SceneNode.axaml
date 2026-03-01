@@ -4,34 +4,41 @@
              x:DataType="viewModels:SceneNodeViewModel"
              x:Class="WisdomWarrior.Editor.SceneList.Views.SceneNode">
 
-    <Panel VerticalAlignment="Center">
+    <UserControl.ContextMenu>
+        <ContextMenu>
+            <MenuItem Header="Create Empty Entity" Command="{Binding AddEntityCommand}" />
+            <MenuItem Header="Rename (F2)" Command="{Binding BeginEditCommand}" />
+        </ContextMenu>
+    </UserControl.ContextMenu>
 
-        <TextBlock Text="{Binding Name}"
-                   FontWeight="Bold"
-                   FontSize="10"
-                   IsVisible="{Binding !IsEditing}"
-                   VerticalAlignment="Center"
-                   Margin="2,1" />
+    <Panel VerticalAlignment="Center" Background="Transparent" HorizontalAlignment="Stretch" Margin="4,2">
 
-        <TextBox x:Name="NameTextBox"
-                 Text="{Binding TempName}"
-                 IsVisible="{Binding IsEditing}"
-                 AttachedToVisualTree="OnTextBoxLoaded"
-                 FontWeight="Bold"
-                 FontSize="10"
-                 Background="Transparent"
-                 BorderThickness="0"
-                 MinHeight="0"
-                 Padding="2,1"
-                 Margin="0"
-                 VerticalAlignment="Center">
+        <StackPanel Orientation="Horizontal" Spacing="5">
+            <TextBlock Text="{Binding Name}"
+                       FontWeight="Bold"
+                       FontSize="10"
+                       IsVisible="{Binding !IsEditing}"
+                       VerticalAlignment="Center"
+                       Margin="0" />
 
-            <TextBox.KeyBindings>
-                <KeyBinding Gesture="Escape" Command="{Binding CancelEditCommand}" />
-                <KeyBinding Gesture="Enter" Command="{Binding CommitEditCommand}" />
-            </TextBox.KeyBindings>
+            <TextBox x:Name="NameTextBox"
+                     Text="{Binding TempName}"
+                     IsVisible="{Binding IsEditing}"
+                     AttachedToVisualTree="OnTextBoxLoaded"
+                     FontWeight="Bold"
+                     FontSize="10"
+                     Background="Transparent"
+                     BorderThickness="0"
+                     MinHeight="0"
+                     Padding="0"
+                     Margin="0"
+                     VerticalAlignment="Center">
 
-        </TextBox>
-
+                <TextBox.KeyBindings>
+                    <KeyBinding Gesture="Escape" Command="{Binding CancelEditCommand}" />
+                    <KeyBinding Gesture="Enter" Command="{Binding CommitEditCommand}" />
+                </TextBox.KeyBindings>
+            </TextBox>
+        </StackPanel>
     </Panel>
 </UserControl>

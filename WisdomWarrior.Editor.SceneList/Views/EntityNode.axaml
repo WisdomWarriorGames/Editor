@@ -1,36 +1,66 @@
 ﻿<UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:viewModels="clr-namespace:WisdomWarrior.Editor.SceneList.ViewModels"
+             xmlns:dragAndDrop="clr-namespace:WisdomWarrior.Editor.Core.DragAndDrop;assembly=WisdomWarrior.Editor.Core"
              x:DataType="viewModels:EntityViewModel"
-             x:Class="WisdomWarrior.Editor.SceneList.Views.EntityNode">
-    <Panel VerticalAlignment="Center">
+             x:Class="WisdomWarrior.Editor.SceneList.Views.EntityNode"
+             dragAndDrop:DragSource.IsEnabled="True"
+             dragAndDrop:DropTarget.DropCommand="{Binding AcceptDropCommand}">
 
-        <TextBlock Text="{Binding Name}"
-                   FontWeight="Bold"
-                   FontSize="10"
-                   IsVisible="{Binding !IsEditing}"
-                   VerticalAlignment="Center"
-                   Margin="2,1" />
+    <UserControl.ContextMenu>
+        <ContextMenu>
+            <MenuItem Header="Create Child Entity" Command="{Binding AddEntityCommand}" />
+            <MenuItem Header="Rename (F2)" Command="{Binding BeginEditCommand}" />
+            <MenuItem Header="Delete" Command="{Binding DeleteCommand}" />
+        </ContextMenu>
+    </UserControl.ContextMenu>
 
-        <TextBox x:Name="NameTextBox"
-                 Text="{Binding TempName}"
-                 IsVisible="{Binding IsEditing}"
-                 AttachedToVisualTree="OnTextBoxLoaded"
-                 FontWeight="Bold"
-                 FontSize="10"
-                 Background="Transparent"
-                 BorderThickness="0"
-                 MinHeight="0"
-                 Padding="2,1"
-                 Margin="0"
-                 VerticalAlignment="Center">
+    <UserControl.KeyBindings>
+        <KeyBinding Gesture="Delete" Command="{Binding DeleteCommand}"></KeyBinding>
+    </UserControl.KeyBindings>
 
-            <TextBox.KeyBindings>
-                <KeyBinding Gesture="Escape" Command="{Binding CancelEditCommand}" />
-                <KeyBinding Gesture="Enter" Command="{Binding CommitEditCommand}" />
-            </TextBox.KeyBindings>
+    <Border Name="EntityRowBorder"
+            Background="Transparent"
+            BorderBrush="Transparent"
+            BorderThickness="2"
+            CornerRadius="2">
+        <Panel VerticalAlignment="Center" Background="Transparent" HorizontalAlignment="Stretch" Margin="4,2">
 
-        </TextBox>
+            <StackPanel Orientation="Horizontal" Spacing="5">
+                <TextBlock Text="{Binding Name}"
+                           FontWeight="Bold"
+                           FontSize="10"
+                           IsVisible="{Binding !IsEditing}"
+                           VerticalAlignment="Center"
+                           Margin="0" />
 
-    </Panel>
+                <TextBox x:Name="NameTextBox"
+                         Text="{Binding TempName}"
+                         IsVisible="{Binding IsEditing}"
+                         AttachedToVisualTree="OnTextBoxLoaded"
+                         FontWeight="Bold"
+                         FontSize="10"
+                         Background="Transparent"
+                         BorderThickness="0"
+                         MinHeight="0"
+                         Padding="0"
+                         Margin="0"
+                         VerticalAlignment="Center">
+
+                    <TextBox.KeyBindings>
+                        <KeyBinding Gesture="Escape" Command="{Binding CancelEditCommand}" />
+                        <KeyBinding Gesture="Enter" Command="{Binding CommitEditCommand}" />
+                    </TextBox.KeyBindings>
+
+                </TextBox>
+            </StackPanel>
+        </Panel>
+    </Border>
+
+    <!-- <UserControl.Styles> -->
+    <!--     <Style Selector="#EntityRowBorder:dragover"> -->
+    <!--         <Setter Property="BorderBrush" Value="#2196F3" /> -->
+    <!--         <Setter Property="BorderThickness" Value="2" /> -->
+    <!--     </Style> -->
+    <!-- </UserControl.Styles> -->
 </UserControl>

@@ -1,7 +1,8 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Markup.Xaml;
-using Avalonia.Threading;
+using Avalonia.Input;
+using Avalonia.VisualTree;
+using WisdomWarrior.Editor.SceneList.ViewModels;
 using WisdomWarrior.Engine.Core;
 
 namespace WisdomWarrior.Editor.SceneList.Views;
@@ -27,6 +28,30 @@ public partial class SceneView : UserControl
         {
             item.IsExpanded = true;
             tree.ContainerPrepared -= OnContainerPrepared;
+        }
+    }
+
+    private void OnBackgroundClicked(object? sender, PointerPressedEventArgs e)
+    {
+        var visual = e.Source as Visual;
+
+        while (visual != null)
+        {
+            if (visual is TreeViewItem)
+            {
+                return;
+            }
+
+            visual = visual.GetVisualParent();
+        }
+
+        if (sender is TreeView treeView)
+        {
+            treeView.SelectedItems.Clear();
+            if (DataContext is SceneHierarchyViewModel viewModel)
+            {
+                viewModel.ResetChanges();
+            }
         }
     }
 }

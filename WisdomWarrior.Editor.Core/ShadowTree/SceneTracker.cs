@@ -21,6 +21,28 @@ public class SceneTracker
         SyncRoots();
     }
 
+    public void AddEntity(GameEntity entity)
+    {
+        if (_activeScene == null) return;
+        _activeScene.AddEntity(entity);
+
+        Update();
+    }
+
+    public void RemoveEntity(GameEntity entity)
+    {
+        if (entity.Parent != null)
+        {
+            entity.Parent.Children.Remove(entity);
+        }
+        else if (_activeScene != null)
+        {
+            _activeScene.Entities.Remove(entity);
+        }
+
+        Update();
+    }
+
     public void Update()
     {
         if (_activeScene == null) return;

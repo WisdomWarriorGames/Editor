@@ -1,8 +1,10 @@
 ﻿using System.Collections.ObjectModel;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using WisdomWarrior.Editor.Core.Services;
 using WisdomWarrior.Editor.Core.ShadowTree;
+using WisdomWarrior.Engine.Core;
 
 namespace WisdomWarrior.Editor.SceneList.ViewModels;
 
@@ -54,13 +56,38 @@ public partial class SceneHierarchyViewModel : ObservableObject
             }
             else
             {
-                rootList.Insert(i, new EntityViewModel(rootTracker));
+                rootList.Insert(i, new EntityViewModel(rootTracker, _sceneTracker));
             }
         }
 
         while (rootList.Count > currentTrackers.Count)
         {
             rootList.RemoveAt(rootList.Count - 1);
+        }
+    }
+
+    public void ResetChanges()
+    {
+        foreach (var scene in Scenes)
+        {
+            scene.CommitEdit();
+            scene.IsSelected = false;
+
+            foreach (var entity in scene.Children)
+            {
+                ResetEntityRecursive(entity);
+            }
+        }
+    }
+
+    private void ResetEntityRecursive(EntityViewModel entity)
+    {
+        entity.CommitEdit();
+        entity.IsSelected = false;
+
+        foreach (var child in entity.Children)
+        {
+            ResetEntityRecursive(child);
         }
     }
 }
