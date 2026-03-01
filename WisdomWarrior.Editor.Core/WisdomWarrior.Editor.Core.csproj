@@ -16,9 +16,4 @@
       <ProjectReference Include="..\..\Engine\WisdomWarrior.Engine.Core\WisdomWarrior.Engine.Core.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Services\" />
-      <Folder Include="Tracking\" />
-    </ItemGroup>
-
 </Project>
