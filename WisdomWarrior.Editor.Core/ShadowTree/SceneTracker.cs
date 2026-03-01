@@ -7,15 +7,17 @@ public class SceneTracker
     private Scene? _activeScene;
     private readonly List<EntityTracker> _rootEntities = new();
     private int _lastRootCount;
+    private string? _lastName;
 
     public event Action? OnSceneModified;
-    
+
     public IReadOnlyList<EntityTracker> TrackedRoots => _rootEntities;
     public Scene? ActiveScene => _activeScene;
-    
+
     public void TrackScene(Scene scene)
     {
         _activeScene = scene;
+        _lastName = scene.Name;
         SyncRoots();
     }
 
@@ -23,25 +25,34 @@ public class SceneTracker
     {
         if (_activeScene == null) return;
 
-        bool structureChanged = false;
-        
+        var isSceneDirty = false;
+
+        if (_activeScene.Name != _lastName)
+        {
+            _lastName = _activeScene.Name;
+            isSceneDirty = true;
+        }
+
         if (_activeScene.Entities.Count != _lastRootCount)
         {
             SyncRoots();
-            structureChanged = true;
+            isSceneDirty = true;
         }
-        
-        if (structureChanged)
+
+        foreach (var rootTracker in _rootEntities)
+        {
+            if (rootTracker.Update())
+            {
+                isSceneDirty = true;
+            }
+        }
+
+        if (isSceneDirty)
         {
             OnSceneModified?.Invoke();
         }
-        
-        foreach (var rootTracker in _rootEntities)
-        {
-            rootTracker.Update();
-        }
     }
-    
+
     private void SyncRoots()
     {
         if (_activeScene == null) return;

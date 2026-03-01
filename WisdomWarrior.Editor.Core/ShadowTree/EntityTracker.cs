@@ -11,6 +11,7 @@ public class EntityTracker
 
     private int _lastComponentCount;
     private int _lastChildCount;
+    private string? _lastName;
 
     public event Action? OnStructureChanged;
     public GameEntity EngineEntity => _entity;
@@ -20,24 +21,34 @@ public class EntityTracker
     public EntityTracker(GameEntity entity)
     {
         _entity = entity;
+        _lastName = entity.Name;
         SyncComponents();
         SyncChildren();
     }
 
-    public void Update()
+    public bool Update()
     {
-        bool structureChanged = false;
+        var isDirty = false;
+        var structureChanged = false;
+
+        if (_entity.Name != _lastName)
+        {
+            _lastName = _entity.Name;
+            isDirty = true;
+        }
 
         if (_entity.Components.Count != _lastComponentCount)
         {
             SyncComponents();
             structureChanged = true;
+            isDirty = true;
         }
 
         if (_entity.Children.Count != _lastChildCount)
         {
             SyncChildren();
             structureChanged = true;
+            isDirty = true;
         }
 
         if (structureChanged)
@@ -48,12 +59,15 @@ public class EntityTracker
         foreach (var comp in _components)
         {
             comp.Update();
+            if (comp.IsDirty) isDirty = true;
         }
 
         foreach (var child in _children)
         {
-            child.Update();
+            if (child.Update()) isDirty = true;
         }
+
+        return isDirty;
     }
 
     private void SyncComponents()

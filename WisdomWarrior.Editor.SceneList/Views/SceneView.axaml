@@ -1,14 +1,21 @@
 ﻿<UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:viewModels="clr-namespace:WisdomWarrior.Editor.SceneList.ViewModels"
+             xmlns:views="clr-namespace:WisdomWarrior.Editor.SceneList.Views"
              x:DataType="viewModels:SceneHierarchyViewModel"
              x:Class="WisdomWarrior.Editor.SceneList.Views.SceneView">
 
     <DockPanel>
-        <TextBlock DockPanel.Dock="Top" Text="HIERARCHY" FontWeight="Bold" Opacity="0.5" Margin="0,0,0,10"
+        <TextBlock DockPanel.Dock="Top" Text="HIERARCHY" FontWeight="Bold" Opacity="0.5" Margin="0,0,0,5"
                    FontSize="11" />
 
         <TreeView Name="HierarchyTree" ItemsSource="{Binding Scenes}">
+
+            <TreeView.KeyBindings>
+                <KeyBinding Gesture="F2"
+                            Command="{Binding #HierarchyTree.SelectedItem.BeginEditCommand}"
+                            x:CompileBindings="False" />
+            </TreeView.KeyBindings>
 
             <TreeView.Styles>
                 <Style Selector="TreeViewItem">
@@ -19,16 +26,13 @@
 
             <TreeView.DataTemplates>
 
+
                 <TreeDataTemplate DataType="viewModels:SceneNodeViewModel" ItemsSource="{Binding Children}">
-                    <StackPanel Orientation="Horizontal" Spacing="5">
-                        <TextBlock Text="{Binding Name}" FontWeight="Bold" VerticalAlignment="Center" />
-                    </StackPanel>
+                    <views:SceneNode />
                 </TreeDataTemplate>
 
                 <TreeDataTemplate DataType="viewModels:EntityViewModel" ItemsSource="{Binding Children}">
-                    <StackPanel Orientation="Horizontal" Spacing="5">
-                        <TextBlock Text="{Binding Name}" VerticalAlignment="Center" />
-                    </StackPanel>
+                    <views:EntityNode />
                 </TreeDataTemplate>
 
             </TreeView.DataTemplates>

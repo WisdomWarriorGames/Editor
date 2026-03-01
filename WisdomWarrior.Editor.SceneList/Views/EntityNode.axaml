@@ -1,0 +1,36 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:viewModels="clr-namespace:WisdomWarrior.Editor.SceneList.ViewModels"
+             x:DataType="viewModels:EntityViewModel"
+             x:Class="WisdomWarrior.Editor.SceneList.Views.EntityNode">
+    <Panel VerticalAlignment="Center">
+
+        <TextBlock Text="{Binding Name}"
+                   FontWeight="Bold"
+                   FontSize="10"
+                   IsVisible="{Binding !IsEditing}"
+                   VerticalAlignment="Center"
+                   Margin="2,1" />
+
+        <TextBox x:Name="NameTextBox"
+                 Text="{Binding TempName}"
+                 IsVisible="{Binding IsEditing}"
+                 AttachedToVisualTree="OnTextBoxLoaded"
+                 FontWeight="Bold"
+                 FontSize="10"
+                 Background="Transparent"
+                 BorderThickness="0"
+                 MinHeight="0"
+                 Padding="2,1"
+                 Margin="0"
+                 VerticalAlignment="Center">
+
+            <TextBox.KeyBindings>
+                <KeyBinding Gesture="Escape" Command="{Binding CancelEditCommand}" />
+                <KeyBinding Gesture="Enter" Command="{Binding CommitEditCommand}" />
+            </TextBox.KeyBindings>
+
+        </TextBox>
+
+    </Panel>
+</UserControl>
