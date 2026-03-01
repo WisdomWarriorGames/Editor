@@ -1,11 +1,11 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using WisdomWarrior.Editor.AssetBrowser.ViewModels;
+using WisdomWarrior.Editor.Core.Services;
 using WisdomWarrior.Editor.FileSystem;
 using WisdomWarrior.Editor.Inspector.ViewModels;
 using WisdomWarrior.Editor.Menus.ViewModels;
 using WisdomWarrior.Editor.MonoGame.ViewModels;
 using WisdomWarrior.Editor.SceneList.ViewModels;
-using WisdomWarrior.Engine.Core;
 
 namespace WisdomWarrior.Editor.Shell.ViewModels;
 
@@ -18,7 +18,7 @@ public partial class MainWindowViewModel : ObservableObject
     private MonoGameViewModel _monoGameWindow;
 
     [ObservableProperty]
-    private SceneListViewModel _sceneListViewModel;
+    private SceneHierarchyViewModel _sceneListViewModel;
 
     [ObservableProperty]
     private FileMenuViewModel _fileMenuViewModel;
@@ -32,7 +32,7 @@ public partial class MainWindowViewModel : ObservableObject
     public MainWindowViewModel(
         AssetBrowserViewModel assetBrowserViewModel,
         MonoGameViewModel monoGameViewModel,
-        SceneListViewModel sceneListViewModel,
+        SceneHierarchyViewModel sceneListViewModel,
         FileMenuViewModel fileMenuViewModel,
         InspectorViewModel inspectorViewModel,
         WorkspaceService workspaceService,
@@ -52,6 +52,6 @@ public partial class MainWindowViewModel : ObservableObject
 
     private void OnWorkspaceInitialized(FileSystemRegistry obj)
     {
-        _currentSceneManager.Initialized(_workspaceService.ActiveScene);
+        _currentSceneManager.LoadScene(_workspaceService.ActiveScene);
     }
 }

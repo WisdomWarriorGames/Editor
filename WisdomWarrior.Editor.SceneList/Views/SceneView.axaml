@@ -1,48 +1,39 @@
 ﻿<UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:core="clr-namespace:WisdomWarrior.Engine.Core;assembly=WisdomWarrior.Engine.Core"
              xmlns:viewModels="clr-namespace:WisdomWarrior.Editor.SceneList.ViewModels"
-             xmlns:suki="https://github.com/kikipoulet/SukiUI"
-             x:DataType="viewModels:SceneListViewModel"
+             x:DataType="viewModels:SceneHierarchyViewModel"
              x:Class="WisdomWarrior.Editor.SceneList.Views.SceneView">
+
     <DockPanel>
         <TextBlock DockPanel.Dock="Top" Text="HIERARCHY" FontWeight="Bold" Opacity="0.5" Margin="0,0,0,10"
                    FontSize="11" />
 
-        <TreeView Name="HierarchyTree" ItemsSource="{Binding SceneRoot}"
-                  SelectedItem="{Binding SelectedObject, Mode=TwoWay}">
-            <TreeView.ContextMenu>
-                <ContextMenu>
-                    <MenuItem Header="Create New Entity" Command="{Binding CreateNewEntityCommand}">
-                        <MenuItem.Icon>
-                            <TextBlock Text="➕" VerticalAlignment="Center" />
-                        </MenuItem.Icon>
-                    </MenuItem>
+        <TreeView Name="HierarchyTree" ItemsSource="{Binding Scenes}">
 
-                    <Separator />
+            <TreeView.Styles>
+                <Style Selector="TreeViewItem">
+                    <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
+                    <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
+                </Style>
+            </TreeView.Styles>
 
-                    <MenuItem Header="Rename" InputGesture="F2" />
-
-                    <MenuItem Header="Delete" Foreground="Red" Command="{Binding DeleteEntityCommand}">
-                        <MenuItem.Icon>
-                            <TextBlock Text="🗑️" Foreground="Red" VerticalAlignment="Center" />
-                        </MenuItem.Icon>
-                    </MenuItem>
-                </ContextMenu>
-            </TreeView.ContextMenu>
             <TreeView.DataTemplates>
-                <TreeDataTemplate DataType="core:Scene" ItemsSource="{Binding Entities}">
+
+                <TreeDataTemplate DataType="viewModels:SceneNodeViewModel" ItemsSource="{Binding Children}">
                     <StackPanel Orientation="Horizontal" Spacing="5">
-                        <TextBlock Text="{Binding Name}" FontWeight="Bold" />
+                        <TextBlock Text="{Binding Name}" FontWeight="Bold" VerticalAlignment="Center" />
                     </StackPanel>
                 </TreeDataTemplate>
 
-                <TreeDataTemplate DataType="core:GameEntity" ItemsSource="{Binding Children}">
-                    <TextBlock Text="{Binding Name}" />
+                <TreeDataTemplate DataType="viewModels:EntityViewModel" ItemsSource="{Binding Children}">
+                    <StackPanel Orientation="Horizontal" Spacing="5">
+                        <TextBlock Text="{Binding Name}" VerticalAlignment="Center" />
+                    </StackPanel>
                 </TreeDataTemplate>
-            </TreeView.DataTemplates>
-        </TreeView>
 
+            </TreeView.DataTemplates>
+
+        </TreeView>
     </DockPanel>
 
 </UserControl>

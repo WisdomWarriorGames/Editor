@@ -11,6 +11,7 @@ public class SceneTracker
     public event Action? OnSceneModified;
     
     public IReadOnlyList<EntityTracker> TrackedRoots => _rootEntities;
+    public Scene? ActiveScene => _activeScene;
     
     public void TrackScene(Scene scene)
     {
