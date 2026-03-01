@@ -124,12 +124,19 @@ public partial class EntityViewModel : ObservableObject
         Tracker.AddEntity(new GameEntity());
     }
 
-    [RelayCommand]
+    private bool CanAcceptDrop(object? droppedItem)
+    {
+        if (droppedItem is not EntityViewModel draggedVm) return false;
+        if (draggedVm == this) return false;
+        if (IsDescendantOf(draggedVm)) return false;
+
+        return true;
+    }
+
+    [RelayCommand(CanExecute = nameof(CanAcceptDrop))]
     public void AcceptDrop(object? droppedObject)
     {
         if (droppedObject is not EntityViewModel draggedVm) return;
-        if (draggedVm == this) return;
-        if (IsDescendantOf(draggedVm)) return;
 
         if (draggedVm.Tracker.EngineEntity.Parent == null)
         {
