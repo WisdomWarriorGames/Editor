@@ -9,14 +9,18 @@ public class FileSystemRegistry : IDisposable
     private readonly object _lock = new();
     private FileSystemWatcher? _watcher;
     private FileSystemNode _currentNode;
+    private FileSystemNode _rootNode;
 
     public string RootDir { get; private set; }
     public string RootName { get; private set; }
     public Dictionary<string, FileSystemNode> Nodes { get; } = new();
     public Dictionary<string, FileSystemNode> Directories { get; } = new();
     public event Action? RegistryUpdated;
+    public event Action? FileSystemChanged;
+    public event Action<FileSystemNode>? CurrentNodeChanged;
 
-    private readonly System.Timers.Timer _updateTimer;
+    private readonly System.Timers.Timer _registryUpdateTimer;
+    private readonly System.Timers.Timer _fileSystemTimer;
 
     public FileSystemNode CurrentNode
     {
@@ -28,19 +32,35 @@ public class FileSystemRegistry : IDisposable
         }
     }
 
+    public FileSystemNode RootNode
+    {
+        get => _rootNode;
+        set => _rootNode = value;
+    }
+
     public FileSystemRegistry(FileSystemService fileSystemService)
     {
         _fileSystemService = fileSystemService;
 
-        _updateTimer = new System.Timers.Timer(50);
-        _updateTimer.AutoReset = false;
-        _updateTimer.Elapsed += (s, e) => RegistryUpdated?.Invoke();
+        _registryUpdateTimer = new System.Timers.Timer(50);
+        _registryUpdateTimer.AutoReset = false;
+        _registryUpdateTimer.Elapsed += (s, e) => RegistryUpdated?.Invoke();
+
+        _fileSystemTimer = new System.Timers.Timer(50);
+        _fileSystemTimer.AutoReset = false;
+        _fileSystemTimer.Elapsed += (s, e) => FileSystemChanged?.Invoke();
     }
 
     private void RequestUIUpdate()
     {
-        _updateTimer.Stop();
-        _updateTimer.Start();
+        _registryUpdateTimer.Stop();
+        _registryUpdateTimer.Start();
+    }
+
+    private void RequestFileSystemUpdate()
+    {
+        _fileSystemTimer.Stop();
+        _fileSystemTimer.Start();
     }
 
     public void SetCurrentNode(string path)
@@ -48,6 +68,7 @@ public class FileSystemRegistry : IDisposable
         if (Nodes.TryGetValue(path, out var node) && node.IsFolder)
         {
             CurrentNode = node;
+            CurrentNodeChanged?.Invoke(CurrentNode);
         }
     }
 
@@ -67,6 +88,7 @@ public class FileSystemRegistry : IDisposable
             {
                 PopulateDictionaryRecursive(rootNode);
                 CurrentNode = rootNode;
+                RootNode = rootNode;
             }
         }
 
@@ -139,6 +161,7 @@ public class FileSystemRegistry : IDisposable
         }
 
         RequestUIUpdate();
+        RequestFileSystemUpdate();
     }
 
     private void HandleDeleted(string path)
@@ -157,6 +180,7 @@ public class FileSystemRegistry : IDisposable
         }
 
         RequestUIUpdate();
+        RequestFileSystemUpdate();
     }
 
     private void RemoveRecursive(FileSystemNode node)
@@ -204,6 +228,7 @@ public class FileSystemRegistry : IDisposable
         }
 
         RequestUIUpdate();
+        RequestFileSystemUpdate();
     }
 
     private void UpdatePathsRecursive(FileSystemNode node, string oldRoot, string newRoot)
@@ -228,6 +253,6 @@ public class FileSystemRegistry : IDisposable
     public void Dispose()
     {
         StopWatcher();
-        _updateTimer.Dispose();
+        _registryUpdateTimer.Dispose();
     }
 }

@@ -12,6 +12,7 @@ public class FileSystemNode
     public string FileNameWithExtension => IsFolder ? Name : $"{Name}{Extension}";
 
     public List<FileSystemNode> Children { get; set; } = [];
+    public List<FileSystemNode> Folders => Children.Where(x => x.IsFolder).ToList();
 
     public FileSystemNode(string path, bool isFolder)
     {

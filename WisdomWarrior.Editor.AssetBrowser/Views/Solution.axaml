@@ -1,9 +1,33 @@
 ﻿<UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:viewModels="clr-namespace:WisdomWarrior.Editor.AssetBrowser.ViewModels"
+             xmlns:models="clr-namespace:WisdomWarrior.Editor.FileSystem.Models;assembly=WisdomWarrior.Editor.FileSystem"
+             x:DataType="viewModels:SolutionViewModel"
              x:Class="WisdomWarrior.Editor.AssetBrowser.Views.Solution">
 
-    <Panel DragDrop.AllowDrop="True">
-        <TextBlock Text="Solution" VerticalAlignment="Center" HorizontalAlignment="Center" Opacity="0.6" />
-    </Panel>
+    <DockPanel>
+        <TextBlock DockPanel.Dock="Top"
+                   Text="SOLUTION"
+                   FontWeight="Bold"
+                   Opacity="0.5"
+                   Margin="5"
+                   FontSize="11" />
+        
+        <TreeView ItemsSource="{Binding FileSystemRoot}"
+                  SelectedItem="{Binding SelectedNode, Mode=TwoWay}">
+            
+            <TreeView.Styles>
+                <Style Selector="TreeViewItem">
+                    <Setter Property="IsExpanded" Value="True" />
+                </Style>
+            </TreeView.Styles>
+            
+            <TreeView.DataTemplates>
+                <TreeDataTemplate DataType="models:FileSystemNode" ItemsSource="{Binding Folders}">
+                    <TextBlock Text="{Binding Name}" />
+                </TreeDataTemplate>
+            </TreeView.DataTemplates>
+        </TreeView>
+    </DockPanel>
 
 </UserControl>
