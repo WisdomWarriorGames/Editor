@@ -1,0 +1,78 @@
+<suki:SukiWindow xmlns="https://github.com/avaloniaui"
+                 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                 xmlns:suki="clr-namespace:SukiUI.Controls;assembly=SukiUI"
+                 xmlns:assetBrowser="clr-namespace:WisdomWarrior.Editor.AssetBrowser.Views;assembly=WisdomWarrior.Editor.AssetBrowser"
+                 xmlns:viewModels="clr-namespace:WisdomWarrior.Editor.Shell.ViewModels"
+                 xmlns:monogame="clr-namespace:WisdomWarrior.Editor.MonoGame.Views;assembly=WisdomWarrior.Editor.MonoGame"
+                 xmlns:sceneView="clr-namespace:WisdomWarrior.Editor.SceneList.Views;assembly=WisdomWarrior.Editor.SceneList"
+                 xmlns:fileMenu="clr-namespace:WisdomWarrior.Editor.Menus.Views;assembly=WisdomWarrior.Editor.Menus"
+                 xmlns:inspector="clr-namespace:WisdomWarrior.Editor.Inspector.Views;assembly=WisdomWarrior.Editor.Inspector"
+                 xmlns:core="clr-namespace:WisdomWarrior.Editor.Core;assembly=WisdomWarrior.Editor.Core"
+                 x:Class="WisdomWarrior.Editor.Shell.MainWindow"
+                 x:DataType="viewModels:MainWindowViewModel"
+                 Title=""
+                 TransparencyLevelHint="Mica"
+                 ExtendClientAreaToDecorationsHint="True"
+                 WindowState="Maximized"
+                 WindowStartupLocation="CenterScreen"
+                 SystemDecorations="Full"
+                 Background="{DynamicResource SukiBackground}">
+    
+    <suki:SukiWindow.Hosts>
+        <suki:SukiToastHost Manager="{x:Static core:EditorUI.ToastManager}" />
+    </suki:SukiWindow.Hosts>
+    <suki:SukiWindow.LogoContent>
+        <StackPanel Orientation="Horizontal" Spacing="5" VerticalAlignment="Center">
+            <fileMenu:FileMenu DataContext="{Binding FileMenuViewModel}" />
+        </StackPanel>
+    </suki:SukiWindow.LogoContent>
+
+    <Grid ColumnDefinitions="4*, 4, 1*">
+
+        <Grid Grid.Column="0" RowDefinitions="8*, 8, 3*">
+
+            <Border Grid.Row="0"
+                    Background="#050505"
+                    BorderBrush="{DynamicResource SukiBorderBrush}">
+                <Grid>
+                    <monogame:MonoGameView DataContext="{Binding MonoGameWindow}" />
+                </Grid>
+            </Border>
+
+            <GridSplitter Grid.Row="1" Background="Transparent" ResizeDirection="Rows" />
+
+
+            <Grid Grid.Row="2">
+                <assetBrowser:AssetBrowser DataContext="{Binding AssetBrowserViewModel}" />
+            </Grid>
+        </Grid>
+
+        <GridSplitter Grid.Column="1" Background="Transparent" ResizeDirection="Columns" />
+
+        <Grid Grid.Column="2" RowDefinitions="1*, 4, 2*">
+
+            <suki:GlassCard Grid.Row="0"
+                            Padding="2"
+                            Margin="2"
+                            CornerRadius="4"
+                            IsAnimated="False">
+
+                <sceneView:SceneView DataContext="{Binding SceneListViewModel}" />
+
+            </suki:GlassCard>
+
+            <GridSplitter Grid.Row="1" Background="Transparent" ResizeDirection="Rows" />
+
+            <suki:GlassCard Grid.Row="2"
+                            Padding="2"
+                            Margin="2"
+                            CornerRadius="4"
+                            IsAnimated="False">
+
+                <inspector:Inspector DataContext="{Binding InspectorViewModel}" />
+
+            </suki:GlassCard>
+        </Grid>
+
+    </Grid>
+</suki:SukiWindow>

@@ -1,0 +1,8 @@
+﻿<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:models="clr-namespace:WisdomWarrior.Editor.Inspector.Models">
+    <DataTemplate x:Key="FloatTemplate" DataType="models:FloatViewModel">
+        <NumericUpDown Value="{Binding Value}"
+                       Increment="0.1" />
+    </DataTemplate>
+</ResourceDictionary>

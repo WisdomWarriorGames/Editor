@@ -1,0 +1,94 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:viewModels="clr-namespace:WisdomWarrior.Editor.AssetBrowser.ViewModels"
+             xmlns:suki="https://github.com/kikipoulet/SukiUI"
+             xmlns:dragAndDrop="clr-namespace:WisdomWarrior.Editor.Core.DragAndDrop;assembly=WisdomWarrior.Editor.Core"
+             x:DataType="viewModels:AssetViewModel"
+             x:Class="WisdomWarrior.Editor.AssetBrowser.Views.Asset">
+    <Grid>
+        <suki:GlassCard Width="80" 
+                        Height="65"
+                        Padding="5" 
+                        Margin="2" 
+                        IsAnimated="False"
+                        CornerRadius="4"
+                        BorderThickness="2"
+                        Cursor="Hand"
+                        Focusable="True"
+                        Background="Transparent"
+                        Classes.selected="{Binding IsSelected}"
+                        ToolTip.Tip="{Binding Name}"
+                        dragAndDrop:DragSource.IsEnabled="True"
+                        dragAndDrop:DropTarget.DropCommand="{Binding AcceptDropCommand}">
+
+            <suki:GlassCard.KeyBindings>
+                <KeyBinding Gesture="F2" Command="{Binding BeginEditCommand}" />
+            </suki:GlassCard.KeyBindings>
+
+            <suki:GlassCard.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Rename (F2)" Command="{Binding BeginEditCommand}" />
+                    <MenuItem Header="Delete" Command="{Binding DeleteCommand}" />
+                    <MenuItem Header="Open in Explorer" Command="{Binding OpenInExplorerCommand}" />
+                </ContextMenu>
+            </suki:GlassCard.ContextMenu>
+
+            <StackPanel VerticalAlignment="Top" Spacing="2">
+                <Panel Height="32" Width="48" HorizontalAlignment="Center" VerticalAlignment="Top">
+                    <TextBlock Text="{Binding Icon}"
+                               FontSize="32"
+                               IsVisible="{Binding !HasThumbnail}"
+                               VerticalAlignment="Center"
+                               HorizontalAlignment="Center" />
+                    
+                    <Image Source="{Binding Thumbnail}"
+                           IsVisible="{Binding HasThumbnail}"
+                           Width="32"
+                           Height="32"
+                           VerticalAlignment="Center"
+                           HorizontalAlignment="Center"
+                           RenderOptions.BitmapInterpolationMode="LowQuality" />
+                </Panel>
+
+                <TextBlock Text="{Binding Name}"
+                           IsVisible="{Binding !IsEditing}"
+                           HorizontalAlignment="Center"
+                           TextAlignment="Center"
+                           FontSize="8"
+                           TextWrapping="Wrap"
+                           TextTrimming="CharacterEllipsis"
+                           MaxHeight="20"/>
+
+                <TextBox x:Name="NameTextBox"
+                         Text="{Binding TempName}"
+                         IsVisible="{Binding IsEditing}"
+                         Classes.invalid="{Binding !IsValid}"
+                         AttachedToVisualTree="OnTextBoxLoaded"
+                         MinWidth="80"
+                         HorizontalAlignment="Center"
+                         TextAlignment="Center" FontSize="8" Padding="1">
+
+                    <TextBox.KeyBindings>
+                        <KeyBinding Gesture="Escape" Command="{Binding CancelEditCommand}" />
+                        <KeyBinding Gesture="Enter" Command="{Binding CommitEditCommand}" />
+                    </TextBox.KeyBindings>
+
+                </TextBox>
+            </StackPanel>
+        </suki:GlassCard>
+    </Grid>
+    
+    <UserControl.Styles>
+        <Style Selector="suki|GlassCard:dragover">
+            <Setter Property="BorderBrush" Value="#2196F3" />
+            <Setter Property="BorderThickness" Value="2" />
+        </Style>
+        <Style Selector="TextBox.invalid /template/ Border#PART_BorderElement">
+            <Setter Property="BorderBrush" Value="Red" />
+            <Setter Property="BorderThickness" Value="2" />
+        </Style>
+        <Style Selector="TextBox.invalid">
+            <Setter Property="Foreground" Value="Red" />
+        </Style>
+    </UserControl.Styles>
+</UserControl>

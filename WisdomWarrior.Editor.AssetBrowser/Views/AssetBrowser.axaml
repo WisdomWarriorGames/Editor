@@ -1,0 +1,29 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:suki="https://github.com/kikipoulet/SukiUI"
+             xmlns:views="clr-namespace:WisdomWarrior.Editor.AssetBrowser.Views"
+             x:Class="WisdomWarrior.Editor.AssetBrowser.Views.AssetBrowser">
+
+    <Grid ColumnDefinitions="1*, 4, 4*">
+        <suki:GlassCard Grid.Column="0"
+                        Padding="0"
+                        CornerRadius="4"
+                        IsAnimated="False">
+            <views:Solution HorizontalAlignment="Stretch"
+                            VerticalAlignment="Stretch"
+                            DataContext="{Binding SolutionViewModel}" />
+        </suki:GlassCard>
+
+        <GridSplitter Grid.Column="1" Background="Transparent" ResizeDirection="Columns" />
+
+        <suki:GlassCard Grid.Column="2"
+                        Padding="0"
+                        CornerRadius="4"
+                        IsAnimated="False">
+            <views:Directory HorizontalAlignment="Stretch"
+                             VerticalAlignment="Stretch"
+                             DataContext="{Binding DirectoryViewModel}" />
+        </suki:GlassCard>
+    </Grid>
+
+</UserControl>
