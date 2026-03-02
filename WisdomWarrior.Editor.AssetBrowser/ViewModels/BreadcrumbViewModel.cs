@@ -35,7 +35,7 @@ public partial class BreadcrumbViewModel : ObservableObject
     [RelayCommand(CanExecute = nameof(CanAcceptDrop))]
     private async Task AcceptDrop(object? droppedItem)
     {
-        droppedItem.ProcessDropAsync(FullPath, _fileSystemService);
+        droppedItem.ProcessFileSystemDropAsync(FullPath, _fileSystemService);
     }
 
     [RelayCommand]

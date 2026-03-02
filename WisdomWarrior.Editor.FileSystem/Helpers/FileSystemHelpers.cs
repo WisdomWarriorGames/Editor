@@ -7,7 +7,7 @@ namespace WisdomWarrior.Editor.FileSystem.Helpers;
 
 public static class FileSystemHelpers
 {
-    public static void ProcessDropAsync(
+    public static void ProcessFileSystemDropAsync(
         this object? droppedItem,
         string destinationPath,
         FileSystemService fileSystem)

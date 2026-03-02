@@ -2,8 +2,10 @@
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using WisdomWarrior.Editor.Core.Helpers;
 using WisdomWarrior.Editor.Core.Models;
 using WisdomWarrior.Editor.Core.ShadowTree;
+using WisdomWarrior.Editor.SceneList.Helpers;
 using WisdomWarrior.Engine.Core;
 
 namespace WisdomWarrior.Editor.SceneList.ViewModels;
@@ -126,34 +128,39 @@ public partial class EntityViewModel : ObservableObject
 
     private bool CanAcceptDrop(object? droppedItem)
     {
-        if (droppedItem is not EntityViewModel draggedVm) return false;
-        if (draggedVm == this) return false;
-        if (IsDescendantOf(draggedVm)) return false;
+        if (droppedItem.CanAccept<EntityViewModel>()) return true;
+        if (droppedItem.CanAccept(this)) return true;
+        if (!IsDescendantOf(droppedItem)) return true;
 
-        return true;
+        return false;
     }
 
     [RelayCommand(CanExecute = nameof(CanAcceptDrop))]
     public void AcceptDrop(object? droppedObject)
     {
-        if (droppedObject is not EntityViewModel draggedVm) return;
+        // if (droppedObject is not EntityViewModel draggedVm) return;
+        //
+        // if (draggedVm.Tracker.EngineEntity.Parent == null)
+        // {
+        //     _sceneTracker.RemoveEntity(draggedVm.Tracker.EngineEntity);
+        // }
+        //
+        // draggedVm.Tracker.EngineEntity.SetParent(Tracker.EngineEntity);
 
-        if (draggedVm.Tracker.EngineEntity.Parent == null)
-        {
-            _sceneTracker.RemoveEntity(draggedVm.Tracker.EngineEntity);
-        }
-
-        draggedVm.Tracker.EngineEntity.SetParent(Tracker.EngineEntity);
+        droppedObject.ProcessEntityDrop(this, _sceneTracker);
 
         IsExpanded = true;
     }
 
-    private bool IsDescendantOf(EntityViewModel potentialParent)
+    private bool IsDescendantOf(object? droppedItem)
     {
+        if (droppedItem == null) return false;
+        if (droppedItem is not EntityViewModel draggedVm) return false;
+
         var current = Tracker.EngineEntity.Parent;
         while (current != null)
         {
-            if (current == potentialParent.Tracker.EngineEntity) return true;
+            if (current == draggedVm.Tracker.EngineEntity) return true;
             current = current.Parent;
         }
 

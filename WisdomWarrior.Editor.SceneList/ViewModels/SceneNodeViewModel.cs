@@ -1,7 +1,9 @@
 ﻿using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using WisdomWarrior.Editor.Core.Helpers;
 using WisdomWarrior.Editor.Core.ShadowTree;
+using WisdomWarrior.Editor.SceneList.Helpers;
 using WisdomWarrior.Engine.Core;
 
 namespace WisdomWarrior.Editor.SceneList.ViewModels;
@@ -75,18 +77,15 @@ public partial class SceneNodeViewModel : ObservableObject
 
     private bool CanAcceptDrop(object? droppedItem)
     {
-        if (droppedItem is not EntityViewModel) return false;
+        if (droppedItem.CanAccept<EntityViewModel>()) return true;
 
-        return true;
+        return false;
     }
 
     [RelayCommand(CanExecute = nameof(CanAcceptDrop))]
     public void AcceptDrop(object? droppedObject)
     {
-        if (droppedObject is not EntityViewModel draggedVm) return;
-
-        draggedVm.Tracker.EngineEntity.RemoveFromParent();
-        _tracker.AddEntity(draggedVm.Tracker.EngineEntity);
+        droppedObject.ProcessEntityDrop(this, _tracker);
 
         IsExpanded = true;
     }
