@@ -11,11 +11,21 @@ public class PropertyTracker
     public string Name => _propertyInfo.Name;
     public bool IsDirty { get; private set; }
 
+    public Type PropertyType => _propertyInfo.PropertyType;
+
     public PropertyTracker(PropertyInfo prop, object target)
     {
         _propertyInfo = prop;
         _target = target;
         _lastValue = _propertyInfo.GetValue(_target);
+    }
+
+    public object? GetValue() => _propertyInfo.GetValue(_target);
+
+    public void SetValue(object? value)
+    {
+        _propertyInfo.SetValue(_target, value);
+        _lastValue = value; // Update lastValue so it doesn't immediately flag as Dirty
     }
 
     public void CheckForChanges()

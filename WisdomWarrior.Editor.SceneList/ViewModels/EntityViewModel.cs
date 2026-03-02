@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using WisdomWarrior.Editor.Core.Helpers;
 using WisdomWarrior.Editor.Core.Models;
+using WisdomWarrior.Editor.Core.Services;
 using WisdomWarrior.Editor.Core.ShadowTree;
 using WisdomWarrior.Editor.SceneList.Helpers;
 using WisdomWarrior.Engine.Core;
@@ -13,6 +14,7 @@ namespace WisdomWarrior.Editor.SceneList.ViewModels;
 public partial class EntityViewModel : ObservableObject
 {
     private readonly SceneTracker _sceneTracker;
+    private readonly SelectionManager _selectionManager;
 
     public EntityTracker Tracker { get; }
 
@@ -25,9 +27,10 @@ public partial class EntityViewModel : ObservableObject
 
     public ObservableCollection<EntityViewModel> Children { get; } = new();
 
-    public EntityViewModel(EntityTracker tracker, SceneTracker sceneTracker)
+    public EntityViewModel(EntityTracker tracker, SceneTracker sceneTracker, SelectionManager selectionManager)
     {
         _sceneTracker = sceneTracker;
+        _selectionManager = selectionManager;
         Tracker = tracker;
         Name = tracker.EngineEntity.Name;
 
@@ -67,13 +70,21 @@ public partial class EntityViewModel : ObservableObject
             }
             else
             {
-                Children.Insert(i, new EntityViewModel(childTracker, _sceneTracker));
+                Children.Insert(i, new EntityViewModel(childTracker, _sceneTracker, _selectionManager));
             }
         }
 
         while (Children.Count > currentTrackers.Count)
         {
             Children.RemoveAt(Children.Count - 1);
+        }
+    }
+
+    partial void OnIsSelectedChanged(bool value)
+    {
+        if (value)
+        {
+            _selectionManager.SetSelection(Tracker);
         }
     }
 
@@ -138,15 +149,6 @@ public partial class EntityViewModel : ObservableObject
     [RelayCommand(CanExecute = nameof(CanAcceptDrop))]
     public void AcceptDrop(object? droppedObject)
     {
-        // if (droppedObject is not EntityViewModel draggedVm) return;
-        //
-        // if (draggedVm.Tracker.EngineEntity.Parent == null)
-        // {
-        //     _sceneTracker.RemoveEntity(draggedVm.Tracker.EngineEntity);
-        // }
-        //
-        // draggedVm.Tracker.EngineEntity.SetParent(Tracker.EngineEntity);
-
         droppedObject.ProcessEntityDrop(this, _sceneTracker);
 
         IsExpanded = true;

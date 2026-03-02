@@ -30,6 +30,7 @@ public static class Configurations
         services.AddSingleton<EditorContext>();
 
         services.AddSingleton<CurrentSceneManager>();
+        services.AddSingleton<SelectionManager>();
 
         services.ConfigureAssetBrowser();
 

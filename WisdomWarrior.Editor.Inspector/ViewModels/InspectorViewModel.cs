@@ -3,6 +3,8 @@ using System.ComponentModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using WisdomWarrior.Editor.Core;
+using WisdomWarrior.Editor.Core.Services;
+using WisdomWarrior.Editor.Core.ShadowTree;
 using WisdomWarrior.Engine.Core;
 using WisdomWarrior.Engine.Core.Components;
 using Component = WisdomWarrior.Engine.Core.Component;
@@ -11,39 +13,30 @@ namespace WisdomWarrior.Editor.Inspector.ViewModels;
 
 public partial class InspectorViewModel : ObservableObject
 {
-    private readonly EditorContext _context;
+    private readonly SelectionManager _selectionManager;
 
-    public GameEntity? SelectedEntity => _context.SelectedEntity;
-    public ObservableCollection<Component> Components => SelectedEntity?.Components ?? new();
+    [ObservableProperty] private EntityTracker? _selectedEntity;
+
+    public ObservableCollection<Component> Components => []; //SelectedEntity.TrackedComponents ?? new();
     public IEnumerable<string> AvailableComponentNames => ComponentRegistry.GetRegisteredKeys();
 
-    public InspectorViewModel(EditorContext context)
+    public InspectorViewModel(SelectionManager selectionManager)
     {
-        _context = context;
+        _selectionManager = selectionManager;
 
-        _context.PropertyChanged += OnPropertyChanged;
+        _selectionManager.OnSelectionChanged += OnSelectionChanged;
     }
 
-    private void OnPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    private void OnSelectionChanged(object? obj)
     {
-        if (e.PropertyName == nameof(EditorContext.SelectedEntity))
+        if (obj == null)
         {
-            OnPropertyChanged(nameof(SelectedEntity));
-            OnPropertyChanged(nameof(Components));
-        }
-    }
-
-    [RelayCommand]
-    private void AddComponent(string typeName)
-    {
-        if (SelectedEntity == null) return;
-        
-        var newComponent = ComponentRegistry.CreateComponent(typeName);
-        if (newComponent != null)
-        {
-            SelectedEntity.AddComponent(newComponent);
+            SelectedEntity = null;
         }
 
-        OnPropertyChanged(nameof(Components));
+        if (obj is EntityTracker entityTracker)
+        {
+            SelectedEntity = entityTracker;
+        }
     }
 }

@@ -14,14 +14,16 @@ public partial class SceneHierarchyViewModel : ObservableObject
 {
     private readonly SceneTracker _sceneTracker;
     private readonly CurrentSceneManager _sceneManager;
+    private readonly SelectionManager _selectionManager;
 
     public ObservableCollection<SceneNodeViewModel> Scenes { get; } = new();
 
     private SceneNodeViewModel _activeSceneNode;
 
-    public SceneHierarchyViewModel(CurrentSceneManager sceneManager)
+    public SceneHierarchyViewModel(CurrentSceneManager sceneManager, SelectionManager selectionManager)
     {
         _sceneManager = sceneManager;
+        _selectionManager = selectionManager;
         _sceneTracker = _sceneManager.Tracker;
 
         _sceneTracker.OnSceneModified += OnSceneModified;
@@ -30,7 +32,7 @@ public partial class SceneHierarchyViewModel : ObservableObject
 
     private void OnSceneReady()
     {
-        _activeSceneNode = new SceneNodeViewModel(_sceneTracker);
+        _activeSceneNode = new SceneNodeViewModel(_sceneTracker, _selectionManager);
         Scenes.Add(_activeSceneNode);
         Dispatcher.UIThread.Post(SyncRootEntities);
     }
@@ -58,7 +60,7 @@ public partial class SceneHierarchyViewModel : ObservableObject
             }
             else
             {
-                rootList.Insert(i, new EntityViewModel(rootTracker, _sceneTracker));
+                rootList.Insert(i, new EntityViewModel(rootTracker, _sceneTracker, _selectionManager));
             }
         }
 
@@ -80,6 +82,8 @@ public partial class SceneHierarchyViewModel : ObservableObject
                 ResetEntityRecursive(entity);
             }
         }
+
+        _selectionManager.Clear();
     }
 
     private void ResetEntityRecursive(EntityViewModel entity)

@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using WisdomWarrior.Editor.Core.Helpers;
+using WisdomWarrior.Editor.Core.Services;
 using WisdomWarrior.Editor.Core.ShadowTree;
 using WisdomWarrior.Editor.SceneList.Helpers;
 using WisdomWarrior.Engine.Core;
@@ -11,6 +12,7 @@ namespace WisdomWarrior.Editor.SceneList.ViewModels;
 public partial class SceneNodeViewModel : ObservableObject
 {
     private readonly SceneTracker _tracker;
+    private readonly SelectionManager _selectionManager;
 
     [ObservableProperty] private string _name = "Loading...";
     [ObservableProperty] private bool _isExpanded = true;
@@ -21,15 +23,24 @@ public partial class SceneNodeViewModel : ObservableObject
 
     public ObservableCollection<EntityViewModel> Children { get; } = new();
 
-    public SceneNodeViewModel(SceneTracker tracker)
+    public SceneNodeViewModel(SceneTracker tracker, SelectionManager selectionManager)
     {
         _tracker = tracker;
+        _selectionManager = selectionManager;
         SyncName();
     }
 
     public void SyncName()
     {
         Name = _tracker.ActiveScene?.Name ?? "Untitled Scene";
+    }
+
+    partial void OnIsSelectedChanged(bool value)
+    {
+        if (value == true)
+        {
+            _selectionManager.SetSelection(_tracker);
+        }
     }
 
     partial void OnNameChanged(string value)
