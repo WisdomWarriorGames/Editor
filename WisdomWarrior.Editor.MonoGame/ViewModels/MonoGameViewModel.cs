@@ -2,27 +2,28 @@
 using Avalonia.Input;
 using ReactiveUI;
 using WisdomWarrior.Editor.Core;
+using WisdomWarrior.Editor.Core.Services;
+using WisdomWarrior.Editor.Core.ShadowTree;
 using WisdomWarrior.Engine.Core;
 
 namespace WisdomWarrior.Editor.MonoGame.ViewModels;
 
 public class MonoGameViewModel : ReactiveObject
 {
-    private readonly EditorContext _context;
+    private readonly SelectionManager _selectionManager;
     public EditorRuntime CurrentGame { get; set; } = new();
 
-    public MonoGameViewModel(EditorContext context)
+    public MonoGameViewModel(SelectionManager selectionManager)
     {
-        _context = context;
-
-        _context.PropertyChanged += OnPropertyChanged;
+        _selectionManager = selectionManager;
+        _selectionManager.OnSelectionChanged += OnOnSelectionChanged;
     }
 
-    private void OnPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    private void OnOnSelectionChanged(object? obj)
     {
-        if (e.PropertyName == nameof(EditorContext.SelectedEntity))
+        if (obj is EntityTracker tracker)
         {
-            CurrentGame.SelectedEntity = _context.SelectedEntity;
+            CurrentGame.SelectedEntity = tracker.EngineEntity;
         }
     }
 }
