@@ -38,23 +38,30 @@
                 <ItemsControl ItemsSource="{Binding Components}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <suki:GlassCard Margin="0,0,0,15" IsAnimated="False">
+                            <suki:GlassCard Padding="5"
+                                            Margin="2"
+                                            CornerRadius="4"
+                                            IsAnimated="False">
                                 <StackPanel>
-                                    <Grid ColumnDefinitions="Auto, *, Auto" Margin="0,0,0,10">
-                                        
-                                        <CheckBox Grid.Column="0" 
-                                                  IsChecked="{Binding Active}" 
-                                                  Margin="0,0,8,0" />
-                
-                                        <TextBlock Grid.Column="1" 
-                                                   Text="{Binding Name}" 
-                                                   FontWeight="Bold" 
+                                    <Grid ColumnDefinitions="Auto, *, Auto" Margin="0,0,0,2">
+
+                                        <CheckBox Grid.Column="0"
+                                                  IsChecked="{Binding Active}"
+                                                  Margin="0,0,2,0">
+                                            <CheckBox.RenderTransform>
+                                                <ScaleTransform ScaleX="0.6" ScaleY="0.6" />
+                                            </CheckBox.RenderTransform>
+                                        </CheckBox>
+
+                                        <TextBlock Grid.Column="1"
+                                                   Text="{Binding Name}"
+                                                   FontWeight="Bold"
                                                    FontSize="10"
-                                                   VerticalAlignment="Center"/>
+                                                   VerticalAlignment="Center" />
                                     </Grid>
 
                                     <Border Height="1" Background="{DynamicResource SukiBorderBrush}" Opacity="0.5"
-                                            Margin="0,0,0,12" />
+                                            Margin="0,0,0,2" />
 
                                     <views:ComponentEditor DataContext="{Binding}" />
 
