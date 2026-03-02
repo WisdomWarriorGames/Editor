@@ -25,7 +25,6 @@ public class PropertyTracker
     public void SetValue(object? value)
     {
         _propertyInfo.SetValue(_target, value);
-        _lastValue = value; // Update lastValue so it doesn't immediately flag as Dirty
     }
 
     public void CheckForChanges()
@@ -41,5 +40,10 @@ public class PropertyTracker
         {
             IsDirty = false;
         }
+    }
+
+    public T? GetCustomAttribute<T>() where T : Attribute
+    {
+        return _propertyInfo.GetCustomAttribute<T>();
     }
 }

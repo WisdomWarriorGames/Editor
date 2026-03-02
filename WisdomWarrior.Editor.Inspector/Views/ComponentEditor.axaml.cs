@@ -7,6 +7,7 @@ using Avalonia.Markup.Xaml;
 using Avalonia.Markup.Xaml.Templates;
 using Avalonia.Media;
 using Avalonia.Threading;
+using WisdomWarrior.Editor.Core.ShadowTree;
 using WisdomWarrior.Editor.Inspector.Helpers;
 using WisdomWarrior.Editor.Inspector.Models;
 using WisdomWarrior.Engine.Core;
@@ -21,30 +22,23 @@ public partial class ComponentEditor : UserControl
         InitializeComponent();
     }
 
-    // This is called when the ContentControl binds a component to this view
     protected override void OnDataContextChanged(EventArgs e)
     {
         base.OnDataContextChanged(e);
-        if (DataContext is not Component component) return;
+
+        if (DataContext is not ComponentTracker tracker) return;
 
         PropertiesStack.Children.Clear();
-        var properties = component.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance);
 
-        foreach (var prop in properties)
+        foreach (var propTracker in tracker.Properties)
         {
-            var shouldHide = prop.GetCustomAttribute<HideInInspectorAttribute>() != null;
+            var shouldHide = propTracker.GetCustomAttribute<HideInInspectorAttribute>() != null;
 
             if (shouldHide) continue;
 
-            var row = CreatePropertyRow(prop, component);
+            var row = CreatePropertyRow(propTracker, tracker);
             PropertiesStack.Children.Add(row);
         }
-
-        component.OnComponentChanged += () =>
-        {
-            // Jump to the UI thread to update the view
-            Dispatcher.UIThread.Post(RefreshAllProperties);
-        };
     }
 
     private void RefreshAllProperties()
@@ -56,15 +50,15 @@ public partial class ComponentEditor : UserControl
         }
     }
 
-    private Control CreatePropertyRow(PropertyInfo prop, Component target)
+    private Control CreatePropertyRow(PropertyTracker prop, ComponentTracker target)
     {
         var panel = new StackPanel { Spacing = 2 };
         panel.Children.Add(new TextBlock { Text = prop.Name, Opacity = 0.5, FontSize = 10 });
 
         var editor = prop.PropertyType switch
         {
-            Type t when t == typeof(Vector2) => this.CreateVector2Editor(prop, target),
-            Type t when t == typeof(float) => this.CreateFloatEditor(prop, target),
+            Type t when t == typeof(Vector2) => this.CreateVector2Editor(prop),
+            Type t when t == typeof(float) => this.CreateFloatEditor(prop),
             // Type t when t == typeof(string) => CreateStringEditor(prop, target),
             _ => new TextBlock { Text = "Unsupported Type", FontStyle = FontStyle.Italic }
         };

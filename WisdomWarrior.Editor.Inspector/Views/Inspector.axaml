@@ -6,6 +6,7 @@
              xmlns:views="clr-namespace:WisdomWarrior.Editor.Inspector.Views"
              x:Class="WisdomWarrior.Editor.Inspector.Views.Inspector"
              x:DataType="viewModels:InspectorViewModel">
+
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -65,25 +66,25 @@
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
 
-                <StackPanel>
-                    <Button Content="Add Component"
-                            Classes="Flat Primary"
-                            HorizontalAlignment="Stretch"
-                            IsVisible="{Binding SelectedEntity, Converter={x:Static ObjectConverters.IsNotNull}}">
-                        <Button.Flyout>
-                            <MenuFlyout ItemsSource="{Binding AvailableComponentNames}">
-                                <MenuFlyout.ItemContainerTheme>
-                                    <ControlTheme TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
-                                        <Setter Property="Header" Value="{Binding}" />
-                                        <Setter Property="Command"
-                                                Value="{Binding $parent[UserControl].DataContext.AddComponentCommand}" />
-                                        <Setter Property="CommandParameter" Value="{Binding}" />
-                                    </ControlTheme>
-                                </MenuFlyout.ItemContainerTheme>
-                            </MenuFlyout>
-                        </Button.Flyout>
-                    </Button>
-                </StackPanel>
+                <!-- <StackPanel> -->
+                <!--     <Button Content="Add Component" -->
+                <!--             Classes="Flat Primary" -->
+                <!--             HorizontalAlignment="Stretch" -->
+                <!--             IsVisible="{Binding SelectedEntity, Converter={x:Static ObjectConverters.IsNotNull}}"> -->
+                <!--         <Button.Flyout> -->
+                <!--             <MenuFlyout ItemsSource="{Binding AvailableComponentNames}"> -->
+                <!--                 <MenuFlyout.ItemContainerTheme> -->
+                <!--                     <ControlTheme TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}"> -->
+                <!--                         <Setter Property="Header" Value="{Binding}" /> -->
+                <!--                         <Setter Property="Command" -->
+                <!--                                 Value="{Binding $parent[UserControl].DataContext.AddComponentCommand}" /> -->
+                <!--                         <Setter Property="CommandParameter" Value="{Binding}" /> -->
+                <!--                     </ControlTheme> -->
+                <!--                 </MenuFlyout.ItemContainerTheme> -->
+                <!--             </MenuFlyout> -->
+                <!--         </Button.Flyout> -->
+                <!--     </Button> -->
+                <!-- </StackPanel> -->
             </StackPanel>
         </ScrollViewer>
     </Grid>

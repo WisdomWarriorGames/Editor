@@ -8,6 +8,8 @@ public class ComponentTracker
     public object EngineComponent { get; }
     public bool IsDirty => _properties.Any(p => p.IsDirty);
 
+    public List<PropertyTracker> Properties => _properties;
+
     public ComponentTracker(object component)
     {
         EngineComponent = component;
