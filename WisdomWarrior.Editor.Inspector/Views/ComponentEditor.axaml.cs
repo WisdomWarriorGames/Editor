@@ -36,21 +36,12 @@ public partial class ComponentEditor : UserControl
 
             if (shouldHide) continue;
 
-            var row = CreatePropertyRow(propTracker, tracker);
+            var row = CreatePropertyRow(propTracker);
             PropertiesStack.Children.Add(row);
         }
     }
 
-    private void RefreshAllProperties()
-    {
-        foreach (var panel in PropertiesStack.Children.OfType<StackPanel>())
-        {
-            var editor = panel.Children.OfType<ContentControl>().FirstOrDefault();
-            if (editor?.Tag is Action refresh) refresh.Invoke();
-        }
-    }
-
-    private Control CreatePropertyRow(PropertyTracker prop, ComponentTracker target)
+    private Control CreatePropertyRow(PropertyTracker prop)
     {
         var panel = new StackPanel { Spacing = 2 };
         panel.Children.Add(new TextBlock { Text = prop.Name, Opacity = 0.5, FontSize = 10 });

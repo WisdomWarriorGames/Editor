@@ -12,7 +12,7 @@ public class TypeToNameConverter : IValueConverter
 
         if (value is ComponentTracker tracker)
         {
-            return tracker.EngineComponent.GetType().Name;
+            return tracker.Name;
         }
 
         return value?.GetType().Name ?? "Unknown Component";
