@@ -139,11 +139,11 @@ public partial class EntityViewModel : ObservableObject
 
     private bool CanAcceptDrop(object? droppedItem)
     {
-        if (droppedItem.CanAccept<EntityViewModel>()) return true;
-        if (droppedItem.CanAccept(this)) return true;
-        if (!IsDescendantOf(droppedItem)) return true;
+        if (!droppedItem.CanAccept(this)) return false;
+        if (IsDescendantOf(droppedItem)) return false;
+        if (!droppedItem.CanAccept<EntityViewModel>()) return false;
 
-        return false;
+        return true;
     }
 
     [RelayCommand(CanExecute = nameof(CanAcceptDrop))]
