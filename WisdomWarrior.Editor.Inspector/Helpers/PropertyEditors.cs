@@ -18,10 +18,10 @@ public static class PropertyEditors
         {
             prop.SetValue(target, newVector);
 
-            if (target is ITrackableComponent trackable)
-            {
-                trackable.NotifyChanged();
-            }
+            // if (target is ITrackableComponent trackable)
+            // {
+            //     trackable.NotifyChanged();
+            // }
         });
 
         var editor = new ContentControl
@@ -45,10 +45,10 @@ public static class PropertyEditors
         {
             prop.SetValue(target, newVector);
 
-            if (target is ITrackableComponent trackable)
-            {
-                trackable.NotifyChanged();
-            }
+            // if (target is ITrackableComponent trackable)
+            // {
+            //     trackable.NotifyChanged();
+            // }
         });
 
         var editor = new ContentControl

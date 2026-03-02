@@ -130,7 +130,7 @@ public partial class DirectoryViewModel : ObservableObject
     [RelayCommand(CanExecute = nameof(CanAcceptDrop))]
     private async Task AcceptDropAsync(object? droppedItem)
     {
-        droppedItem.ProcessDropAsync(_registry.CurrentNode.FullPath, _fileSystemService);
+        droppedItem.ProcessFileSystemDropAsync(_registry.CurrentNode.FullPath, _fileSystemService);
     }
 
     [RelayCommand]

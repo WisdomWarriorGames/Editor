@@ -15,7 +15,7 @@ public class DragSource : AvaloniaObject
 
     public static bool GetIsEnabled(AvaloniaObject element) =>
         element.GetValue(IsEnabledProperty);
-    
+
     private static Point _dragStartPoint;
     private const double DragThreshold = 3.0;
 
@@ -46,12 +46,10 @@ public class DragSource : AvaloniaObject
         if (sender is Control control && e.GetCurrentPoint(control).Properties.IsLeftButtonPressed)
         {
             _dragStartPoint = e.GetPosition(null);
-            
-            var listBox = FindAncestorOfType<ListBox>(control);
-            if (listBox?.SelectedItems != null && control.DataContext != null)
-            {
-                var selectedItems = listBox.SelectedItems.Cast<object>().ToList();
 
+            var selectedItems = GetSelectedItems(control)?.ToList();
+            if (selectedItems != null && control.DataContext != null)
+            {
                 if (selectedItems.Count > 1 && selectedItems.Contains(control.DataContext))
                 {
                     if ((e.KeyModifiers & (KeyModifiers.Control | KeyModifiers.Shift)) == 0)
@@ -67,27 +65,23 @@ public class DragSource : AvaloniaObject
     {
         if (sender is Control control && e.GetCurrentPoint(control).Properties.IsLeftButtonPressed)
         {
-            // 2. CALCULATE DISTANCE
             var currentPoint = e.GetPosition(null);
             var diff = _dragStartPoint - currentPoint;
             var distance = Math.Sqrt(diff.X * diff.X + diff.Y * diff.Y);
 
-            // 3. ONLY START DRAG IF WE MOVED PAST THE THRESHOLD
             if (distance < DragThreshold)
             {
-                return; 
+                return;
             }
 
             var data = new DataObject();
             if (control.DataContext != null)
             {
                 object payload = control.DataContext;
-                var listBox = FindAncestorOfType<ListBox>(control);
+                var selectedItems = GetSelectedItems(control)?.ToList();
 
-                if (listBox != null && listBox.SelectedItems != null)
+                if (selectedItems != null && selectedItems.Count > 1)
                 {
-                    var selectedItems = listBox.SelectedItems.Cast<object>().ToList();
-
                     if (selectedItems.Contains(control.DataContext))
                     {
                         payload = selectedItems;
@@ -98,6 +92,17 @@ public class DragSource : AvaloniaObject
                 await DragDrop.DoDragDrop(e, data, DragDropEffects.Move);
             }
         }
+    }
+
+    private static IEnumerable<object>? GetSelectedItems(Control control)
+    {
+        var listBox = FindAncestorOfType<ListBox>(control);
+        if (listBox != null) return listBox.SelectedItems?.Cast<object>();
+
+        var treeView = FindAncestorOfType<TreeView>(control);
+        if (treeView != null) return treeView.SelectedItems?.Cast<object>();
+
+        return null;
     }
 
     private static T? FindAncestorOfType<T>(Visual? visual) where T : Visual

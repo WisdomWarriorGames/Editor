@@ -1,14 +1,13 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using WisdomWarrior.Editor.AssetBrowser.Configurations;
-using WisdomWarrior.Editor.AssetBrowser.ViewModels;
 using WisdomWarrior.Editor.Core;
+using WisdomWarrior.Editor.Core.Services;
 using WisdomWarrior.Editor.FileSystem;
 using WisdomWarrior.Editor.Inspector.ViewModels;
 using WisdomWarrior.Editor.Menus.ViewModels;
 using WisdomWarrior.Editor.MonoGame.ViewModels;
 using WisdomWarrior.Editor.SceneList.ViewModels;
 using WisdomWarrior.Editor.Shell.ViewModels;
-using WisdomWarrior.Engine.Core;
 
 namespace WisdomWarrior.Editor.Shell.Configurations;
 
@@ -24,7 +23,7 @@ public static class Configurations
 
         services.AddSingleton<MainWindowViewModel>();
         services.AddSingleton<MonoGameViewModel>();
-        services.AddSingleton<SceneListViewModel>();
+        services.AddSingleton<SceneHierarchyViewModel>();
         services.AddSingleton<FileMenuViewModel>();
         services.AddSingleton<InspectorViewModel>();
 

@@ -183,7 +183,7 @@ public partial class AssetViewModel : ObservableObject, IDroppableAsset
     [RelayCommand(CanExecute = nameof(CanAcceptDrop))]
     private async Task AcceptDrop(object? droppedItem)
     {
-        droppedItem.ProcessDropAsync(FullPath, _fileSystemService);
+        droppedItem.ProcessFileSystemDropAsync(FullPath, _fileSystemService);
     }
 
     public async Task ProcessAsync(string destinationDirectory, IProgress<string>? progress = null)

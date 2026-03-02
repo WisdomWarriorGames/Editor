@@ -96,6 +96,7 @@ public class DropTarget : AvaloniaObject
         else
         {
             ((IPseudoClasses)control.Classes).Remove(":dragover");
+            e.DragEffects = DragDropEffects.None;
         }
     }
 
