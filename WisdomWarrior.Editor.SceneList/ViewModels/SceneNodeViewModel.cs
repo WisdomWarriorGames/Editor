@@ -72,4 +72,22 @@ public partial class SceneNodeViewModel : ObservableObject
     {
         _tracker.AddEntity(new GameEntity());
     }
+
+    private bool CanAcceptDrop(object? droppedItem)
+    {
+        if (droppedItem is not EntityViewModel) return false;
+
+        return true;
+    }
+
+    [RelayCommand(CanExecute = nameof(CanAcceptDrop))]
+    public void AcceptDrop(object? droppedObject)
+    {
+        if (droppedObject is not EntityViewModel draggedVm) return;
+
+        draggedVm.Tracker.EngineEntity.RemoveFromParent();
+        _tracker.AddEntity(draggedVm.Tracker.EngineEntity);
+
+        IsExpanded = true;
+    }
 }

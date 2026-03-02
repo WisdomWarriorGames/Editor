@@ -2,6 +2,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:viewModels="clr-namespace:WisdomWarrior.Editor.SceneList.ViewModels"
              xmlns:views="clr-namespace:WisdomWarrior.Editor.SceneList.Views"
+             xmlns:dragAndDrop="clr-namespace:WisdomWarrior.Editor.Core.DragAndDrop;assembly=WisdomWarrior.Editor.Core"
              x:DataType="viewModels:SceneHierarchyViewModel"
              x:Class="WisdomWarrior.Editor.SceneList.Views.SceneView">
 
@@ -9,45 +10,57 @@
         <TextBlock DockPanel.Dock="Top" Text="HIERARCHY" FontWeight="Bold" Opacity="0.5" Margin="0,0,0,5"
                    FontSize="11" />
 
-        <TreeView Name="HierarchyTree"
-                  ItemsSource="{Binding Scenes}"
-                  SelectionMode="Multiple"
-                  PointerPressed="OnBackgroundClicked">
+        <Border dragAndDrop:DropTarget.DropCommand="{Binding AcceptDropCommand}"
+                Background="Transparent" 
+                BorderThickness="2"
+                CornerRadius="4">
+            <TreeView Name="HierarchyTree"
+                      ItemsSource="{Binding Scenes}"
+                      SelectionMode="Multiple"
+                      PointerPressed="OnBackgroundClicked">
 
-            <TreeView.KeyBindings>
-                <KeyBinding Gesture="F2"
-                            Command="{Binding #HierarchyTree.SelectedItem.BeginEditCommand}"
-                            x:CompileBindings="False" />
-                
-                <KeyBinding Gesture="Delete"
-                            Command="{Binding #HierarchyTree.SelectedItem.DeleteCommand}"
-                            x:CompileBindings="False" />
-            </TreeView.KeyBindings>
+                <TreeView.KeyBindings>
+                    <KeyBinding Gesture="F2"
+                                Command="{Binding #HierarchyTree.SelectedItem.BeginEditCommand}"
+                                x:CompileBindings="False" />
 
-            <TreeView.Styles>
-                <Style Selector="TreeViewItem">
-                    <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
-                    <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
+                    <KeyBinding Gesture="Delete"
+                                Command="{Binding #HierarchyTree.SelectedItem.DeleteCommand}"
+                                x:CompileBindings="False" />
+                </TreeView.KeyBindings>
 
-                    <Setter Property="Padding" Value="0" />
-                    <Setter Property="HorizontalAlignment" Value="Stretch" />
-                </Style>
-            </TreeView.Styles>
+                <TreeView.Styles>
+                    <Style Selector="TreeViewItem">
+                        <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
+                        <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
 
-            <TreeView.DataTemplates>
+                        <Setter Property="Padding" Value="0" />
+                        <Setter Property="HorizontalAlignment" Value="Stretch" />
+                    </Style>
+                    <Style Selector="TreeView:dragover">
+                        <Setter Property="BorderBrush" Value="#2196F3" />
+                    </Style>
+                </TreeView.Styles>
+
+                <TreeView.DataTemplates>
 
 
-                <TreeDataTemplate DataType="viewModels:SceneNodeViewModel" ItemsSource="{Binding Children}">
-                    <views:SceneNode />
-                </TreeDataTemplate>
+                    <TreeDataTemplate DataType="viewModels:SceneNodeViewModel" ItemsSource="{Binding Children}">
+                        <views:SceneNode />
+                    </TreeDataTemplate>
 
-                <TreeDataTemplate DataType="viewModels:EntityViewModel" ItemsSource="{Binding Children}">
-                    <views:EntityNode />
-                </TreeDataTemplate>
+                    <TreeDataTemplate DataType="viewModels:EntityViewModel" ItemsSource="{Binding Children}">
+                        <views:EntityNode />
+                    </TreeDataTemplate>
 
-            </TreeView.DataTemplates>
+                </TreeView.DataTemplates>
 
-        </TreeView>
+            </TreeView>
+        </Border>
     </DockPanel>
-
+    <UserControl.Styles>
+        <Style Selector="Border:dragover">
+            <Setter Property="BorderBrush" Value="#2196F3" />
+        </Style>
+    </UserControl.Styles>
 </UserControl>

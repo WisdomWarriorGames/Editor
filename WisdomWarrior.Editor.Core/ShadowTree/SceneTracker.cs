@@ -24,6 +24,7 @@ public class SceneTracker
     public void AddEntity(GameEntity entity)
     {
         if (_activeScene == null) return;
+        if (_activeScene.Entities.Contains(entity)) return;
         _activeScene.AddEntity(entity);
 
         Update();

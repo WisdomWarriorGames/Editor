@@ -90,4 +90,22 @@ public partial class SceneHierarchyViewModel : ObservableObject
             ResetEntityRecursive(child);
         }
     }
+    
+    private bool CanAcceptDrop(object? droppedItem)
+    {
+        if (droppedItem is not EntityViewModel) return false;
+
+        return true;
+    }
+
+    [RelayCommand(CanExecute = nameof(CanAcceptDrop))]
+    public void AcceptDrop(object? droppedObject)
+    {
+        if (droppedObject is not EntityViewModel draggedVm) return;
+
+        draggedVm.Tracker.EngineEntity.RemoveFromParent();
+        _sceneTracker.AddEntity(draggedVm.Tracker.EngineEntity);
+
+        draggedVm.IsExpanded = true;
+    }
 }
