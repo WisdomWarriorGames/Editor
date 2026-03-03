@@ -9,7 +9,7 @@ public partial class InspectorViewModel : ObservableObject
 {
     private readonly SelectionManager _selectionManager;
     [ObservableProperty] private ObservableObject? _currentContent;
-    [ObservableProperty] private string _name = "No Selection";
+    [ObservableProperty] private string? _name = "No Selection";
 
     public InspectorViewModel(SelectionManager selectionManager)
     {
@@ -29,7 +29,7 @@ public partial class InspectorViewModel : ObservableObject
         (CurrentContent, Name) = obj switch
         {
             EntityTracker entity => (new EntityInspectorViewModel(entity), entity.Name),
-            FileSystemNode node => (null, node.Name),
+            FileSystemNode node => (null, node.FileNameWithExtension),
 
             _ => (null, "No Selection")
         };

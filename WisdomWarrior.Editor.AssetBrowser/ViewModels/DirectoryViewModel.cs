@@ -33,20 +33,6 @@ public partial class DirectoryViewModel : ObservableObject
         _fileSystemService = fileSystemService;
         _selectionManager = selectionManager;
         RootDir = "Assets";
-
-        SelectedItems.CollectionChanged += OnCollectionChanged;
-    }
-
-    private void OnCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
-    {
-        if (sender is not IEnumerable<AssetViewModel> assets) return;
-        if (assets.Count() > 1) return;
-
-        var asset = assets.FirstOrDefault();
-
-        if (asset == null) return;
-
-        _selectionManager.SetSelection(asset.Node);
     }
 
     public void Initialize(FileSystemRegistry registry)
@@ -80,7 +66,7 @@ public partial class DirectoryViewModel : ObservableObject
 
             foreach (var child in sortedChildren)
             {
-                var vm = new AssetViewModel(child, _fileSystemService);
+                var vm = new AssetViewModel(child, _fileSystemService, _selectionManager);
 
                 Dispatcher.UIThread.Post(() =>
                 {
