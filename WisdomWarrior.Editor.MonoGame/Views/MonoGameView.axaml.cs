@@ -14,47 +14,49 @@ public partial class MonoGameView : UserControl
 
     protected override void OnPointerMoved(PointerEventArgs e)
     {
-        var point = e.GetPosition(this);
+        if (DataContext is not MonoGameViewModel viewModel) return;
 
-        var viewModel = DataContext as MonoGameViewModel;
-        viewModel.CurrentGame.LocalMousePosition = new Vector2((float)point.X, (float)point.Y);
-        viewModel.CurrentGame.CursorScale = (float)(VisualRoot?.RenderScaling ?? 1.0f);
-        // viewModel.CurrentGame.UpdateObjectPosition();
-        UpdateEditorCursor(viewModel);
+        var input = viewModel.InputService;
+
+        var point = e.GetPosition(this);
+        var newPosition = new Vector2((float)point.X, (float)point.Y);
+
+        input.MousePosition = newPosition;
     }
 
     protected override void OnPointerPressed(PointerPressedEventArgs e)
     {
-        var viewModel = DataContext as MonoGameViewModel;
-        if (viewModel == null) return;
+        if (DataContext is not MonoGameViewModel viewModel) return;
+        var input = viewModel.InputService;
 
-        // 1. Grab the exact position right as the click happens
-        var point = e.GetPosition(this);
-        viewModel.CurrentGame.LocalMousePosition = new Vector2((float)point.X, (float)point.Y);
-
-        // 2. Start dragging
-        var properties = e.GetCurrentPoint(this).Properties;
-        if (properties.IsLeftButtonPressed)
+        var props = e.GetCurrentPoint(this).Properties;
+        if (props.IsLeftButtonPressed)
         {
-            viewModel.CurrentGame.StartDragging();
+            input.IsLeftMouseDown = true;
+            Cursor = new Cursor(StandardCursorType.None);
+        }
+
+        if (props.IsRightButtonPressed)
+        {
+            input.IsRightMouseDown = true;
         }
     }
 
     protected override void OnPointerReleased(PointerReleasedEventArgs e)
     {
-        var viewModel = DataContext as MonoGameViewModel;
-        viewModel.CurrentGame.StopDragging();
-    }
+        if (DataContext is not MonoGameViewModel viewModel) return;
+        var input = viewModel.InputService;
 
-    private void UpdateEditorCursor(MonoGameViewModel viewModel)
-    {
-        if (viewModel.CurrentGame.IsHovering)
+        var props = e.GetCurrentPoint(this).Properties;
+        if (!props.IsLeftButtonPressed)
         {
-            this.Cursor = new Cursor(StandardCursorType.Hand);
+            input.IsLeftMouseDown = false;
+            Cursor = new Cursor(StandardCursorType.Arrow);
         }
-        else
+
+        if (!props.IsRightButtonPressed)
         {
-            this.Cursor = new Cursor(StandardCursorType.Arrow);
+            input.IsRightMouseDown = false;
         }
     }
 }
