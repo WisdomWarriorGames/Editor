@@ -1,7 +1,6 @@
 ﻿<UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:viewModels="clr-namespace:WisdomWarrior.Editor.Inspector.ViewModels"
-             xmlns:converters="clr-namespace:WisdomWarrior.Editor.Inspector.Converters"
              xmlns:suki="https://github.com/kikipoulet/SukiUI"
              xmlns:views="clr-namespace:WisdomWarrior.Editor.Inspector.Views"
              x:DataType="viewModels:EntityInspectorViewModel"
@@ -60,26 +59,6 @@
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
-
-                <!-- <StackPanel> -->
-                <!--     <Button Content="Add Component" -->
-                <!--             Classes="Flat Primary" -->
-                <!--             HorizontalAlignment="Stretch" -->
-                <!--             IsVisible="{Binding Entity, Converter={x:Static ObjectConverters.IsNotNull}}"> -->
-                <!--         <Button.Flyout> -->
-                <!--             <MenuFlyout ItemsSource="{Binding AvailableComponentNames}"> -->
-                <!--                 <MenuFlyout.ItemContainerTheme> -->
-                <!--                     <ControlTheme TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}"> -->
-                <!--                         <Setter Property="Header" Value="{Binding}" /> -->
-                <!--                         <Setter Property="Command" -->
-                <!--                                 Value="{Binding $parent[UserControl].DataContext.AddComponentCommand}" /> -->
-                <!--                         <Setter Property="CommandParameter" Value="{Binding}" /> -->
-                <!--                     </ControlTheme> -->
-                <!--                 </MenuFlyout.ItemContainerTheme> -->
-                <!--             </MenuFlyout> -->
-                <!--         </Button.Flyout> -->
-                <!--     </Button> -->
-                <!-- </StackPanel> -->
             </StackPanel>
         </ScrollViewer>
     </Grid>

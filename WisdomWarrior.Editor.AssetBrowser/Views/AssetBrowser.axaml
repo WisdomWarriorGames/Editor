@@ -4,7 +4,7 @@
              xmlns:views="clr-namespace:WisdomWarrior.Editor.AssetBrowser.Views"
              x:Class="WisdomWarrior.Editor.AssetBrowser.Views.AssetBrowser">
 
-    <Grid ColumnDefinitions="1*, 4, 4*">
+    <Grid ColumnDefinitions="1*, 4, 5*">
         <suki:GlassCard Grid.Column="0"
                         Padding="0"
                         CornerRadius="4"

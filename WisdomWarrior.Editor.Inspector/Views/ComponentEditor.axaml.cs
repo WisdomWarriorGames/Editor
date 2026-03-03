@@ -1,5 +1,6 @@
 ﻿using System.Numerics;
 using Avalonia.Controls;
+using Avalonia.Layout;
 using Avalonia.Media;
 using WisdomWarrior.Editor.Core.ShadowTree;
 using WisdomWarrior.Editor.Inspector.Helpers;
@@ -35,8 +36,22 @@ public partial class ComponentEditor : UserControl
 
     private Control CreatePropertyRow(PropertyTracker prop)
     {
-        var panel = new StackPanel { Spacing = 2 };
-        panel.Children.Add(new TextBlock { Text = prop.Name, Opacity = 0.5, FontSize = 10 });
+        var grid = new Grid
+        {
+            ColumnDefinitions = new ColumnDefinitions("100, *"),
+            HorizontalAlignment = HorizontalAlignment.Stretch
+        };
+
+        var label = new TextBlock
+        {
+            Text = prop.Name,
+            Opacity = 0.5,
+            FontSize = 10,
+            VerticalAlignment = VerticalAlignment.Center
+        };
+
+        Grid.SetColumn(label, 0);
+        grid.Children.Add(label);
 
         var editor = prop.PropertyType switch
         {
@@ -46,7 +61,8 @@ public partial class ComponentEditor : UserControl
             _ => new TextBlock { Text = "Unsupported Type", FontStyle = FontStyle.Italic }
         };
 
-        panel.Children.Add(editor);
-        return panel;
+        Grid.SetColumn(editor, 1);
+        grid.Children.Add(editor);
+        return grid;
     }
 }

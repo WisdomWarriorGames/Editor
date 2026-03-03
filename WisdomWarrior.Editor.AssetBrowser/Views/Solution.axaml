@@ -24,7 +24,7 @@
             
             <TreeView.DataTemplates>
                 <TreeDataTemplate DataType="models:FileSystemNode" ItemsSource="{Binding Folders}">
-                    <TextBlock Text="{Binding Name}" />
+                    <TextBlock FontSize="10" Text="{Binding Name}" />
                 </TreeDataTemplate>
             </TreeView.DataTemplates>
         </TreeView>
