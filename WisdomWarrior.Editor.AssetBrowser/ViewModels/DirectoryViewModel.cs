@@ -1,12 +1,9 @@
 ﻿using System.Collections.ObjectModel;
-using System.Collections.Specialized;
 using System.Diagnostics;
 using Avalonia.Platform.Storage;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using SukiUI.Toasts;
-using WisdomWarrior.Editor.Core;
 using WisdomWarrior.Editor.Core.Helpers;
 using WisdomWarrior.Editor.Core.Services;
 using WisdomWarrior.Editor.FileSystem;
