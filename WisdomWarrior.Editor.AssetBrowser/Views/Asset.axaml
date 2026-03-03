@@ -6,10 +6,10 @@
              x:DataType="viewModels:AssetViewModel"
              x:Class="WisdomWarrior.Editor.AssetBrowser.Views.Asset">
     <Grid>
-        <suki:GlassCard Width="80" 
+        <suki:GlassCard Width="80"
                         Height="65"
-                        Padding="5" 
-                        Margin="2" 
+                        Padding="5"
+                        Margin="2"
                         IsAnimated="False"
                         CornerRadius="4"
                         BorderThickness="2"
@@ -30,6 +30,7 @@
                     <MenuItem Header="Rename (F2)" Command="{Binding BeginEditCommand}" />
                     <MenuItem Header="Delete" Command="{Binding DeleteCommand}" />
                     <MenuItem Header="Open in Explorer" Command="{Binding OpenInExplorerCommand}" />
+                    <MenuItem Header="Properties" Command="{Binding ViewPropertiesCommand}" />
                 </ContextMenu>
             </suki:GlassCard.ContextMenu>
 
@@ -40,7 +41,7 @@
                                IsVisible="{Binding !HasThumbnail}"
                                VerticalAlignment="Center"
                                HorizontalAlignment="Center" />
-                    
+
                     <Image Source="{Binding Thumbnail}"
                            IsVisible="{Binding HasThumbnail}"
                            Width="32"
@@ -57,7 +58,7 @@
                            FontSize="8"
                            TextWrapping="Wrap"
                            TextTrimming="CharacterEllipsis"
-                           MaxHeight="20"/>
+                           MaxHeight="20" />
 
                 <TextBox x:Name="NameTextBox"
                          Text="{Binding TempName}"
@@ -77,7 +78,7 @@
             </StackPanel>
         </suki:GlassCard>
     </Grid>
-    
+
     <UserControl.Styles>
         <Style Selector="suki|GlassCard:dragover">
             <Setter Property="BorderBrush" Value="#2196F3" />

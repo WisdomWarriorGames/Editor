@@ -8,7 +8,6 @@ public class FileSystemRegistry : IDisposable
     private readonly FileSystemService _fileSystemService;
     private readonly object _lock = new();
     private FileSystemWatcher? _watcher;
-    private FileSystemNode _currentNode;
     private FileSystemNode _rootNode;
 
     public string RootDir { get; private set; }
@@ -24,10 +23,10 @@ public class FileSystemRegistry : IDisposable
 
     public FileSystemNode CurrentNode
     {
-        get => _currentNode;
+        get;
         private set
         {
-            _currentNode = value;
+            field = value;
             RequestUIUpdate();
         }
     }

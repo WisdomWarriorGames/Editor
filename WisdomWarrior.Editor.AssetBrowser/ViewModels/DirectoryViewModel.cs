@@ -4,9 +4,8 @@ using Avalonia.Platform.Storage;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using SukiUI.Toasts;
-using WisdomWarrior.Editor.Core;
 using WisdomWarrior.Editor.Core.Helpers;
+using WisdomWarrior.Editor.Core.Services;
 using WisdomWarrior.Editor.FileSystem;
 using WisdomWarrior.Editor.FileSystem.Helpers;
 
@@ -17,6 +16,7 @@ public partial class DirectoryViewModel : ObservableObject
     private const int MAX_BREADCRUMBS = 4;
 
     private readonly FileSystemService _fileSystemService;
+    private readonly SelectionManager _selectionManager;
     private FileSystemRegistry _registry;
 
     [ObservableProperty] private string _rootDir;
@@ -25,9 +25,10 @@ public partial class DirectoryViewModel : ObservableObject
     public ObservableCollection<AssetViewModel> Assets { get; } = [];
     public ObservableCollection<BreadcrumbViewModel> Breadcrumbs { get; set; } = new();
 
-    public DirectoryViewModel(FileSystemService fileSystemService)
+    public DirectoryViewModel(FileSystemService fileSystemService, SelectionManager selectionManager)
     {
         _fileSystemService = fileSystemService;
+        _selectionManager = selectionManager;
         RootDir = "Assets";
     }
 
@@ -49,10 +50,10 @@ public partial class DirectoryViewModel : ObservableObject
     {
         var activeNode = _registry.CurrentNode;
         if (activeNode == null) return;
-        
+
         Assets.Clear();
         SetupBreadcrumbs();
-        
+
         await Task.Run(() =>
         {
             var sortedChildren = activeNode.Children
@@ -62,9 +63,9 @@ public partial class DirectoryViewModel : ObservableObject
 
             foreach (var child in sortedChildren)
             {
-                var vm = new AssetViewModel(child, _fileSystemService);
-                
-                Dispatcher.UIThread.Post(() => 
+                var vm = new AssetViewModel(child, _fileSystemService, _selectionManager);
+
+                Dispatcher.UIThread.Post(() =>
                 {
                     if (_registry.CurrentNode == activeNode)
                     {

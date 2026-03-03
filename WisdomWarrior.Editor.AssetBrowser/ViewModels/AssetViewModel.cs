@@ -1,14 +1,12 @@
 ﻿using System.Diagnostics;
 using Avalonia.Media.Imaging;
-using Avalonia.Platform.Storage;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using SukiUI.Toasts;
 using WisdomWarrior.Editor.AssetBrowser.Helpers;
-using WisdomWarrior.Editor.Core;
 using WisdomWarrior.Editor.Core.Helpers;
 using WisdomWarrior.Editor.Core.Models;
+using WisdomWarrior.Editor.Core.Services;
 using WisdomWarrior.Editor.FileSystem;
 using WisdomWarrior.Editor.FileSystem.Helpers;
 using WisdomWarrior.Editor.FileSystem.Models;
@@ -17,7 +15,9 @@ namespace WisdomWarrior.Editor.AssetBrowser.ViewModels;
 
 public partial class AssetViewModel : ObservableObject, IDroppableAsset
 {
+    public FileSystemNode? Node { get; }
     private readonly FileSystemService _fileSystemService;
+    private readonly SelectionManager? _selectionManager;
     private readonly Action<AssetViewModel> _cancelEdit;
 
     [ObservableProperty] private bool _isSelected = false;
@@ -55,9 +55,11 @@ public partial class AssetViewModel : ObservableObject, IDroppableAsset
         _ => false
     };
 
-    public AssetViewModel(FileSystemNode node, FileSystemService fileSystemService)
+    public AssetViewModel(FileSystemNode node, FileSystemService fileSystemService, SelectionManager selectionManager)
     {
+        Node = node;
         _fileSystemService = fileSystemService;
+        _selectionManager = selectionManager;
 
         Name = node.Name;
         Extension = node.Extension;
@@ -78,6 +80,7 @@ public partial class AssetViewModel : ObservableObject, IDroppableAsset
         IsNew = true;
 
         ValidateName(name);
+        InitializeThumbnail();
     }
 
     private void InitializeThumbnail()
@@ -264,5 +267,14 @@ public partial class AssetViewModel : ObservableObject, IDroppableAsset
             UseShellExecute = true,
             Verb = "open"
         });
+    }
+
+    [RelayCommand]
+    public void ViewProperties()
+    {
+        if (_selectionManager == null) return;
+        if (Node == null) return;
+
+        _selectionManager.SetSelection(Node);
     }
 }

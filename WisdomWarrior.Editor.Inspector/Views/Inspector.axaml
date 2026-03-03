@@ -1,90 +1,31 @@
 ﻿<UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:viewModels="clr-namespace:WisdomWarrior.Editor.Inspector.ViewModels"
-             xmlns:conv="clr-namespace:WisdomWarrior.Editor.Inspector.Converters"
-             xmlns:suki="https://github.com/kikipoulet/SukiUI"
              xmlns:views="clr-namespace:WisdomWarrior.Editor.Inspector.Views"
              x:Class="WisdomWarrior.Editor.Inspector.Views.Inspector"
              x:DataType="viewModels:InspectorViewModel">
-    <UserControl.Resources>
-        <ResourceDictionary>
-            <ResourceDictionary.MergedDictionaries>
-                <ResourceInclude Source="avares://WisdomWarrior.Editor.Inspector/Resources/Vector2Template.axaml" />
-                <ResourceInclude Source="avares://WisdomWarrior.Editor.Inspector/Resources/FloatTemplate.axaml" />
-            </ResourceDictionary.MergedDictionaries>
-
-            <conv:TypeToNameConverter x:Key="TypeToNameConverter" />
-        </ResourceDictionary>
-    </UserControl.Resources>
-    <Grid RowDefinitions="Auto, *">
+    <StackPanel>
         <TextBlock FontSize="11" FontWeight="Bold" Opacity="0.5" Margin="0,0,0,10">
             <Run Text="INSPECTOR" />
             <Run Text=" (" />
-            <Run Text="{Binding SelectedEntity.Name, FallbackValue='None'}" />
+            <Run Text="{Binding Name, FallbackValue='None'}" />
             <Run Text=")" />
         </TextBlock>
+        <ContentControl Content="{Binding CurrentContent}">
+            <ContentControl.DataTemplates>
 
-        <ScrollViewer Grid.Row="1">
-            <StackPanel Spacing="15">
+                <DataTemplate DataType="{x:Type viewModels:EntityInspectorViewModel}">
+                    <views:EntityInspector />
+                </DataTemplate>
 
-                <suki:GlassCard IsVisible="{Binding SelectedEntity, Converter={x:Static ObjectConverters.IsNull}}"
-                                VerticalAlignment="Center" HorizontalAlignment="Stretch">
-                    <TextBlock Text="Select an entity to view components."
-                               HorizontalAlignment="Center"
-                               Classes="Description" />
-                </suki:GlassCard>
+                <!-- <DataTemplate DataType="{x:Type viewModels:AssetInspectorViewModel}"> -->
+                <!--     <StackPanel> -->
+                <!--         <TextBlock Text="Asset Properties" FontWeight="Bold" /> -->
+                <!--         <TextBlock Text="{Binding File.FullPath}" /> -->
+                <!--     </StackPanel> -->
+                <!-- </DataTemplate> -->
 
-                <ItemsControl ItemsSource="{Binding Components}">
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <suki:GlassCard Margin="0,0,0,15" IsAnimated="False">
-                                <StackPanel>
-                                    <Grid ColumnDefinitions="Auto, *, Auto" Margin="0,0,0,10">
-                                        <CheckBox Grid.Column="0"
-                                                  IsChecked="{Binding Active}"
-                                                  Margin="0,0,8,0"
-                                                  Command="{Binding #InspectorRoot.DataContext.ComponentToggledCommand}"
-                                                  CommandParameter="{Binding}"
-                                                  VerticalAlignment="Center" />
-
-                                        <TextBlock Grid.Column="1"
-                                                   Text="{Binding Converter={StaticResource TypeToNameConverter}}"
-                                                   FontWeight="Bold"
-                                                   FontSize="12"
-                                                   VerticalAlignment="Center" />
-                                    </Grid>
-
-                                    <Border Height="1" Background="{DynamicResource SukiBorderBrush}" Opacity="0.5"
-                                            Margin="0,0,0,12" />
-
-                                    <views:ComponentEditor DataContext="{Binding}" />
-
-                                </StackPanel>
-                            </suki:GlassCard>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-
-                <StackPanel>
-                    <Button Content="Add Component"
-                            Classes="Flat Primary"
-                            HorizontalAlignment="Stretch"
-                            IsVisible="{Binding SelectedEntity, Converter={x:Static ObjectConverters.IsNotNull}}">
-                        <Button.Flyout>
-                            <MenuFlyout ItemsSource="{Binding AvailableComponentNames}">
-                                <MenuFlyout.ItemContainerTheme>
-                                    <ControlTheme TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
-                                        <Setter Property="Header" Value="{Binding}" />
-                                        <Setter Property="Command"
-                                                Value="{Binding $parent[UserControl].DataContext.AddComponentCommand}" />
-                                        <Setter Property="CommandParameter" Value="{Binding}" />
-                                    </ControlTheme>
-                                </MenuFlyout.ItemContainerTheme>
-                            </MenuFlyout>
-                        </Button.Flyout>
-                    </Button>
-                </StackPanel>
-            </StackPanel>
-        </ScrollViewer>
-    </Grid>
+            </ContentControl.DataTemplates>
+        </ContentControl>
+    </StackPanel>
 </UserControl>

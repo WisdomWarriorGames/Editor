@@ -1,49 +1,37 @@
-﻿using System.Collections.ObjectModel;
-using System.ComponentModel;
-using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
-using WisdomWarrior.Editor.Core;
-using WisdomWarrior.Engine.Core;
-using WisdomWarrior.Engine.Core.Components;
-using Component = WisdomWarrior.Engine.Core.Component;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using WisdomWarrior.Editor.Core.Services;
+using WisdomWarrior.Editor.Core.ShadowTree;
+using WisdomWarrior.Editor.FileSystem.Models;
 
 namespace WisdomWarrior.Editor.Inspector.ViewModels;
 
 public partial class InspectorViewModel : ObservableObject
 {
-    private readonly EditorContext _context;
+    private readonly SelectionManager _selectionManager;
+    [ObservableProperty] private ObservableObject? _currentContent;
+    [ObservableProperty] private string? _name = "No Selection";
 
-    public GameEntity? SelectedEntity => _context.SelectedEntity;
-    public ObservableCollection<Component> Components => SelectedEntity?.Components ?? new();
-    public IEnumerable<string> AvailableComponentNames => ComponentRegistry.GetRegisteredKeys();
-
-    public InspectorViewModel(EditorContext context)
+    public InspectorViewModel(SelectionManager selectionManager)
     {
-        _context = context;
-
-        _context.PropertyChanged += OnPropertyChanged;
+        _selectionManager = selectionManager;
+        _selectionManager.OnSelectionChanged += OnSelectionChanged;
     }
 
-    private void OnPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    private void OnSelectionChanged(object? obj)
     {
-        if (e.PropertyName == nameof(EditorContext.SelectedEntity))
+        if (obj == null)
         {
-            OnPropertyChanged(nameof(SelectedEntity));
-            OnPropertyChanged(nameof(Components));
-        }
-    }
-
-    [RelayCommand]
-    private void AddComponent(string typeName)
-    {
-        if (SelectedEntity == null) return;
-        
-        var newComponent = ComponentRegistry.CreateComponent(typeName);
-        if (newComponent != null)
-        {
-            SelectedEntity.AddComponent(newComponent);
+            CurrentContent = null;
+            Name = "No Selection";
+            return;
         }
 
-        OnPropertyChanged(nameof(Components));
+        (CurrentContent, Name) = obj switch
+        {
+            EntityTracker entity => (new EntityInspectorViewModel(entity), entity.Name),
+            FileSystemNode node => (null, node.FileNameWithExtension),
+
+            _ => (null, "No Selection")
+        };
     }
 }

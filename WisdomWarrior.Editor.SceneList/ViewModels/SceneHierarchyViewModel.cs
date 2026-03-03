@@ -6,7 +6,6 @@ using WisdomWarrior.Editor.Core.Helpers;
 using WisdomWarrior.Editor.Core.Services;
 using WisdomWarrior.Editor.Core.ShadowTree;
 using WisdomWarrior.Editor.SceneList.Helpers;
-using WisdomWarrior.Engine.Core;
 
 namespace WisdomWarrior.Editor.SceneList.ViewModels;
 
@@ -14,23 +13,34 @@ public partial class SceneHierarchyViewModel : ObservableObject
 {
     private readonly SceneTracker _sceneTracker;
     private readonly CurrentSceneManager _sceneManager;
+    private readonly SelectionManager _selectionManager;
 
     public ObservableCollection<SceneNodeViewModel> Scenes { get; } = new();
 
     private SceneNodeViewModel _activeSceneNode;
 
-    public SceneHierarchyViewModel(CurrentSceneManager sceneManager)
+    public SceneHierarchyViewModel(CurrentSceneManager sceneManager, SelectionManager selectionManager)
     {
         _sceneManager = sceneManager;
+        _selectionManager = selectionManager;
         _sceneTracker = _sceneManager.Tracker;
 
         _sceneTracker.OnSceneModified += OnSceneModified;
         _sceneManager.CurrentSceneReady += OnSceneReady;
+        _selectionManager.OnSelectionChanged += OnSelectionChanged;
+    }
+
+    private void OnSelectionChanged(object? obj)
+    {
+        if (obj is not EntityTracker && obj is not SceneTracker)
+        {
+            Dispatcher.UIThread.Post(ResetChanges);
+        }
     }
 
     private void OnSceneReady()
     {
-        _activeSceneNode = new SceneNodeViewModel(_sceneTracker);
+        _activeSceneNode = new SceneNodeViewModel(_sceneTracker, _selectionManager);
         Scenes.Add(_activeSceneNode);
         Dispatcher.UIThread.Post(SyncRootEntities);
     }
@@ -58,7 +68,7 @@ public partial class SceneHierarchyViewModel : ObservableObject
             }
             else
             {
-                rootList.Insert(i, new EntityViewModel(rootTracker, _sceneTracker));
+                rootList.Insert(i, new EntityViewModel(rootTracker, _sceneTracker, _selectionManager));
             }
         }
 
@@ -80,6 +90,11 @@ public partial class SceneHierarchyViewModel : ObservableObject
                 ResetEntityRecursive(entity);
             }
         }
+    }
+
+    public void ClearSelection()
+    {
+        _selectionManager.Clear();
     }
 
     private void ResetEntityRecursive(EntityViewModel entity)

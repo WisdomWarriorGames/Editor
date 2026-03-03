@@ -27,9 +27,8 @@ public static class Configurations
         services.AddSingleton<FileMenuViewModel>();
         services.AddSingleton<InspectorViewModel>();
 
-        services.AddSingleton<EditorContext>();
-
         services.AddSingleton<CurrentSceneManager>();
+        services.AddSingleton<SelectionManager>();
 
         services.ConfigureAssetBrowser();
 

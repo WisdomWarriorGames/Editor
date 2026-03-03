@@ -17,6 +17,7 @@ public class EntityTracker
     public GameEntity EngineEntity => _entity;
     public IReadOnlyList<EntityTracker> TrackedChildren => _children;
     public IReadOnlyList<ComponentTracker> TrackedComponents => _components;
+    public string? Name => _lastName;
 
     public EntityTracker(GameEntity entity)
     {
