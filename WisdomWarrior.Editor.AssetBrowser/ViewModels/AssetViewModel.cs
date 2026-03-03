@@ -17,6 +17,7 @@ namespace WisdomWarrior.Editor.AssetBrowser.ViewModels;
 
 public partial class AssetViewModel : ObservableObject, IDroppableAsset
 {
+    public FileSystemNode Node { get; }
     private readonly FileSystemService _fileSystemService;
     private readonly Action<AssetViewModel> _cancelEdit;
 
@@ -57,6 +58,7 @@ public partial class AssetViewModel : ObservableObject, IDroppableAsset
 
     public AssetViewModel(FileSystemNode node, FileSystemService fileSystemService)
     {
+        Node = node;
         _fileSystemService = fileSystemService;
 
         Name = node.Name;

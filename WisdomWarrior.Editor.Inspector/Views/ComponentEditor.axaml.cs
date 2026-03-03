@@ -1,16 +1,8 @@
 ﻿using System.Numerics;
-using System.Reflection;
-using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Data;
-using Avalonia.Markup.Xaml;
-using Avalonia.Markup.Xaml.Templates;
 using Avalonia.Media;
-using Avalonia.Threading;
 using WisdomWarrior.Editor.Core.ShadowTree;
 using WisdomWarrior.Editor.Inspector.Helpers;
-using WisdomWarrior.Editor.Inspector.Models;
-using WisdomWarrior.Engine.Core;
 using WisdomWarrior.Engine.Core.Attributes;
 
 namespace WisdomWarrior.Editor.Inspector.Views;

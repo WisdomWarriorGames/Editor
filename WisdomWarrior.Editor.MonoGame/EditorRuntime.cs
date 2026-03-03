@@ -98,24 +98,31 @@ public class EditorRuntime : Game
     {
         GraphicsDevice.Clear(Color.CornflowerBlue);
 
-        _spriteBatch.Begin(blendState: BlendState.NonPremultiplied);
-        _editorViewportRenderer?.Draw(_spriteBatch, SelectedEntity);
-        // _editorViewportRenderer?.Draw(_spriteBatch, LocalMousePosition, IsHovering, CursorScale);
-        _spriteBatch.End();
-
-        _spriteBatch.Begin(blendState: BlendState.AlphaBlend);
-        var font = _fontSystem.GetFont(18); // Get a font at size 18
-        _spriteBatch.DrawString(font, $"Mouse: {LocalMousePosition.ToString()}", new Vector2(10, 10), Color.White);
-        if (SelectedEntity != null)
-        {
-            var transform = SelectedEntity.Components.OfType<Transform>().FirstOrDefault();
-            var vec = new Vector2(transform.Position.X, transform.Position.Y);
-            _spriteBatch.DrawString(font, $"Entity: {vec.ToString()}", new Vector2(10, 30), Color.White);
-            var diff = LocalMousePosition - vec;
-            _spriteBatch.DrawString(font, $"Difference: {diff.ToString()}", new Vector2(10, 50), Color.White);
-        }
-
-        _spriteBatch.End();
+        // if (SelectedEntity == null) return;
+        //
+        // _spriteBatch.Begin(blendState: BlendState.NonPremultiplied);
+        //
+        // _editorViewportRenderer?.Draw(_spriteBatch, SelectedEntity);
+        // // _editorViewportRenderer?.Draw(_spriteBatch, LocalMousePosition, IsHovering, CursorScale);
+        //
+        // _spriteBatch.End();
+        //
+        // _spriteBatch.Begin(blendState: BlendState.AlphaBlend);
+        //
+        // var font = _fontSystem.GetFont(18); // Get a font at size 18
+        // _spriteBatch.DrawString(font, $"Mouse: {LocalMousePosition.ToString()}", new Vector2(10, 10), Color.White);
+        // if (SelectedEntity != null)
+        // {
+        //     var transform = SelectedEntity.Components.OfType<Transform>().FirstOrDefault();
+        //     if (transform == null) return;
+        //
+        //     var vec = new Vector2(transform.Position.X, transform.Position.Y);
+        //     _spriteBatch.DrawString(font, $"Entity: {vec.ToString()}", new Vector2(10, 30), Color.White);
+        //     var diff = LocalMousePosition - vec;
+        //     _spriteBatch.DrawString(font, $"Difference: {diff.ToString()}", new Vector2(10, 50), Color.White);
+        // }
+        //
+        // _spriteBatch.End();
 
         base.Draw(gameTime);
     }

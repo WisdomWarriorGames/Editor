@@ -1,19 +1,15 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using WisdomWarrior.Editor.Core.Services;
 using WisdomWarrior.Editor.Core.ShadowTree;
-using WisdomWarrior.Engine.Core.Components;
+using WisdomWarrior.Editor.FileSystem.Models;
 
 namespace WisdomWarrior.Editor.Inspector.ViewModels;
 
 public partial class InspectorViewModel : ObservableObject
 {
     private readonly SelectionManager _selectionManager;
-
-    [ObservableProperty] private EntityTracker? _selectedEntity;
-
-    public IEnumerable<ComponentTracker> Components => SelectedEntity?.TrackedComponents ?? Enumerable.Empty<ComponentTracker>();
-
-    public IEnumerable<string> AvailableComponentNames => ComponentRegistry.GetRegisteredKeys();
+    [ObservableProperty] private ObservableObject? _currentContent;
+    [ObservableProperty] private string _name = "No Selection";
 
     public InspectorViewModel(SelectionManager selectionManager)
     {
@@ -25,14 +21,17 @@ public partial class InspectorViewModel : ObservableObject
     {
         if (obj == null)
         {
-            SelectedEntity = null;
+            CurrentContent = null;
+            Name = "No Selection";
+            return;
         }
 
-        if (obj is EntityTracker entityTracker)
+        (CurrentContent, Name) = obj switch
         {
-            SelectedEntity = entityTracker;
-        }
+            EntityTracker entity => (new EntityInspectorViewModel(entity), entity.Name),
+            FileSystemNode node => (null, node.Name),
 
-        OnPropertyChanged(nameof(Components));
+            _ => (null, "No Selection")
+        };
     }
 }

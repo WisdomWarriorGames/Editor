@@ -51,6 +51,7 @@ public partial class SceneView : UserControl
             if (DataContext is SceneHierarchyViewModel viewModel)
             {
                 viewModel.ResetChanges();
+                viewModel.ClearSelection();
             }
         }
     }

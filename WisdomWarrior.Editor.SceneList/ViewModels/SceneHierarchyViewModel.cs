@@ -6,7 +6,6 @@ using WisdomWarrior.Editor.Core.Helpers;
 using WisdomWarrior.Editor.Core.Services;
 using WisdomWarrior.Editor.Core.ShadowTree;
 using WisdomWarrior.Editor.SceneList.Helpers;
-using WisdomWarrior.Engine.Core;
 
 namespace WisdomWarrior.Editor.SceneList.ViewModels;
 
@@ -28,6 +27,15 @@ public partial class SceneHierarchyViewModel : ObservableObject
 
         _sceneTracker.OnSceneModified += OnSceneModified;
         _sceneManager.CurrentSceneReady += OnSceneReady;
+        _selectionManager.OnSelectionChanged += OnSelectionChanged;
+    }
+
+    private void OnSelectionChanged(object? obj)
+    {
+        if (obj is not EntityTracker && obj is not SceneTracker)
+        {
+            Dispatcher.UIThread.Post(ResetChanges);
+        }
     }
 
     private void OnSceneReady()
@@ -82,7 +90,10 @@ public partial class SceneHierarchyViewModel : ObservableObject
                 ResetEntityRecursive(entity);
             }
         }
+    }
 
+    public void ClearSelection()
+    {
         _selectionManager.Clear();
     }
 
