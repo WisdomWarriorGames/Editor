@@ -4,7 +4,8 @@
              xmlns:suki="https://github.com/kikipoulet/SukiUI"
              xmlns:views="clr-namespace:WisdomWarrior.Editor.Inspector.Views"
              x:DataType="viewModels:EntityInspectorViewModel"
-             x:Class="WisdomWarrior.Editor.Inspector.Views.EntityInspector">
+             x:Class="WisdomWarrior.Editor.Inspector.Views.EntityInspector"
+             x:Name="EntityInspectorControl">
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -15,7 +16,7 @@
     </UserControl.Resources>
     <Grid RowDefinitions="Auto, *">
         <ScrollViewer Grid.Row="1">
-            <StackPanel Spacing="15">
+            <StackPanel Spacing="2">
 
                 <suki:GlassCard IsVisible="{Binding Entity, Converter={x:Static ObjectConverters.IsNull}}"
                                 VerticalAlignment="Center" HorizontalAlignment="Stretch">
@@ -47,6 +48,22 @@
                                                    FontWeight="Bold"
                                                    FontSize="10"
                                                    VerticalAlignment="Center" />
+                                        
+                                        <Button Grid.Column="2" 
+                                                Width="16"
+                                                Height="16"
+                                                Padding="0"
+                                                BorderThickness="0"
+                                                BorderBrush="Transparent"
+                                                Cursor="Hand"
+                                                HorizontalContentAlignment="Center"
+                                                VerticalContentAlignment="Center"
+                                                VerticalAlignment="Center"
+                                                Theme="{DynamicResource SukiFlatButtonTheme}"
+                                                Command="{Binding #EntityInspectorControl.((viewModels:EntityInspectorViewModel)DataContext).RemoveComponentCommand}"
+                                                CommandParameter="{Binding}">
+                                            <TextBlock Text="🗑" FontSize="10" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                        </Button>
                                     </Grid>
 
                                     <Border Height="1" Background="{DynamicResource SukiBorderBrush}" Opacity="0.5"

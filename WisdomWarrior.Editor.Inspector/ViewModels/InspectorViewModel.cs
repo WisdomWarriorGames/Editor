@@ -11,6 +11,8 @@ public partial class InspectorViewModel : ObservableObject
     [ObservableProperty] private ObservableObject? _currentContent;
     [ObservableProperty] private string? _name = "No Selection";
 
+    public bool IsEntitySelected => CurrentContent is EntityInspectorViewModel;
+
     public InspectorViewModel(SelectionManager selectionManager)
     {
         _selectionManager = selectionManager;
@@ -23,6 +25,8 @@ public partial class InspectorViewModel : ObservableObject
         {
             CurrentContent = null;
             Name = "No Selection";
+
+            OnPropertyChanged(nameof(IsEntitySelected));
             return;
         }
 
@@ -33,5 +37,7 @@ public partial class InspectorViewModel : ObservableObject
 
             _ => (null, "No Selection")
         };
+
+        OnPropertyChanged(nameof(IsEntitySelected));
     }
 }
