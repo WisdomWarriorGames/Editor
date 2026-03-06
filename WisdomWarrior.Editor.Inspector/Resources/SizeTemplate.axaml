@@ -1,0 +1,16 @@
+﻿<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:models="clr-namespace:WisdomWarrior.Editor.Inspector.Models">
+    <DataTemplate x:Key="SizeTemplate" DataType="models:SizeViewModel">
+        <Grid ColumnDefinitions="*, *" ColumnSpacing="3">
+            <NumericUpDown Grid.Column="0"
+                           Value="{Binding W}"
+                           ShowButtonSpinner="False"
+                           InnerLeftContent="W" />
+            <NumericUpDown Grid.Column="1"
+                           Value="{Binding H}"
+                           ShowButtonSpinner="False"
+                           InnerLeftContent="H" />
+        </Grid>
+    </DataTemplate>
+</ResourceDictionary>

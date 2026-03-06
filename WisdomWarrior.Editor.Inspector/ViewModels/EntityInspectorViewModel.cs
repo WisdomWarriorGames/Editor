@@ -5,11 +5,18 @@ using WisdomWarrior.Engine.Core.Components;
 
 namespace WisdomWarrior.Editor.Inspector.ViewModels;
 
-public partial class EntityInspectorViewModel(EntityTracker entity) : ObservableObject
+public partial class EntityInspectorViewModel : ObservableObject
 {
-    [ObservableProperty] private EntityTracker? _entity = entity;
+    [ObservableProperty] private EntityTracker? _entity;
     public IEnumerable<ComponentTracker> Components => Entity?.TrackedComponents.ToList() ?? Enumerable.Empty<ComponentTracker>();
     public IEnumerable<string> AvailableComponentNames => ComponentRegistry.GetRegisteredKeys();
+
+    public EntityInspectorViewModel(EntityTracker entity)
+    {
+        _entity = entity;
+
+        _entity.OnStructureChanged += () => OnPropertyChanged(nameof(Components));
+    }
 
     [RelayCommand]
     private void AddComponent(string componentName)
@@ -20,9 +27,6 @@ public partial class EntityInspectorViewModel(EntityTracker entity) : Observable
         if (newComponent == null) return;
 
         Entity?.EngineEntity.AddComponent(newComponent);
-        Entity?.Update();
-
-        OnPropertyChanged(nameof(Components));
     }
 
     [RelayCommand]
@@ -31,8 +35,5 @@ public partial class EntityInspectorViewModel(EntityTracker entity) : Observable
         if (tracker == null || Entity == null) return;
 
         Entity.EngineEntity.RemoveComponent(tracker.EngineComponent);
-        Entity.Update();
-
-        OnPropertyChanged(nameof(Components));
     }
 }

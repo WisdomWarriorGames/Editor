@@ -12,7 +12,7 @@ public class PropertyTracker
     public bool IsDirty { get; private set; }
 
     public Type PropertyType => _propertyInfo.PropertyType;
-    
+
     public event Action<object?>? OnValueChanged;
 
     public PropertyTracker(PropertyInfo prop, object target)
@@ -33,7 +33,13 @@ public class PropertyTracker
     {
         var currentValue = _propertyInfo.GetValue(_target);
 
-        if (!Equals(currentValue, _lastValue))
+        if (currentValue == null)
+        {
+            IsDirty = false;
+            return;
+        }
+
+        if (!currentValue.Equals(_lastValue))
         {
             _lastValue = currentValue;
             IsDirty = true;

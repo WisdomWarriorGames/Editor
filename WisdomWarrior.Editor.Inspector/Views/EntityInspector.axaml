@@ -11,6 +11,8 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceInclude Source="avares://WisdomWarrior.Editor.Inspector/Resources/Vector2Template.axaml" />
                 <ResourceInclude Source="avares://WisdomWarrior.Editor.Inspector/Resources/FloatTemplate.axaml" />
+                <ResourceInclude Source="avares://WisdomWarrior.Editor.Inspector/Resources/SizeTemplate.axaml" />
+                <ResourceInclude Source="avares://WisdomWarrior.Editor.Inspector/Resources/ColourTemplate.axaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </UserControl.Resources>
@@ -48,8 +50,8 @@
                                                    FontWeight="Bold"
                                                    FontSize="10"
                                                    VerticalAlignment="Center" />
-                                        
-                                        <Button Grid.Column="2" 
+
+                                        <Button Grid.Column="2"
                                                 Width="16"
                                                 Height="16"
                                                 Padding="0"
@@ -62,7 +64,8 @@
                                                 Theme="{DynamicResource SukiFlatButtonTheme}"
                                                 Command="{Binding #EntityInspectorControl.((viewModels:EntityInspectorViewModel)DataContext).RemoveComponentCommand}"
                                                 CommandParameter="{Binding}">
-                                            <TextBlock Text="🗑" FontSize="10" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                            <TextBlock Text="🗑" FontSize="10" HorizontalAlignment="Center"
+                                                       VerticalAlignment="Center" />
                                         </Button>
                                     </Grid>
 

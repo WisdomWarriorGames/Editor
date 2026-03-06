@@ -27,6 +27,18 @@
             <Setter Property="FontSize" Value="10" />
             <Setter Property="FontWeight" Value="Bold" />
         </Style>
+        
+        <Style Selector="ColorPicker">
+            <Setter Property="MinHeight" Value="18" />
+            <Setter Property="Height" Value="24" />
+        
+            <Setter Property="Padding" Value="2" />
+        
+            <Setter Property="CornerRadius" Value="2" />
+            <Setter Property="BorderThickness" Value="1" />
+        
+            <Setter Property="FontSize" Value="10" />
+        </Style>
     </UserControl.Styles>
     <StackPanel Name="PropertiesStack" Spacing="4" />
 </UserControl>

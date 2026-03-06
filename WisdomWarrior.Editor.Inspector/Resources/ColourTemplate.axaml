@@ -1,0 +1,54 @@
+﻿<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:models="clr-namespace:WisdomWarrior.Editor.Inspector.Models"
+                    xmlns:converters="clr-namespace:WisdomWarrior.Editor.Inspector.Converters">
+    <converters:SystemDrawingColorConverter x:Key="SysColorConverter" />
+    <DataTemplate x:Key="ColourTemplate" DataType="models:ColourViewModel">
+        <Button HorizontalAlignment="Stretch"
+                Height="24"
+                Padding="0"
+                CornerRadius="2"
+                BorderThickness="1"
+                BorderBrush="{DynamicResource SukiBorderBrush}"
+                Cursor="Hand">
+
+            <Button.Background>
+                <SolidColorBrush Color="{Binding Value, Converter={StaticResource SysColorConverter}}" />
+            </Button.Background>
+
+            <Button.Flyout>
+                <Flyout>
+
+                    <Border Background="{DynamicResource SukiBackground}"
+                            BorderBrush="{DynamicResource SukiBorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="2"
+                            Padding="4"
+                            BoxShadow="0 4 15 0 #40000000">
+                        <ColorView Color="{Binding Value, Converter={StaticResource SysColorConverter}, Mode=TwoWay}"
+                                   Foreground="White">
+                            <ColorView.Styles>
+                    
+                                <Style Selector="ColorView Button">
+                                    <Setter Property="Foreground" Value="White" />
+                                </Style>
+                    
+                                <Style Selector="ColorView PathIcon">
+                                    <Setter Property="Foreground" Value="White" />
+                                </Style>
+
+                                <Style Selector="ColorView TextBox">
+                                    <Setter Property="Foreground" Value="White" />
+                                </Style>
+                    
+                            </ColorView.Styles>
+                        </ColorView>
+
+                    </Border>
+
+                </Flyout>
+            </Button.Flyout>
+
+        </Button>
+    </DataTemplate>
+</ResourceDictionary>
