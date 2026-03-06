@@ -4,6 +4,7 @@ using Avalonia.Layout;
 using Avalonia.Media;
 using WisdomWarrior.Editor.Core.ShadowTree;
 using WisdomWarrior.Editor.Inspector.Helpers;
+using WisdomWarrior.Engine.Core.Assets;
 using WisdomWarrior.Engine.Core.Attributes;
 using WisdomWarrior.Engine.Core.DataTypes;
 using Color = System.Drawing.Color;
@@ -61,6 +62,7 @@ public partial class ComponentEditor : UserControl
             Type t when t == typeof(float) => this.CreateFloatEditor(prop),
             Type t when t == typeof(Size) => this.CreateSizeEditor(prop),
             Type t when t == typeof(Color) => this.CreateColourEditor(prop),
+            Type t when t == typeof(ImageAsset) => this.CreateImageAssetEditor(prop),
             // Type t when t == typeof(string) => CreateStringEditor(prop, target),
             _ => new TextBlock { Text = "Unsupported Type", FontStyle = FontStyle.Italic }
         };

@@ -1,0 +1,10 @@
+﻿<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:models="clr-namespace:WisdomWarrior.Editor.Inspector.Models"
+                    xmlns:dragAndDrop="clr-namespace:WisdomWarrior.Editor.Core.DragAndDrop;assembly=WisdomWarrior.Editor.Core">
+    <DataTemplate x:Key="ImageAssetTemplate" DataType="models:ImageAssetViewModel">
+        <Border dragAndDrop:DropTarget.DropCommand="{Binding AcceptDropCommand}">
+            <TextBox Text="{Binding Path}" />
+        </Border>
+    </DataTemplate>
+</ResourceDictionary>

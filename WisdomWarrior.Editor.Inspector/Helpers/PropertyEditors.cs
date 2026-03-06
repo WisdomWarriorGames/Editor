@@ -6,6 +6,7 @@ using Avalonia.Markup.Xaml.Templates;
 using Avalonia.Threading;
 using WisdomWarrior.Editor.Core.ShadowTree;
 using WisdomWarrior.Editor.Inspector.Models;
+using WisdomWarrior.Engine.Core.Assets;
 using Size = WisdomWarrior.Engine.Core.DataTypes.Size;
 
 namespace WisdomWarrior.Editor.Inspector.Helpers;
@@ -52,6 +53,17 @@ public static class PropertyEditors
             prop,
             "ColourTemplate",
             (val, setter) => new ColourViewModel(val, setter),
+            (vm, val) => vm.UpdateFromEngine(val)
+        );
+    }
+
+    public static Control CreateImageAssetEditor(this UserControl control, PropertyTracker prop)
+    {
+        return BuildEditor<ImageAsset, ImageAssetViewModel>(
+            control,
+            prop,
+            "ImageAssetTemplate",
+            (val, setter) => new ImageAssetViewModel(val, setter),
             (vm, val) => vm.UpdateFromEngine(val)
         );
     }

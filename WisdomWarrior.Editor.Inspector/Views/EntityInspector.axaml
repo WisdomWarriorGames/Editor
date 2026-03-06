@@ -13,6 +13,7 @@
                 <ResourceInclude Source="avares://WisdomWarrior.Editor.Inspector/Resources/FloatTemplate.axaml" />
                 <ResourceInclude Source="avares://WisdomWarrior.Editor.Inspector/Resources/SizeTemplate.axaml" />
                 <ResourceInclude Source="avares://WisdomWarrior.Editor.Inspector/Resources/ColourTemplate.axaml" />
+                <ResourceInclude Source="avares://WisdomWarrior.Editor.Inspector/Resources/ImageAssetTemplate.axaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </UserControl.Resources>
