@@ -8,6 +8,7 @@
 
     <ItemGroup>
       <PackageReference Include="Avalonia" Version="11.3.12" />
+      <PackageReference Include="Avalonia.Controls.ColorPicker" Version="11.3.12" />
       <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
       <PackageReference Include="SukiUI" Version="6.0.3" />
     </ItemGroup>
@@ -15,12 +16,6 @@
     <ItemGroup>
       <ProjectReference Include="..\WisdomWarrior.Editor.Core\WisdomWarrior.Editor.Core.csproj" />
       <ProjectReference Include="..\WisdomWarrior.Editor.FileSystem\WisdomWarrior.Editor.FileSystem.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Reference Include="Avalonia.Controls.ColorPicker">
-        <HintPath>..\..\..\..\Users\EdBrown\.nuget\packages\avalonia.controls.colorpicker\11.3.12\lib\net8.0\Avalonia.Controls.ColorPicker.dll</HintPath>
-      </Reference>
     </ItemGroup>
 
 </Project>

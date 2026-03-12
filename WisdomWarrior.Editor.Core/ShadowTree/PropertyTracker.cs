@@ -33,13 +33,13 @@ public class PropertyTracker
     {
         var currentValue = _propertyInfo.GetValue(_target);
 
-        if (currentValue == null)
+        if (currentValue == null && _lastValue == null)
         {
             IsDirty = false;
             return;
         }
 
-        if (!currentValue.Equals(_lastValue))
+        if (currentValue == null || _lastValue == null || !currentValue.Equals(_lastValue))
         {
             _lastValue = currentValue;
             IsDirty = true;

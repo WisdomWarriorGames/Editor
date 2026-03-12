@@ -50,12 +50,12 @@ public class ProjectService
         var manifest = new Manifest
         {
             ProjectName = projectName,
-            ProjectNameStripped = projectName.Replace(" ", ""),
-            GameProjectPath = $"{projectName}.Game",
-            ActiveScene = $"{projectName}.Game/CurrentScene.scene.json",
+            ProjectNameStripped = name,
+            GameProjectPath = $"{name}.Game",
+            ActiveScene = $"{name}.Game/CurrentScene.scene.json",
             Modules = new List<ProjectModule>
             {
-                new() { Name = projectName, Path = projectName }
+                new() { Name = projectName, Path = name }
             }
         };
 
