@@ -34,13 +34,15 @@ public class SceneTracker
 
     public void RemoveEntity(GameEntity entity)
     {
+        if (_activeScene == null) return;
+
         if (entity.Parent != null)
         {
-            entity.Parent.Children.Remove(entity);
+            entity.Parent.RemoveEntity(entity);
         }
-        else if (_activeScene != null)
+        else
         {
-            _activeScene.Entities.Remove(entity);
+            _activeScene.RemoveEntity(entity);
         }
 
         Update();
