@@ -51,6 +51,9 @@ public class CurrentSceneManager
         ActiveScene = JsonSerializer.Deserialize<Scene>(json, options);
         ActiveScene.Initialize();
 
+        SceneManager.AddScene(ActiveScene.Name, ActiveScene);
+        SceneManager.SetCurrentScene(ActiveScene.Name);
+
         Tracker.TrackScene(ActiveScene);
 
         _saveTimer.Start();

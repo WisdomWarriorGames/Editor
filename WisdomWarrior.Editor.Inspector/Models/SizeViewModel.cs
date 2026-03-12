@@ -25,7 +25,7 @@ public class SizeViewModel : ObservableObject
         OnPropertyChanged(nameof(H));
     }
 
-    public float W
+    public int W
     {
         get => _value.W;
         set
@@ -37,7 +37,7 @@ public class SizeViewModel : ObservableObject
         }
     }
 
-    public float H
+    public int H
     {
         get => _value.H;
         set
