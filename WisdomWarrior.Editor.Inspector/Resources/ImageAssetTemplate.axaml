@@ -4,7 +4,7 @@
                     xmlns:dragAndDrop="clr-namespace:WisdomWarrior.Editor.Core.DragAndDrop;assembly=WisdomWarrior.Editor.Core">
     <DataTemplate x:Key="ImageAssetTemplate" DataType="models:ImageAssetViewModel">
         <Border dragAndDrop:DropTarget.DropCommand="{Binding AcceptDropCommand}">
-            <TextBox Text="{Binding Path}" />
+            <TextBox Text="{Binding Name}" />
         </Border>
     </DataTemplate>
 </ResourceDictionary>
