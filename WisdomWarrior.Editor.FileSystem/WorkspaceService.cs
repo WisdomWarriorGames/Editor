@@ -1,14 +1,17 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using WisdomWarrior.Editor.Core;
+using WisdomWarrior.Editor.Core.Helpers;
 
 namespace WisdomWarrior.Editor.FileSystem;
 
 public class WorkspaceService(FileSystemRegistry registry)
 {
-    private FileSystemRegistry _currentRegistry = registry;
+    private readonly FileSystemRegistry _currentRegistry = registry;
     private Manifest? _project;
-    public string ProjectRoot { get; private set; }
-    public string ActiveScene => Path.Combine(ProjectRoot, _project.ActiveScene);
+
+    public string ProjectRoot { get; private set; } = string.Empty;
+    public string CurrentModuleRoot { get; private set; } = string.Empty;
+    public string ActiveScene => Path.Combine(ProjectRoot, _project!.ActiveScene);
 
     public event Action<FileSystemRegistry>? WorkspaceInitialized;
 
@@ -17,7 +20,7 @@ public class WorkspaceService(FileSystemRegistry registry)
         var json = File.ReadAllText(pathToManifest);
         _project = JsonSerializer.Deserialize<Manifest>(json);
 
-        string baseDirectory = Path.GetDirectoryName(pathToManifest)!;
+        var baseDirectory = Path.GetDirectoryName(pathToManifest)!;
         Load(_project, baseDirectory);
     }
 
@@ -31,11 +34,11 @@ public class WorkspaceService(FileSystemRegistry registry)
         }
 
         ProjectRoot = rootPath;
+        AssetPathContext.Configure(ProjectRoot, null);
 
         if (_project.Modules.Count > 0)
         {
             var module = _project.Modules[0];
-
             var path = Path.Combine(rootPath, module.Path);
             ChangeModule(path);
         }
@@ -44,6 +47,8 @@ public class WorkspaceService(FileSystemRegistry registry)
     public void ChangeModule(string path)
     {
         _currentRegistry.Initialize(path);
+        CurrentModuleRoot = path;
+        AssetPathContext.Configure(ProjectRoot, CurrentModuleRoot);
         WorkspaceInitialized?.Invoke(_currentRegistry);
     }
 }

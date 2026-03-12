@@ -2,7 +2,6 @@
 using Microsoft.Xna.Framework.Graphics;
 using WisdomWarrior.Editor.MonoGame.Overlays;
 using WisdomWarrior.Editor.MonoGame.Tools;
-using WisdomWarrior.Engine.Core.Interfaces;
 using WisdomWarrior.Engine.MonoGame;
 
 namespace WisdomWarrior.Editor.MonoGame;
@@ -15,9 +14,9 @@ public class EditorRuntime : Game
     private OverlayManager _overlayManager;
     private ToolManager _toolManager;
 
-    private TextureManager _textureManager;
-    private RenderService _renderService;
-    private Engine.Core.Engine _engine;
+    private TextureManager? _textureManager;
+    private readonly EditorRenderService _renderService;
+    private readonly Engine.Core.Engine _engine;
 
     public EditorRuntime(ToolContext context)
     {
@@ -26,7 +25,7 @@ public class EditorRuntime : Game
         _toolManager = new ToolManager(context);
         _graphics = new GraphicsDeviceManager(this);
 
-        _renderService = new RenderService();
+        _renderService = new EditorRenderService();
         _engine = new Engine.Core.Engine(_renderService);
     }
 

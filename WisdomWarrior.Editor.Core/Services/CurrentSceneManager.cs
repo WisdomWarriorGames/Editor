@@ -1,5 +1,6 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using System.Text.Json.Serialization;
+using WisdomWarrior.Editor.Core.Helpers;
 using WisdomWarrior.Editor.Core.ShadowTree;
 using WisdomWarrior.Engine.Core;
 using WisdomWarrior.Engine.Core.Components;
@@ -10,11 +11,11 @@ namespace WisdomWarrior.Editor.Core.Services;
 public class CurrentSceneManager
 {
     private string _activeScenePath = string.Empty;
-    private bool _isDirty = false;
+    private bool _isDirty;
     private readonly System.Timers.Timer _saveTimer;
 
     private int _ticksPerSecond = 20;
-    private bool _isTicking = false;
+    private bool _isTicking;
 
     public int TicksPerSecond
     {
@@ -22,8 +23,7 @@ public class CurrentSceneManager
         set => _ticksPerSecond = Math.Max(1, value);
     }
 
-    public Scene ActiveScene { get; private set; }
-
+    public Scene? ActiveScene { get; private set; }
     public SceneTracker Tracker { get; } = new();
 
     public event Action? CurrentSceneReady;
@@ -32,14 +32,16 @@ public class CurrentSceneManager
     {
         Tracker.OnSceneModified += () => _isDirty = true;
 
-        _saveTimer = new System.Timers.Timer(1000);
-        _saveTimer.AutoReset = true;
+        _saveTimer = new System.Timers.Timer(1000)
+        {
+            AutoReset = true
+        };
         _saveTimer.Elapsed += (sender, args) => CheckAndSave();
     }
 
     public void LoadScene(string path)
     {
-        if (string.IsNullOrEmpty(path)) return;
+        if (string.IsNullOrWhiteSpace(path)) return;
 
         _activeScenePath = path;
 
@@ -49,6 +51,9 @@ public class CurrentSceneManager
 
         var json = File.ReadAllText(path);
         ActiveScene = JsonSerializer.Deserialize<Scene>(json, options);
+        if (ActiveScene == null) return;
+
+        NormalizeSceneAssetPathsForStorage();
         ActiveScene.Initialize();
 
         SceneManager.AddScene(ActiveScene.Name, ActiveScene);
@@ -83,7 +88,9 @@ public class CurrentSceneManager
 
     public bool SaveScene()
     {
-        if (string.IsNullOrEmpty(_activeScenePath) || ActiveScene == null) return false;
+        if (string.IsNullOrWhiteSpace(_activeScenePath) || ActiveScene == null) return false;
+
+        NormalizeSceneAssetPathsForStorage();
 
         var options = new JsonSerializerOptions
         {
@@ -121,5 +128,30 @@ public class CurrentSceneManager
     {
         _isTicking = false;
         _saveTimer.Stop();
+    }
+
+    private void NormalizeSceneAssetPathsForStorage()
+    {
+        if (ActiveScene == null) return;
+
+        foreach (var rootEntity in ActiveScene.Entities)
+        {
+            NormalizeEntityAssetsRecursive(rootEntity);
+        }
+    }
+
+    private static void NormalizeEntityAssetsRecursive(GameEntity entity)
+    {
+        foreach (var sprite in entity.Components.OfType<Sprite>())
+        {
+            if (sprite.Image == null) continue;
+
+            sprite.Image.AssetPath = AssetHelpers.NormalizeAssetPathForStorage(sprite.Image.AssetPath);
+        }
+
+        foreach (var child in entity.Children)
+        {
+            NormalizeEntityAssetsRecursive(child);
+        }
     }
 }
