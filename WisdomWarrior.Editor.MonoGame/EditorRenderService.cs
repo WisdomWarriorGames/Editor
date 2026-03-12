@@ -11,11 +11,13 @@ public class EditorRenderService : IRenderService
 {
     private SpriteBatch? _spriteBatch;
     private TextureManager? _textureManager;
+    private readonly HashSet<string> _pendingPreloadPaths = new(StringComparer.OrdinalIgnoreCase);
 
     public void LoadContent(SpriteBatch spriteBatch, TextureManager textureManager)
     {
         _spriteBatch = spriteBatch;
         _textureManager = textureManager;
+        FlushPendingPreloads();
     }
 
     public void Begin()
@@ -26,6 +28,19 @@ public class EditorRenderService : IRenderService
     public void End()
     {
         _spriteBatch?.End();
+    }
+
+    public void PreloadTextures(IEnumerable<string> texturePaths)
+    {
+        if (texturePaths == null) return;
+
+        if (_textureManager == null)
+        {
+            QueuePendingPreloads(texturePaths);
+            return;
+        }
+
+        _textureManager.PreloadTextures(ResolvePaths(texturePaths));
     }
 
     public void Draw(string texturePath, Vector2 position, int width, int height, Color color, float rotation, Vector2 scale)
@@ -53,5 +68,35 @@ public class EditorRenderService : IRenderService
             mgScale,
             SpriteEffects.None,
             0.0f);
+    }
+
+    private void QueuePendingPreloads(IEnumerable<string> texturePaths)
+    {
+        foreach (var texturePath in texturePaths)
+        {
+            if (string.IsNullOrWhiteSpace(texturePath)) continue;
+            _pendingPreloadPaths.Add(texturePath);
+        }
+    }
+
+    private void FlushPendingPreloads()
+    {
+        if (_textureManager == null || _pendingPreloadPaths.Count == 0) return;
+
+        _textureManager.PreloadTextures(ResolvePaths(_pendingPreloadPaths));
+        _pendingPreloadPaths.Clear();
+    }
+
+    private static IEnumerable<string> ResolvePaths(IEnumerable<string> texturePaths)
+    {
+        foreach (var texturePath in texturePaths)
+        {
+            if (string.IsNullOrWhiteSpace(texturePath)) continue;
+
+            var resolvedPath = AssetHelpers.ResolveAbsoluteAssetPath(texturePath);
+            if (string.IsNullOrWhiteSpace(resolvedPath)) continue;
+
+            yield return resolvedPath;
+        }
     }
 }
