@@ -20,6 +20,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\WisdomWarrior.Editor.Core\WisdomWarrior.Editor.Core.csproj" />
+    <ProjectReference Include="..\WisdomWarrior.Editor.Inspector\WisdomWarrior.Editor.Inspector.csproj" />
     <ProjectReference Include="..\..\Engine\WisdomWarrior.Engine.Core\WisdomWarrior.Engine.Core.csproj" />
     <ProjectReference Include="..\..\Engine\WisdomWarrior.Engine.MonoGame\WisdomWarrior.Engine.MonoGame.csproj" />
   </ItemGroup>

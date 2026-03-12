@@ -1,28 +1,90 @@
-﻿namespace WisdomWarrior.Editor.Core.Helpers;
+namespace WisdomWarrior.Editor.Core.Helpers;
 
 public static class DropHelper
 {
+    public static IEnumerable<T> GetPayloadItems<T>(this object? payload)
+    {
+        if (payload == null)
+        {
+            yield break;
+        }
+
+        if (payload is T single)
+        {
+            yield return single;
+            yield break;
+        }
+
+        if (payload is not System.Collections.IEnumerable list || payload is string)
+        {
+            yield break;
+        }
+
+        foreach (var item in list)
+        {
+            if (item is T typedItem)
+            {
+                yield return typedItem;
+            }
+        }
+    }
+
     public static bool CanAccept<T>(this object? payload)
     {
-        if (payload is T) return true;
-        if (payload is IEnumerable<T> typedList) return typedList.Any();
-        if (payload is IEnumerable<object> objList) return objList.Any() && objList.All(x => x is T);
+        if (payload is System.Collections.IEnumerable list && payload is not string)
+        {
+            var hasAny = false;
 
-        return false;
+            foreach (var item in list)
+            {
+                hasAny = true;
+
+                if (item is not T)
+                {
+                    return false;
+                }
+            }
+
+            return hasAny;
+        }
+
+        if (payload is not T)
+        {
+            return false;
+        }
+
+        return true;
     }
 
     public static bool CanAccept<T>(this object? payload, T target) where T : class
     {
-        if (payload is T singleItem)
+        if (payload is System.Collections.IEnumerable list && payload is not string)
         {
-            return singleItem != target;
+            var hasAny = false;
+
+            foreach (var item in list)
+            {
+                if (item is not T typedItem)
+                {
+                    return false;
+                }
+
+                hasAny = true;
+
+                if (typedItem == target)
+                {
+                    return false;
+                }
+            }
+
+            return hasAny;
         }
 
-        if (payload is IEnumerable<object> list)
+        if (payload is not T singleItem)
         {
-            return list.Any() && list.All(item => item is T tItem && tItem != target);
+            return false;
         }
 
-        return false;
+        return singleItem != target;
     }
 }

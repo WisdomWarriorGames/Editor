@@ -1,6 +1,7 @@
 ﻿using Avalonia.Platform.Storage;
 using SukiUI.Toasts;
 using WisdomWarrior.Editor.Core;
+using WisdomWarrior.Editor.Core.Helpers;
 using WisdomWarrior.Editor.Core.Models;
 
 namespace WisdomWarrior.Editor.FileSystem.Helpers;
@@ -23,9 +24,7 @@ public static class FileSystemHelpers
             }
         });
 
-        var workQueue = new List<IDroppableAsset>();
-        if (droppedItem is IDroppableAsset single) workQueue.Add(single);
-        else if (droppedItem is IEnumerable<object> list) workQueue.AddRange(list.OfType<IDroppableAsset>());
+        var workQueue = droppedItem.GetPayloadItems<IDroppableAsset>().ToList();
 
         var externalPaths = new List<string>();
         if (droppedItem is IStorageItem file)

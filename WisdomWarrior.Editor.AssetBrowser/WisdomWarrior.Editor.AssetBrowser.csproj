@@ -15,6 +15,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\WisdomWarrior.Editor.Core\WisdomWarrior.Editor.Core.csproj" />
       <ProjectReference Include="..\WisdomWarrior.Editor.FileSystem\WisdomWarrior.Editor.FileSystem.csproj" />
     </ItemGroup>
 
