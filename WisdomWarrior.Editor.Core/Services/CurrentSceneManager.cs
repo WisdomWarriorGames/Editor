@@ -81,9 +81,9 @@ public class CurrentSceneManager
         }
     }
 
-    public void SaveScene()
+    public bool SaveScene()
     {
-        if (string.IsNullOrEmpty(_activeScenePath) || ActiveScene == null) return;
+        if (string.IsNullOrEmpty(_activeScenePath) || ActiveScene == null) return false;
 
         var options = new JsonSerializerOptions
         {
@@ -94,8 +94,19 @@ public class CurrentSceneManager
         options.Converters.Add(new ComponentConverter());
         options.Converters.Add(new SystemDrawingColorJsonConverter());
 
-        var json = JsonSerializer.Serialize(ActiveScene, options);
-        File.WriteAllText(_activeScenePath, json);
+        try
+        {
+            var json = JsonSerializer.Serialize(ActiveScene, options);
+            File.WriteAllText(_activeScenePath, json);
+
+            Tracker.AcknowledgeSaved();
+            _isDirty = false;
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
     }
 
     private void CheckAndSave()
@@ -103,7 +114,12 @@ public class CurrentSceneManager
         if (_isDirty)
         {
             SaveScene();
-            _isDirty = false;
         }
+    }
+
+    public void StopTicking()
+    {
+        _isTicking = false;
+        _saveTimer.Stop();
     }
 }

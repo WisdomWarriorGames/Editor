@@ -76,6 +76,31 @@ public class EntityTracker
         return isDirty;
     }
 
+    public void AcknowledgeSaved()
+    {
+        _lastName = _entity.Name;
+
+        if (_entity.Components.Count != _lastComponentCount)
+        {
+            SyncComponents();
+        }
+
+        if (_entity.Children.Count != _lastChildCount)
+        {
+            SyncChildren();
+        }
+
+        foreach (var component in _components)
+        {
+            component.AcknowledgeSaved();
+        }
+
+        foreach (var child in _children)
+        {
+            child.AcknowledgeSaved();
+        }
+    }
+
     private void SyncComponents()
     {
         var currentEngineComponents = _entity.Components;

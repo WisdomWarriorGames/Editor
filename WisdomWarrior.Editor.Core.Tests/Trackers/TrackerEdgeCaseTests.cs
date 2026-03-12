@@ -8,7 +8,7 @@ namespace WisdomWarrior.Editor.Core.Tests.Trackers;
 public class TrackerEdgeCaseTests
 {
     [Fact]
-    public void ComponentTracker_MultipleUpdatesAfterChange_SettlesBackToClean()
+    public void ComponentTracker_MultipleUpdatesAfterChange_RemainsDirtyUntilSaved()
     {
         var component = new Transform();
         var tracker = new ComponentTracker(component);
@@ -20,6 +20,10 @@ public class TrackerEdgeCaseTests
         tracker.Update();
         Assert.True(tracker.IsDirty);
 
+        tracker.Update();
+        Assert.True(tracker.IsDirty);
+
+        tracker.AcknowledgeSaved();
         tracker.Update();
         Assert.False(tracker.IsDirty);
     }
@@ -38,11 +42,15 @@ public class TrackerEdgeCaseTests
         Assert.True(tracker.IsDirty);
 
         tracker.Update();
-        Assert.False(tracker.IsDirty);
+        Assert.True(tracker.IsDirty);
 
         component.Nickname = null;
         tracker.Update();
         Assert.True(tracker.IsDirty);
+
+        tracker.AcknowledgeSaved();
+        tracker.Update();
+        Assert.False(tracker.IsDirty);
     }
 
     [Fact]

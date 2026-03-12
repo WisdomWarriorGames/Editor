@@ -55,16 +55,21 @@ public class SceneTrackerDirtyStateTests
 
         Assert.Equal(1, modifiedCount);
         Assert.Equal(2, tracker.TrackedRoots.Count);
+        Assert.True(tracker.IsDirty);
+
+        tracker.AcknowledgeSaved();
+        Assert.False(tracker.IsDirty);
 
         scene.Entities.Remove(secondRoot);
         tracker.Update();
 
         Assert.Equal(2, modifiedCount);
         Assert.Single(tracker.TrackedRoots);
+        Assert.True(tracker.IsDirty);
     }
 
     [Fact]
-    public void Update_WhenComponentPropertyChanges_RaisesSceneModifiedThenSettles()
+    public void Update_WhenComponentPropertyChanges_RemainsDirtyUntilSaved()
     {
         var scene = TestSceneFactory.CreateSceneWithRoot();
         var tracker = new SceneTracker();
@@ -81,6 +86,21 @@ public class SceneTrackerDirtyStateTests
         tracker.Update();
 
         Assert.Equal(1, modifiedCount);
+        Assert.True(tracker.IsDirty);
+
+        var trackedTransform = tracker.TrackedRoots[0].TrackedComponents
+            .Single(c => c.EngineComponent is Transform);
+
+        var trackedPosition = trackedTransform.Properties
+            .Single(p => p.Name == nameof(Transform.Position));
+
+        Assert.True(trackedPosition.IsDirty);
+
+        tracker.AcknowledgeSaved();
+        tracker.Update();
+
+        Assert.False(tracker.IsDirty);
+        Assert.False(trackedPosition.IsDirty);
     }
 
     [Fact]
@@ -98,6 +118,7 @@ public class SceneTrackerDirtyStateTests
 
         root.AddComponent(sprite);
         tracker.Update();
+        tracker.AcknowledgeSaved();
 
         root.RemoveComponent(sprite);
         tracker.Update();
@@ -120,6 +141,7 @@ public class SceneTrackerDirtyStateTests
 
         root.AddEntity(child);
         tracker.Update();
+        tracker.AcknowledgeSaved();
 
         root.Children.Remove(child);
         tracker.Update();

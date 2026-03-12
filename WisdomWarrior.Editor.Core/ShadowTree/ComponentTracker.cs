@@ -62,6 +62,14 @@ public class ComponentTracker : INotifyPropertyChanged
         }
     }
 
+    public void AcknowledgeSaved()
+    {
+        foreach (var property in _properties)
+        {
+            property.AcknowledgeSaved();
+        }
+    }
+
     protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
