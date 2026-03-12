@@ -11,6 +11,7 @@ namespace WisdomWarrior.Editor.Core.Services;
 public class CurrentSceneManager
 {
     private string _activeScenePath = string.Empty;
+    private string? _registeredSceneName;
     private bool _isDirty;
     private readonly System.Timers.Timer _saveTimer;
 
@@ -50,16 +51,26 @@ public class CurrentSceneManager
         options.Converters.Add(new SystemDrawingColorJsonConverter());
 
         var json = File.ReadAllText(path);
-        ActiveScene = JsonSerializer.Deserialize<Scene>(json, options);
-        if (ActiveScene == null) return;
+        var deserializedScene = JsonSerializer.Deserialize<Scene>(json, options);
+        if (deserializedScene == null) return;
+
+        if (!string.IsNullOrWhiteSpace(_registeredSceneName) &&
+            !string.Equals(_registeredSceneName, deserializedScene.Name, StringComparison.Ordinal))
+        {
+            SceneManager.RemoveScene(_registeredSceneName);
+        }
+
+        ActiveScene = deserializedScene;
 
         NormalizeSceneAssetPathsForStorage();
         ActiveScene.Initialize();
 
-        SceneManager.AddScene(ActiveScene.Name, ActiveScene);
+        SceneManager.AddOrReplaceScene(ActiveScene.Name, ActiveScene);
         SceneManager.SetCurrentScene(ActiveScene.Name);
+        _registeredSceneName = ActiveScene.Name;
 
         Tracker.TrackScene(ActiveScene);
+        _isDirty = false;
 
         _saveTimer.Start();
         CurrentSceneReady?.Invoke();

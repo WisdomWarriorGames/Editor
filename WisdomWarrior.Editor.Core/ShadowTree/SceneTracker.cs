@@ -21,6 +21,7 @@ public class SceneTracker
         _activeScene = scene;
         _lastName = scene.Name;
         SyncRoots();
+        _isDirty = false;
     }
 
     public void AddEntity(GameEntity entity)
