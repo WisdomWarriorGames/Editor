@@ -29,7 +29,7 @@ public partial class ImageAssetViewModel : ObservableObject
         {
             if (_value.AssetPath == value) return;
 
-            var newAsset = new ImageAsset { AssetPath = value };
+            var newAsset = AssetHelpers.CreateImageAsset(value);
             _value = newAsset;
 
             OnPropertyChanged();
@@ -50,15 +50,16 @@ public partial class ImageAssetViewModel : ObservableObject
     private bool CanAcceptDrop(object? droppedItem)
     {
         if (droppedItem is not IHasFileSystemNode node) return false;
-        if (!AssetHelpers.IsImage(node.Node.Extension.ToLower())) return false;
 
-        return true;
+        return AssetHelpers.IsImage(node.Node.Extension);
     }
 
     [RelayCommand(CanExecute = nameof(CanAcceptDrop))]
-    private async Task AcceptDrop(object? droppedItem)
+    private Task AcceptDrop(object? droppedItem)
     {
-        if (droppedItem is not IHasFileSystemNode node) return;
+        if (droppedItem is not IHasFileSystemNode node) return Task.CompletedTask;
         Path = node.Node.FullPath;
+
+        return Task.CompletedTask;
     }
 }
