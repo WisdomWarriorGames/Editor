@@ -17,4 +17,10 @@
       <ProjectReference Include="..\WisdomWarrior.Editor.FileSystem\WisdomWarrior.Editor.FileSystem.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Reference Include="Avalonia.Controls.ColorPicker">
+        <HintPath>..\..\..\..\Users\EdBrown\.nuget\packages\avalonia.controls.colorpicker\11.3.12\lib\net8.0\Avalonia.Controls.ColorPicker.dll</HintPath>
+      </Reference>
+    </ItemGroup>
+
 </Project>

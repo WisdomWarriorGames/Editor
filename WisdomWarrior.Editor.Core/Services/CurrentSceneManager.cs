@@ -3,6 +3,7 @@ using System.Text.Json.Serialization;
 using WisdomWarrior.Editor.Core.ShadowTree;
 using WisdomWarrior.Engine.Core;
 using WisdomWarrior.Engine.Core.Components;
+using WisdomWarrior.Engine.Core.Converters;
 
 namespace WisdomWarrior.Editor.Core.Services;
 
@@ -44,10 +45,14 @@ public class CurrentSceneManager
 
         var options = new JsonSerializerOptions { IncludeFields = true };
         options.Converters.Add(new ComponentConverter());
+        options.Converters.Add(new SystemDrawingColorJsonConverter());
 
         var json = File.ReadAllText(path);
         ActiveScene = JsonSerializer.Deserialize<Scene>(json, options);
         ActiveScene.Initialize();
+
+        SceneManager.AddScene(ActiveScene.Name, ActiveScene);
+        SceneManager.SetCurrentScene(ActiveScene.Name);
 
         Tracker.TrackScene(ActiveScene);
 
@@ -87,6 +92,7 @@ public class CurrentSceneManager
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
         };
         options.Converters.Add(new ComponentConverter());
+        options.Converters.Add(new SystemDrawingColorJsonConverter());
 
         var json = JsonSerializer.Serialize(ActiveScene, options);
         File.WriteAllText(_activeScenePath, json);

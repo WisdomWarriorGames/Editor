@@ -5,12 +5,44 @@
              x:Class="WisdomWarrior.Editor.Inspector.Views.Inspector"
              x:DataType="viewModels:InspectorViewModel">
     <StackPanel>
-        <TextBlock FontSize="11" FontWeight="Bold" Opacity="0.5" Margin="0,0,0,10">
-            <Run Text="INSPECTOR" />
-            <Run Text=" (" />
-            <Run Text="{Binding Name, FallbackValue='None'}" />
-            <Run Text=")" />
-        </TextBlock>
+        <Grid ColumnDefinitions="*, Auto" Margin="0,0,0,10">
+            <TextBlock Grid.Column="0" FontSize="11" FontWeight="Bold" Opacity="0.5" Margin="0,0,0,2">
+                <Run Text="INSPECTOR" />
+                <Run Text=" (" />
+                <Run Text="{Binding Name, FallbackValue='None'}" />
+                <Run Text=")" />
+            </TextBlock>
+
+            <Panel Grid.Column="1" IsVisible="{Binding IsEntitySelected}" Margin="0,0,4,0">
+                <Button Content="+"
+                        Width="16"
+                        Height="16"
+                        Padding="0"
+                        BorderThickness="0"
+                        BorderBrush="Transparent"
+                        Cursor="Hand"
+                        HorizontalContentAlignment="Center"
+                        VerticalContentAlignment="Center"
+                        VerticalAlignment="Center"
+                        Theme="{DynamicResource SukiFlatButtonTheme}"
+                        DataContext="{Binding CurrentContent}">
+                    <Button.Flyout>
+                        <MenuFlyout ItemsSource="{Binding AvailableComponentNames}">
+                            <MenuFlyout.ItemContainerTheme>
+                                <ControlTheme TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
+                                    <Setter Property="Header" Value="{Binding}" />
+
+                                    <Setter Property="Command"
+                                            Value="{Binding $parent[Button].((viewModels:EntityInspectorViewModel)DataContext).AddComponentCommand}" />
+                                    <Setter Property="CommandParameter" Value="{Binding}" />
+                                </ControlTheme>
+                            </MenuFlyout.ItemContainerTheme>
+                        </MenuFlyout>
+                    </Button.Flyout>
+                </Button>
+            </Panel>
+        </Grid>
+
         <ContentControl Content="{Binding CurrentContent}">
             <ContentControl.DataTemplates>
 

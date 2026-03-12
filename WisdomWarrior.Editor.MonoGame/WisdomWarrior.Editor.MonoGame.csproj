@@ -15,6 +15,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\..\Engine\WisdomWarrior.Engine.Core\WisdomWarrior.Engine.Core.csproj" />
+      <ProjectReference Include="..\..\Engine\WisdomWarrior.Engine.MonoGame\WisdomWarrior.Engine.MonoGame.csproj" />
       <ProjectReference Include="..\WisdomWarrior.Editor.Core\WisdomWarrior.Editor.Core.csproj" />
     </ItemGroup>
 
@@ -22,10 +23,7 @@
       <None Update="Gizmos\point-gizmo.png">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
-      <None Update="Gizmos\cursor.png">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </None>
-      <None Update="Gizmos\hand.png">
+      <None Update="Gizmos\move-gizmo.png">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
     </ItemGroup>

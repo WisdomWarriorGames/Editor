@@ -7,6 +7,7 @@
     <Application.Styles>
         <suki:SukiTheme Locale="en-GB" ThemeColor="Blue" />
         <StyleInclude Source="avares://IconPacks.Avalonia.Material/Material.axaml" />
+        <StyleInclude Source="avares://Avalonia.Controls.ColorPicker/Themes/Fluent/Fluent.xaml" />
     </Application.Styles>
 
 </Application>

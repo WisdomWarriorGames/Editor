@@ -13,7 +13,7 @@ using WisdomWarrior.Editor.FileSystem.Models;
 
 namespace WisdomWarrior.Editor.AssetBrowser.ViewModels;
 
-public partial class AssetViewModel : ObservableObject, IDroppableAsset
+public partial class AssetViewModel : ObservableObject, IDroppableAsset, IHasFileSystemNode
 {
     public FileSystemNode? Node { get; }
     private readonly FileSystemService _fileSystemService;
@@ -43,11 +43,7 @@ public partial class AssetViewModel : ObservableObject, IDroppableAsset
 
     public string Icon => IsFolder ? "📁" : "📄";
 
-    public bool IsImage => Extension.ToLower() switch
-    {
-        ".png" or ".jpg" or ".jpeg" or ".bmp" or ".gif" => true,
-        _ => false
-    };
+    public bool IsImage => AssetHelpers.IsImage(Extension.ToLower());
 
     public bool IsAudio => Extension.ToLower() switch
     {
