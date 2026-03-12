@@ -102,6 +102,20 @@ public class SceneTracker
         _isDirty = false;
     }
 
+    public EntityTracker? FindTrackerByEntity(GameEntity entity)
+    {
+        foreach (var rootTracker in _rootEntities)
+        {
+            var match = FindTrackerByEntity(rootTracker, entity);
+            if (match != null)
+            {
+                return match;
+            }
+        }
+
+        return null;
+    }
+
     private void SyncRoots()
     {
         if (_activeScene == null) return;
@@ -127,5 +141,24 @@ public class SceneTracker
         _rootEntities.AddRange(syncedRoots);
 
         _lastRootCount = currentEngineRoots.Count;
+    }
+
+    private static EntityTracker? FindTrackerByEntity(EntityTracker tracker, GameEntity entity)
+    {
+        if (ReferenceEquals(tracker.EngineEntity, entity))
+        {
+            return tracker;
+        }
+
+        foreach (var childTracker in tracker.TrackedChildren)
+        {
+            var match = FindTrackerByEntity(childTracker, entity);
+            if (match != null)
+            {
+                return match;
+            }
+        }
+
+        return null;
     }
 }

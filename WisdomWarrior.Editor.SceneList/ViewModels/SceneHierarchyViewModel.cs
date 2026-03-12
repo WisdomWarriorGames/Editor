@@ -1,4 +1,4 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -17,7 +17,9 @@ public partial class SceneHierarchyViewModel : ObservableObject
 
     public ObservableCollection<SceneNodeViewModel> Scenes { get; } = new();
 
-    private SceneNodeViewModel _activeSceneNode;
+    private SceneNodeViewModel? _activeSceneNode;
+    private SceneNodeViewModel? _selectedSceneNode;
+    private EntityViewModel? _selectedEntityNode;
 
     public SceneHierarchyViewModel(CurrentSceneManager sceneManager, SelectionManager selectionManager)
     {
@@ -32,10 +34,19 @@ public partial class SceneHierarchyViewModel : ObservableObject
 
     private void OnSelectionChanged(object? obj)
     {
-        if (obj is not EntityTracker && obj is not SceneTracker)
+        if (obj is EntityTracker entityTracker)
         {
-            Dispatcher.UIThread.Post(ResetChanges);
+            Dispatcher.UIThread.Post(() => ApplyEntitySelection(entityTracker));
+            return;
         }
+
+        if (obj is SceneTracker sceneTracker && ReferenceEquals(sceneTracker, _sceneTracker))
+        {
+            Dispatcher.UIThread.Post(ApplySceneSelection);
+            return;
+        }
+
+        Dispatcher.UIThread.Post(ResetChanges);
     }
 
     private void OnSceneReady()
@@ -52,6 +63,11 @@ public partial class SceneHierarchyViewModel : ObservableObject
 
     private void SyncRootEntities()
     {
+        if (_activeSceneNode == null)
+        {
+            return;
+        }
+
         _activeSceneNode.SyncName();
         var currentTrackers = _sceneTracker.TrackedRoots;
         var rootList = _activeSceneNode.Children;
@@ -90,6 +106,9 @@ public partial class SceneHierarchyViewModel : ObservableObject
                 ResetEntityRecursive(entity);
             }
         }
+
+        _selectedSceneNode = null;
+        _selectedEntityNode = null;
     }
 
     public void ClearSelection()
@@ -97,7 +116,7 @@ public partial class SceneHierarchyViewModel : ObservableObject
         _selectionManager.Clear();
     }
 
-    private void ResetEntityRecursive(EntityViewModel entity)
+    private static void ResetEntityRecursive(EntityViewModel entity)
     {
         entity.CommitEdit();
         entity.IsSelected = false;
@@ -119,5 +138,75 @@ public partial class SceneHierarchyViewModel : ObservableObject
     public void AcceptDrop(object? droppedObject)
     {
         droppedObject.ProcessEntityDrop(this, _sceneTracker);
+    }
+
+    private void ApplyEntitySelection(EntityTracker targetTracker)
+    {
+        if (_activeSceneNode == null)
+        {
+            return;
+        }
+
+        ClearCurrentSelectionState();
+        _activeSceneNode.IsExpanded = true;
+
+        var selectedEntity = TrySelectEntityRecursive(_activeSceneNode.Children, targetTracker);
+        if (selectedEntity == null)
+        {
+            return;
+        }
+
+        _selectedEntityNode = selectedEntity;
+    }
+
+    private void ApplySceneSelection()
+    {
+        if (_activeSceneNode == null)
+        {
+            return;
+        }
+
+        ClearCurrentSelectionState();
+        _activeSceneNode.IsSelected = true;
+        _activeSceneNode.IsExpanded = true;
+        _selectedSceneNode = _activeSceneNode;
+    }
+
+    private void ClearCurrentSelectionState()
+    {
+        if (_selectedSceneNode != null)
+        {
+            _selectedSceneNode.IsSelected = false;
+            _selectedSceneNode = null;
+        }
+
+        if (_selectedEntityNode != null)
+        {
+            _selectedEntityNode.IsSelected = false;
+            _selectedEntityNode = null;
+        }
+    }
+
+    private static EntityViewModel? TrySelectEntityRecursive(
+        IEnumerable<EntityViewModel> entities,
+        EntityTracker targetTracker)
+    {
+        foreach (var entity in entities)
+        {
+            if (ReferenceEquals(entity.Tracker, targetTracker))
+            {
+                entity.IsSelected = true;
+                return entity;
+            }
+
+            var selectedChild = TrySelectEntityRecursive(entity.Children, targetTracker);
+            if (selectedChild != null)
+            {
+                entity.IsExpanded = true;
+                return selectedChild;
+            }
+        }
+
+        return null;
     }
 }
