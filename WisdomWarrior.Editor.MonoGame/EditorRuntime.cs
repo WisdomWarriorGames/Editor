@@ -57,4 +57,15 @@ public class EditorRuntime : Game
 
         base.Draw(gameTime);
     }
+
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            _textureManager?.Dispose();
+            _textureManager = null;
+        }
+
+        base.Dispose(disposing);
+    }
 }
