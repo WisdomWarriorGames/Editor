@@ -52,10 +52,9 @@
 
                 <Button Grid.Column="1"
                         Command="{Binding SaveSceneCommand}"
-                        Width="20"
-                        Height="20"
+                        Width="16"
+                        Height="16"
                         Padding="0"
-                        Margin="8,0,0,0"
                         ToolTip.Tip="Save Scene">
                     <PathIcon Width="12"
                               Height="12"
