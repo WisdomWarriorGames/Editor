@@ -2,9 +2,12 @@ using System.Collections.ObjectModel;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using SukiUI.Toasts;
+using WisdomWarrior.Editor.Core;
 using WisdomWarrior.Editor.Core.Helpers;
 using WisdomWarrior.Editor.Core.Services;
 using WisdomWarrior.Editor.Core.ShadowTree;
+using WisdomWarrior.Editor.FileSystem;
 using WisdomWarrior.Editor.SceneList.Helpers;
 
 namespace WisdomWarrior.Editor.SceneList.ViewModels;
@@ -14,6 +17,7 @@ public partial class SceneHierarchyViewModel : ObservableObject
     private readonly SceneTracker _sceneTracker;
     private readonly CurrentSceneManager _sceneManager;
     private readonly SelectionManager _selectionManager;
+    private readonly ScenePersistenceService _scenePersistenceService;
 
     public ObservableCollection<SceneNodeViewModel> Scenes { get; } = new();
 
@@ -21,10 +25,14 @@ public partial class SceneHierarchyViewModel : ObservableObject
     private SceneNodeViewModel? _selectedSceneNode;
     private EntityViewModel? _selectedEntityNode;
 
-    public SceneHierarchyViewModel(CurrentSceneManager sceneManager, SelectionManager selectionManager)
+    public SceneHierarchyViewModel(
+        CurrentSceneManager sceneManager,
+        SelectionManager selectionManager,
+        ScenePersistenceService scenePersistenceService)
     {
         _sceneManager = sceneManager;
         _selectionManager = selectionManager;
+        _scenePersistenceService = scenePersistenceService;
         _sceneTracker = _sceneManager.Tracker;
 
         _sceneTracker.OnSceneModified += OnSceneModified;
@@ -51,9 +59,23 @@ public partial class SceneHierarchyViewModel : ObservableObject
 
     private void OnSceneReady()
     {
-        _activeSceneNode = new SceneNodeViewModel(_sceneTracker, _selectionManager);
+        ClearCurrentSelectionState();
+        Scenes.Clear();
+
+        _activeSceneNode = new SceneNodeViewModel(_sceneTracker, _selectionManager, SaveActiveScene);
         Scenes.Add(_activeSceneNode);
         Dispatcher.UIThread.Post(SyncRootEntities);
+    }
+
+    private void SaveActiveScene()
+    {
+        var saved = _scenePersistenceService.TrySaveSceneToPreferredDirectory();
+        if (saved)
+            return;
+
+        EditorUI.ToastManager.CreateToast()
+            .WithTitle("Unable to save scene in the selected folder.")
+            .Queue();
     }
 
     private void OnSceneModified()

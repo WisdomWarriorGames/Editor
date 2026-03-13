@@ -28,6 +28,7 @@ public partial class MainWindowViewModel : ObservableObject
 
     private readonly WorkspaceService _workspaceService;
     private readonly CurrentSceneManager _currentSceneManager;
+    private readonly ScenePersistenceService _scenePersistenceService;
 
     public MainWindowViewModel(
         AssetBrowserViewModel assetBrowserViewModel,
@@ -36,7 +37,8 @@ public partial class MainWindowViewModel : ObservableObject
         FileMenuViewModel fileMenuViewModel,
         InspectorViewModel inspectorViewModel,
         WorkspaceService workspaceService,
-        CurrentSceneManager currentSceneManager)
+        CurrentSceneManager currentSceneManager,
+        ScenePersistenceService scenePersistenceService)
     {
         _assetBrowserViewModel = assetBrowserViewModel;
         _monoGameWindow = monoGameViewModel;
@@ -46,12 +48,35 @@ public partial class MainWindowViewModel : ObservableObject
 
         _workspaceService = workspaceService;
         _currentSceneManager = currentSceneManager;
+        _scenePersistenceService = scenePersistenceService;
 
         _workspaceService.WorkspaceInitialized += OnWorkspaceInitialized;
     }
 
     private void OnWorkspaceInitialized(FileSystemRegistry obj)
     {
-        _currentSceneManager.LoadScene(_workspaceService.ActiveScene);
+        var activeScenePath = _workspaceService.ActiveScene;
+
+        if (!string.IsNullOrWhiteSpace(activeScenePath) && System.IO.File.Exists(activeScenePath))
+        {
+            _currentSceneManager.LoadScene(activeScenePath);
+            return;
+        }
+
+        _currentSceneManager.CreateInMemoryScene();
+    }
+
+    public bool HasUnsavedInMemoryDirtyScene => _scenePersistenceService.HasUnsavedInMemoryDirtyScene;
+
+    public bool HasDirtyPersistedScene => _scenePersistenceService.HasDirtyPersistedScene;
+
+    public bool TrySaveSceneToDirectory(string directoryPath)
+    {
+        return _scenePersistenceService.TrySaveSceneToDirectory(directoryPath);
+    }
+
+    public bool TryAutoSavePersistedScene()
+    {
+        return _scenePersistenceService.TryAutoSavePersistedScene();
     }
 }

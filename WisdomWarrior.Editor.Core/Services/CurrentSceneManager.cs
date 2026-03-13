@@ -26,6 +26,9 @@ public class CurrentSceneManager
 
     public Scene? ActiveScene { get; private set; }
     public SceneTracker Tracker { get; } = new();
+    public bool IsDirty => _isDirty;
+    public bool HasPersistedScene => !string.IsNullOrWhiteSpace(_activeScenePath);
+    public string ActiveScenePath => _activeScenePath;
 
     public event Action? CurrentSceneReady;
 
@@ -54,13 +57,45 @@ public class CurrentSceneManager
         var deserializedScene = JsonSerializer.Deserialize<Scene>(json, options);
         if (deserializedScene == null) return;
 
-        if (!string.IsNullOrWhiteSpace(_registeredSceneName) &&
-            !string.Equals(_registeredSceneName, deserializedScene.Name, StringComparison.Ordinal))
+        if (!string.IsNullOrWhiteSpace(_registeredSceneName))
         {
             SceneManager.RemoveScene(_registeredSceneName);
         }
 
         ActiveScene = deserializedScene;
+
+        NormalizeSceneAssetPathsForStorage();
+        ActiveScene.Initialize();
+
+        SceneManager.AddOrReplaceScene(ActiveScene.Name, ActiveScene);
+        SceneManager.SetCurrentScene(ActiveScene.Name);
+        _registeredSceneName = ActiveScene.Name;
+
+        Tracker.TrackScene(ActiveScene);
+        _isDirty = false;
+
+        _saveTimer.Start();
+        CurrentSceneReady?.Invoke();
+
+        StartTicking();
+    }
+
+    public void CreateInMemoryScene(string sceneName = "Scene1")
+    {
+        var name = string.IsNullOrWhiteSpace(sceneName) ? "Scene1" : sceneName.Trim();
+
+        if (!string.IsNullOrWhiteSpace(_registeredSceneName))
+        {
+            SceneManager.RemoveScene(_registeredSceneName);
+        }
+
+        _activeScenePath = string.Empty;
+
+        ActiveScene = new Scene
+        {
+            Name = name,
+            Entities = []
+        };
 
         NormalizeSceneAssetPathsForStorage();
         ActiveScene.Initialize();
@@ -127,9 +162,34 @@ public class CurrentSceneManager
         }
     }
 
+    public bool SaveSceneAs(string path)
+    {
+        if (string.IsNullOrWhiteSpace(path) || ActiveScene == null)
+            return false;
+
+        var directory = Path.GetDirectoryName(path);
+        if (string.IsNullOrWhiteSpace(directory))
+            return false;
+
+        try
+        {
+            if (!Directory.Exists(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
+        }
+        catch
+        {
+            return false;
+        }
+
+        _activeScenePath = path;
+        return SaveScene();
+    }
+
     private void CheckAndSave()
     {
-        if (_isDirty)
+        if (_isDirty && !string.IsNullOrWhiteSpace(_activeScenePath))
         {
             SaveScene();
         }

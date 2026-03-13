@@ -16,38 +16,52 @@
             Background="Transparent" 
             BorderThickness="2"
             CornerRadius="4">
-        <Panel VerticalAlignment="Center" 
-               Background="Transparent" 
-               HorizontalAlignment="Stretch" 
+        <Panel VerticalAlignment="Center"
+               Background="Transparent"
+               HorizontalAlignment="Stretch"
                Margin="4,2">
 
-            <StackPanel Orientation="Horizontal" Spacing="5">
-                <TextBlock Text="{Binding Name}"
-                           FontWeight="Bold"
-                           FontSize="10"
-                           IsVisible="{Binding !IsEditing}"
-                           VerticalAlignment="Center"
-                           Margin="0" />
+            <Grid ColumnDefinitions="*,Auto" VerticalAlignment="Center">
+                <StackPanel Orientation="Horizontal" Spacing="5" Grid.Column="0">
+                    <TextBlock Text="{Binding Name}"
+                               FontWeight="Bold"
+                               FontSize="10"
+                               IsVisible="{Binding !IsEditing}"
+                               VerticalAlignment="Center"
+                               Margin="0" />
 
-                <TextBox x:Name="NameTextBox"
-                         Text="{Binding TempName}"
-                         IsVisible="{Binding IsEditing}"
-                         AttachedToVisualTree="OnTextBoxLoaded"
-                         FontWeight="Bold"
-                         FontSize="10"
-                         Background="Transparent"
-                         BorderThickness="0"
-                         MinHeight="0"
-                         Padding="0"
-                         Margin="0"
-                         VerticalAlignment="Center">
+                    <TextBox x:Name="NameTextBox"
+                             Text="{Binding TempName}"
+                             IsVisible="{Binding IsEditing}"
+                             AttachedToVisualTree="OnTextBoxLoaded"
+                             FontWeight="Bold"
+                             FontSize="10"
+                             Background="Transparent"
+                             BorderThickness="0"
+                             MinHeight="0"
+                             Padding="0"
+                             Margin="0"
+                             VerticalAlignment="Center">
 
-                    <TextBox.KeyBindings>
-                        <KeyBinding Gesture="Escape" Command="{Binding CancelEditCommand}" />
-                        <KeyBinding Gesture="Enter" Command="{Binding CommitEditCommand}" />
-                    </TextBox.KeyBindings>
-                </TextBox>
-            </StackPanel>
+                        <TextBox.KeyBindings>
+                            <KeyBinding Gesture="Escape" Command="{Binding CancelEditCommand}" />
+                            <KeyBinding Gesture="Enter" Command="{Binding CommitEditCommand}" />
+                        </TextBox.KeyBindings>
+                    </TextBox>
+                </StackPanel>
+
+                <Button Grid.Column="1"
+                        Command="{Binding SaveSceneCommand}"
+                        Width="20"
+                        Height="20"
+                        Padding="0"
+                        Margin="8,0,0,0"
+                        ToolTip.Tip="Save Scene">
+                    <PathIcon Width="12"
+                              Height="12"
+                              Data="M17,3H5A2,2 0 0 0 3,5V19A2,2 0 0 0 5,21H19A2,2 0 0 0 21,19V7L17,3M12,19A3,3 0 0 1 9,16A3,3 0 0 1 12,13A3,3 0 0 1 15,16A3,3 0 0 1 12,19M6,5H15V9H6V5Z" />
+                </Button>
+            </Grid>
         </Panel>
     </Border>
     <UserControl.Styles>

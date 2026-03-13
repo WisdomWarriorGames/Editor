@@ -1,0 +1,31 @@
+<suki:SukiWindow xmlns="https://github.com/avaloniaui"
+                 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                 xmlns:suki="clr-namespace:SukiUI.Controls;assembly=SukiUI"
+                 x:Class="WisdomWarrior.Editor.Shell.UnsavedSceneCloseDialog"
+                 Width="460"
+                 Height="220"
+                 CanResize="False"
+                 WindowStartupLocation="CenterOwner"
+                 ShowInTaskbar="False"
+                 Title="Unsaved Scene">
+    <Grid Margin="18" RowDefinitions="Auto,Auto,*">
+        <TextBlock Text="The current scene has unsaved changes."
+                   FontWeight="Bold"
+                   FontSize="14" />
+
+        <TextBlock Grid.Row="1"
+                   Margin="0,10,0,0"
+                   TextWrapping="Wrap"
+                   Text="Choose &quot;Save and Close&quot; to select where to save the scene file inside this solution, &quot;Don&apos;t Save&quot; to close without saving, or &quot;Cancel&quot; to keep editing." />
+
+        <StackPanel Grid.Row="2"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Bottom"
+                    Spacing="8">
+            <Button Content="Cancel" Click="OnCancelClicked" />
+            <Button Content="Don't Save" Click="OnDontSaveClicked" />
+            <Button Classes="accent" Content="Save and Close" Click="OnSaveAndCloseClicked" />
+        </StackPanel>
+    </Grid>
+</suki:SukiWindow>

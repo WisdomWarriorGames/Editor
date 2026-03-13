@@ -13,6 +13,7 @@ public partial class SceneNodeViewModel : ObservableObject
 {
     private readonly SceneTracker _tracker;
     private readonly SelectionManager _selectionManager;
+    private readonly Action _saveScene;
 
     [ObservableProperty] private string _name = "Loading...";
     [ObservableProperty] private bool _isExpanded = true;
@@ -23,10 +24,11 @@ public partial class SceneNodeViewModel : ObservableObject
 
     public ObservableCollection<EntityViewModel> Children { get; } = new();
 
-    public SceneNodeViewModel(SceneTracker tracker, SelectionManager selectionManager)
+    public SceneNodeViewModel(SceneTracker tracker, SelectionManager selectionManager, Action saveScene)
     {
         _tracker = tracker;
         _selectionManager = selectionManager;
+        _saveScene = saveScene;
         SyncName();
     }
 
@@ -84,6 +86,12 @@ public partial class SceneNodeViewModel : ObservableObject
     public void AddEntity()
     {
         _tracker.AddEntity(new GameEntity());
+    }
+
+    [RelayCommand]
+    public void SaveScene()
+    {
+        _saveScene.Invoke();
     }
 
     private bool CanAcceptDrop(object? droppedItem)

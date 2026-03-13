@@ -17,6 +17,10 @@ public static class Configurations
     {
         services.AddTransient<FileSystemService>();
         services.AddTransient<ProjectService>();
+        services.AddSingleton<EditorManifestService>();
+        services.AddTransient<SlnxProjectService>();
+        services.AddTransient<SlnxWorkspaceLoader>();
+        services.AddSingleton<ScenePersistenceService>();
 
         services.AddSingleton<FileSystemRegistry>();
         services.AddSingleton<WorkspaceService>();
