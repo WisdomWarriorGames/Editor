@@ -187,6 +187,37 @@ public class CurrentSceneManager
         return SaveScene();
     }
 
+    public void UpdateActiveScenePath(string path)
+    {
+        _activeScenePath = string.IsNullOrWhiteSpace(path) ? string.Empty : path;
+    }
+
+    public bool RenameActiveScene(string newSceneName)
+    {
+        if (ActiveScene == null)
+            return false;
+
+        var trimmedName = newSceneName?.Trim();
+        if (string.IsNullOrWhiteSpace(trimmedName))
+            return false;
+
+        if (string.Equals(ActiveScene.Name, trimmedName, StringComparison.Ordinal))
+            return true;
+
+        if (!string.IsNullOrWhiteSpace(_registeredSceneName))
+        {
+            SceneManager.RemoveScene(_registeredSceneName);
+        }
+
+        ActiveScene.Name = trimmedName;
+        SceneManager.AddOrReplaceScene(ActiveScene.Name, ActiveScene);
+        SceneManager.SetCurrentScene(ActiveScene.Name);
+        _registeredSceneName = ActiveScene.Name;
+
+        Tracker.Update();
+        return true;
+    }
+
     private void CheckAndSave()
     {
         if (_isDirty && !string.IsNullOrWhiteSpace(_activeScenePath))

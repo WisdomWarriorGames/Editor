@@ -98,7 +98,7 @@ public class ScenePersistenceService(
         _manifestService.Save(root, manifest);
     }
 
-    private static string SanitizeSceneFileName(string? sceneName)
+    internal static string SanitizeSceneFileName(string? sceneName)
     {
         var candidate = string.IsNullOrWhiteSpace(sceneName) ? "Scene1" : sceneName.Trim();
         var invalidChars = Path.GetInvalidFileNameChars();

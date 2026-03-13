@@ -15,11 +15,12 @@ public static class Configurations
 {
     public static IServiceCollection Configure(this IServiceCollection services)
     {
-        services.AddTransient<FileSystemService>();
+        services.AddSingleton<FileSystemService>();
         services.AddSingleton<EditorManifestService>();
         services.AddTransient<WorkspaceCreationService>();
         services.AddTransient<WorkspaceLoader>();
         services.AddSingleton<ScenePersistenceService>();
+        services.AddSingleton<ScenePathSynchronizationService>();
 
         services.AddSingleton<FileSystemRegistry>();
         services.AddSingleton<WorkspaceService>();

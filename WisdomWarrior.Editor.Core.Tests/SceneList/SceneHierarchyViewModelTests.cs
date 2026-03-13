@@ -19,7 +19,13 @@ public class SceneHierarchyViewModelTests
         var manifestService = new EditorManifestService();
         var workspaceService = new WorkspaceService(fileSystemRegistry, manifestService);
         var scenePersistenceService = new ScenePersistenceService(currentSceneManager, workspaceService, manifestService);
-        var sceneHierarchyViewModel = new SceneHierarchyViewModel(currentSceneManager, selectionManager, scenePersistenceService);
+        var fileSystemService = new FileSystemService();
+        var scenePathSynchronizationService = new ScenePathSynchronizationService(currentSceneManager, workspaceService, manifestService, fileSystemService);
+        var sceneHierarchyViewModel = new SceneHierarchyViewModel(
+            currentSceneManager,
+            selectionManager,
+            scenePersistenceService,
+            scenePathSynchronizationService);
 
         try
         {

@@ -18,6 +18,7 @@ public partial class SceneHierarchyViewModel : ObservableObject
     private readonly CurrentSceneManager _sceneManager;
     private readonly SelectionManager _selectionManager;
     private readonly ScenePersistenceService _scenePersistenceService;
+    private readonly ScenePathSynchronizationService _scenePathSynchronizationService;
 
     public ObservableCollection<SceneNodeViewModel> Scenes { get; } = new();
 
@@ -28,11 +29,13 @@ public partial class SceneHierarchyViewModel : ObservableObject
     public SceneHierarchyViewModel(
         CurrentSceneManager sceneManager,
         SelectionManager selectionManager,
-        ScenePersistenceService scenePersistenceService)
+        ScenePersistenceService scenePersistenceService,
+        ScenePathSynchronizationService scenePathSynchronizationService)
     {
         _sceneManager = sceneManager;
         _selectionManager = selectionManager;
         _scenePersistenceService = scenePersistenceService;
+        _scenePathSynchronizationService = scenePathSynchronizationService;
         _sceneTracker = _sceneManager.Tracker;
 
         _sceneTracker.OnSceneModified += OnSceneModified;
@@ -64,7 +67,11 @@ public partial class SceneHierarchyViewModel : ObservableObject
             ClearCurrentSelectionState();
             Scenes.Clear();
 
-            _activeSceneNode = new SceneNodeViewModel(_sceneTracker, _selectionManager, SaveActiveScene);
+            _activeSceneNode = new SceneNodeViewModel(
+                _sceneTracker,
+                _selectionManager,
+                SaveActiveScene,
+                RenameActiveScene);
             Scenes.Add(_activeSceneNode);
             SyncRootEntities();
         });
@@ -79,6 +86,21 @@ public partial class SceneHierarchyViewModel : ObservableObject
         EditorUI.ToastManager.CreateToast()
             .WithTitle("Unable to save scene in the selected folder.")
             .Queue();
+    }
+
+    private SceneRenameResult RenameActiveScene(string newSceneName)
+    {
+        var result = _scenePathSynchronizationService.RenameActiveScene(newSceneName);
+        if (result.Success)
+        {
+            return result;
+        }
+
+        EditorUI.ToastManager.CreateToast()
+            .WithTitle(result.ErrorMessage ?? "Unable to rename scene.")
+            .Queue();
+
+        return result;
     }
 
     private void OnSceneModified()

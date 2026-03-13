@@ -1,5 +1,5 @@
-using SixLabors.ImageSharp;
 using WisdomWarrior.Engine.Core.Assets;
+using Size = WisdomWarrior.Engine.Core.DataTypes.Size;
 
 namespace WisdomWarrior.Editor.Core.Helpers;
 
@@ -37,16 +37,12 @@ public static class AssetHelpers
 
         try
         {
-            var info = Image.Identify(resolvedPath);
-
-            if (info != null)
-            {
-                asset.Dimensions = new Engine.Core.DataTypes.Size(info.Width, info.Height);
-            }
+            if (TryReadImageDimensions(resolvedPath, out var dimensions))
+                asset.Dimensions = dimensions;
         }
         catch
         {
-            asset.Dimensions = Engine.Core.DataTypes.Size.Zero;
+            asset.Dimensions = Size.Zero;
         }
 
         return asset;
@@ -168,5 +164,162 @@ public static class AssetHelpers
         }
 
         return normalized;
+    }
+
+    private static bool TryReadImageDimensions(string path, out Size dimensions)
+    {
+        dimensions = Size.Zero;
+
+        using var stream = File.OpenRead(path);
+        using var reader = new BinaryReader(stream);
+
+        if (stream.Length < 10)
+            return false;
+
+        Span<byte> header = stackalloc byte[8];
+        if (stream.Read(header) != header.Length)
+            return false;
+
+        stream.Position = 0;
+
+        if (header[0] == 0x89 &&
+            header[1] == 0x50 &&
+            header[2] == 0x4E &&
+            header[3] == 0x47)
+        {
+            return TryReadPngDimensions(reader, out dimensions);
+        }
+
+        if (header[0] == 0xFF && header[1] == 0xD8)
+        {
+            return TryReadJpegDimensions(reader, out dimensions);
+        }
+
+        if (header[0] == 0x47 &&
+            header[1] == 0x49 &&
+            header[2] == 0x46)
+        {
+            return TryReadGifDimensions(reader, out dimensions);
+        }
+
+        if (header[0] == 0x42 && header[1] == 0x4D)
+        {
+            return TryReadBmpDimensions(reader, out dimensions);
+        }
+
+        return false;
+    }
+
+    private static bool TryReadPngDimensions(BinaryReader reader, out Size dimensions)
+    {
+        dimensions = Size.Zero;
+
+        reader.BaseStream.Position = 16;
+        if (reader.BaseStream.Length < 24)
+            return false;
+
+        var width = ReadInt32BigEndian(reader);
+        var height = ReadInt32BigEndian(reader);
+        dimensions = new Size(width, height);
+        return width > 0 && height > 0;
+    }
+
+    private static bool TryReadGifDimensions(BinaryReader reader, out Size dimensions)
+    {
+        dimensions = Size.Zero;
+
+        reader.BaseStream.Position = 6;
+        if (reader.BaseStream.Length < 10)
+            return false;
+
+        var width = reader.ReadUInt16();
+        var height = reader.ReadUInt16();
+        dimensions = new Size(width, height);
+        return width > 0 && height > 0;
+    }
+
+    private static bool TryReadBmpDimensions(BinaryReader reader, out Size dimensions)
+    {
+        dimensions = Size.Zero;
+
+        reader.BaseStream.Position = 18;
+        if (reader.BaseStream.Length < 26)
+            return false;
+
+        var width = reader.ReadInt32();
+        var height = Math.Abs(reader.ReadInt32());
+        dimensions = new Size(width, height);
+        return width > 0 && height > 0;
+    }
+
+    private static bool TryReadJpegDimensions(BinaryReader reader, out Size dimensions)
+    {
+        dimensions = Size.Zero;
+        reader.BaseStream.Position = 2;
+
+        while (reader.BaseStream.Position + 4 <= reader.BaseStream.Length)
+        {
+            if (reader.ReadByte() != 0xFF)
+                return false;
+
+            byte marker;
+            do
+            {
+                if (reader.BaseStream.Position >= reader.BaseStream.Length)
+                    return false;
+
+                marker = reader.ReadByte();
+            }
+            while (marker == 0xFF);
+
+            if (marker == 0xD9 || marker == 0xDA)
+                return false;
+
+            var segmentLength = ReadUInt16BigEndian(reader);
+            if (segmentLength < 2 || reader.BaseStream.Position + segmentLength - 2 > reader.BaseStream.Length)
+                return false;
+
+            if (IsJpegStartOfFrame(marker))
+            {
+                reader.ReadByte();
+                var height = ReadUInt16BigEndian(reader);
+                var width = ReadUInt16BigEndian(reader);
+                dimensions = new Size(width, height);
+                return width > 0 && height > 0;
+            }
+
+            reader.BaseStream.Position += segmentLength - 2;
+        }
+
+        return false;
+    }
+
+    private static bool IsJpegStartOfFrame(byte marker)
+    {
+        return marker switch
+        {
+            0xC0 or 0xC1 or 0xC2 or 0xC3 or 0xC5 or 0xC6 or 0xC7 or 0xC9 or 0xCA or 0xCB or 0xCD or 0xCE or 0xCF => true,
+            _ => false
+        };
+    }
+
+    private static int ReadInt32BigEndian(BinaryReader reader)
+    {
+        Span<byte> buffer = stackalloc byte[4];
+        reader.Read(buffer);
+        if (BitConverter.IsLittleEndian)
+            buffer.Reverse();
+
+        return BitConverter.ToInt32(buffer);
+    }
+
+    private static ushort ReadUInt16BigEndian(BinaryReader reader)
+    {
+        Span<byte> buffer = stackalloc byte[2];
+        reader.Read(buffer);
+        if (BitConverter.IsLittleEndian)
+            buffer.Reverse();
+
+        return BitConverter.ToUInt16(buffer);
     }
 }
