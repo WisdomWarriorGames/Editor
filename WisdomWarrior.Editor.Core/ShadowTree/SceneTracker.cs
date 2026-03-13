@@ -4,6 +4,7 @@ namespace WisdomWarrior.Editor.Core.ShadowTree;
 
 public class SceneTracker
 {
+    private readonly object _syncRoot = new();
     private Scene? _activeScene;
     private readonly List<EntityTracker> _rootEntities = new();
     private int _lastRootCount;
@@ -12,38 +13,76 @@ public class SceneTracker
 
     public event Action? OnSceneModified;
 
-    public IReadOnlyList<EntityTracker> TrackedRoots => _rootEntities;
-    public Scene? ActiveScene => _activeScene;
-    public bool IsDirty => _isDirty;
+    public IReadOnlyList<EntityTracker> TrackedRoots
+    {
+        get
+        {
+            lock (_syncRoot)
+            {
+                return _rootEntities.ToArray();
+            }
+        }
+    }
+
+    public Scene? ActiveScene
+    {
+        get
+        {
+            lock (_syncRoot)
+            {
+                return _activeScene;
+            }
+        }
+    }
+
+    public bool IsDirty
+    {
+        get
+        {
+            lock (_syncRoot)
+            {
+                return _isDirty;
+            }
+        }
+    }
 
     public void TrackScene(Scene scene)
     {
-        _activeScene = scene;
-        _lastName = scene.Name;
-        SyncRoots();
-        _isDirty = false;
+        lock (_syncRoot)
+        {
+            _activeScene = scene;
+            _lastName = scene.Name;
+            SyncRoots();
+            _isDirty = false;
+        }
     }
 
     public void AddEntity(GameEntity entity)
     {
-        if (_activeScene == null) return;
-        if (_activeScene.Entities.Contains(entity)) return;
-        _activeScene.AddEntity(entity);
+        lock (_syncRoot)
+        {
+            if (_activeScene == null) return;
+            if (_activeScene.Entities.Contains(entity)) return;
+            _activeScene.AddEntity(entity);
+        }
 
         Update();
     }
 
     public void RemoveEntity(GameEntity entity)
     {
-        if (_activeScene == null) return;
+        lock (_syncRoot)
+        {
+            if (_activeScene == null) return;
 
-        if (entity.Parent != null)
-        {
-            entity.Parent.RemoveEntity(entity);
-        }
-        else
-        {
-            _activeScene.RemoveEntity(entity);
+            if (entity.Parent != null)
+            {
+                entity.Parent.RemoveEntity(entity);
+            }
+            else
+            {
+                _activeScene.RemoveEntity(entity);
+            }
         }
 
         Update();
@@ -51,23 +90,30 @@ public class SceneTracker
 
     public void Update()
     {
-        if (_activeScene == null) return;
-
+        EntityTracker[] rootTrackers;
         var detectedChanges = false;
+        Action? onSceneModified = null;
 
-        if (_activeScene.Name != _lastName)
+        lock (_syncRoot)
         {
-            _lastName = _activeScene.Name;
-            detectedChanges = true;
+            if (_activeScene == null) return;
+
+            if (_activeScene.Name != _lastName)
+            {
+                _lastName = _activeScene.Name;
+                detectedChanges = true;
+            }
+
+            if (_activeScene.Entities.Count != _lastRootCount)
+            {
+                SyncRoots();
+                detectedChanges = true;
+            }
+
+            rootTrackers = _rootEntities.ToArray();
         }
 
-        if (_activeScene.Entities.Count != _lastRootCount)
-        {
-            SyncRoots();
-            detectedChanges = true;
-        }
-
-        foreach (var rootTracker in _rootEntities)
+        foreach (var rootTracker in rootTrackers)
         {
             if (rootTracker.Update())
             {
@@ -75,36 +121,51 @@ public class SceneTracker
             }
         }
 
-        if (!detectedChanges) return;
+        lock (_syncRoot)
+        {
+            if (!detectedChanges) return;
+            if (_isDirty) return;
 
-        if (_isDirty) return;
+            _isDirty = true;
+            onSceneModified = OnSceneModified;
+        }
 
-        _isDirty = true;
-        OnSceneModified?.Invoke();
+        onSceneModified?.Invoke();
     }
 
     public void AcknowledgeSaved()
     {
-        if (_activeScene == null)
+        EntityTracker[] rootTrackers;
+
+        lock (_syncRoot)
         {
+            if (_activeScene == null)
+            {
+                _isDirty = false;
+                return;
+            }
+
+            _lastName = _activeScene.Name;
+            SyncRoots();
+            rootTrackers = _rootEntities.ToArray();
             _isDirty = false;
-            return;
         }
 
-        _lastName = _activeScene.Name;
-        SyncRoots();
-
-        foreach (var rootTracker in _rootEntities)
+        foreach (var rootTracker in rootTrackers)
         {
             rootTracker.AcknowledgeSaved();
         }
-
-        _isDirty = false;
     }
 
     public EntityTracker? FindTrackerByEntity(GameEntity entity)
     {
-        foreach (var rootTracker in _rootEntities)
+        EntityTracker[] rootTrackers;
+        lock (_syncRoot)
+        {
+            rootTrackers = _rootEntities.ToArray();
+        }
+
+        foreach (var rootTracker in rootTrackers)
         {
             var match = FindTrackerByEntity(rootTracker, entity);
             if (match != null)

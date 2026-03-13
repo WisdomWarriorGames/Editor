@@ -2,7 +2,7 @@ using WisdomWarrior.Editor.FileSystem;
 
 namespace WisdomWarrior.Editor.Core.Tests.Services;
 
-public class SlnxWorkspaceLoaderTests
+public class WorkspaceLoaderTests
 {
     [Fact]
     public void Load_WhenManifestMissing_CreatesManifestNextToSlnx_UsingFirstProjectAsDefault()
@@ -19,7 +19,7 @@ public class SlnxWorkspaceLoaderTests
                 "ProjectB/ProjectB.csproj");
 
             var manifestService = new EditorManifestService();
-            var loader = new SlnxWorkspaceLoader(manifestService);
+            var loader = new WorkspaceLoader(manifestService);
             var workspace = loader.Load(solutionPath);
 
             var manifestPath = manifestService.GetManifestPath(tempRoot);
@@ -35,7 +35,7 @@ public class SlnxWorkspaceLoaderTests
             var workspaceService = new WorkspaceService(registry, manifestService);
             workspaceService.Load(workspace);
 
-            Assert.Equal(Path.Combine(tempRoot, "ProjectA"), workspaceService.CurrentModuleRoot);
+            Assert.Equal(Path.Combine(tempRoot, "ProjectA"), workspaceService.CurrentProjectRoot);
         }
         finally
         {
@@ -67,7 +67,7 @@ public class SlnxWorkspaceLoaderTests
                 LastActiveScene = null
             });
 
-            var loader = new SlnxWorkspaceLoader(manifestService);
+            var loader = new WorkspaceLoader(manifestService);
             var workspace = loader.Load(solutionPath);
 
             Assert.Equal("ProjectA", workspace.DefaultProjectPath);

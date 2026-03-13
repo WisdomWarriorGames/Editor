@@ -71,6 +71,28 @@ public class TrackerEdgeCaseTests
         Assert.Equal(0, modifiedCount);
     }
 
+    [Fact]
+    public void SceneTracker_AddEntity_DuringConcurrentUpdates_DoesNotThrow()
+    {
+        var scene = TestSceneFactory.CreateSceneWithRoot();
+        var tracker = new SceneTracker();
+        tracker.TrackScene(scene);
+
+        var error = Record.Exception(() =>
+            Parallel.Invoke(
+                () =>
+                {
+                    for (var i = 0; i < 100; i++)
+                    {
+                        tracker.Update();
+                    }
+                },
+                () => tracker.AddEntity(TestSceneFactory.CreateEntityWithTransform("Root2", new(1f, 1f)))));
+
+        Assert.Null(error);
+        Assert.Equal(2, tracker.TrackedRoots.Count);
+    }
+
     private sealed class NullableNameComponent : Component
     {
         public string? Nickname { get; set; }

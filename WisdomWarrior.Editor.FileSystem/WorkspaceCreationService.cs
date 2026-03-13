@@ -2,20 +2,20 @@ using System.Diagnostics;
 
 namespace WisdomWarrior.Editor.FileSystem;
 
-public class SlnxProjectService
+public class WorkspaceCreationService
 {
     private readonly EditorManifestService _manifestService;
 
-    public SlnxProjectService() : this(new EditorManifestService())
+    public WorkspaceCreationService() : this(new EditorManifestService())
     {
     }
 
-    public SlnxProjectService(EditorManifestService manifestService)
+    public WorkspaceCreationService(EditorManifestService manifestService)
     {
         _manifestService = manifestService;
     }
 
-    public SlnxWorkspaceDescriptor CreateSolution(string projectPath, string projectName)
+    public WorkspaceDescriptor CreateSolution(string projectPath, string projectName)
     {
         var name = projectName.Replace(" ", string.Empty);
         var rootPath = GetRootPath(projectPath, projectName);
@@ -34,7 +34,7 @@ public class SlnxProjectService
         DeleteIfExists(Path.Combine(defaultProjectPath, "Class1.cs"));
         _manifestService.Save(rootPath, _manifestService.CreateDefault(name));
 
-        return new SlnxWorkspaceDescriptor
+        return new WorkspaceDescriptor
         {
             RootPath = rootPath,
             SolutionFilePath = Path.Combine(rootPath, $"{name}.slnx"),

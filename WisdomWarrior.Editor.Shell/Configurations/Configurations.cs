@@ -16,10 +16,9 @@ public static class Configurations
     public static IServiceCollection Configure(this IServiceCollection services)
     {
         services.AddTransient<FileSystemService>();
-        services.AddTransient<ProjectService>();
         services.AddSingleton<EditorManifestService>();
-        services.AddTransient<SlnxProjectService>();
-        services.AddTransient<SlnxWorkspaceLoader>();
+        services.AddTransient<WorkspaceCreationService>();
+        services.AddTransient<WorkspaceLoader>();
         services.AddSingleton<ScenePersistenceService>();
 
         services.AddSingleton<FileSystemRegistry>();

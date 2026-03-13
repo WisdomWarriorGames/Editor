@@ -25,7 +25,7 @@ public class ScenePersistenceServiceTests
             var manifestService = new EditorManifestService();
             registry = new FileSystemRegistry(new FileSystemService());
             var workspaceService = new WorkspaceService(registry, manifestService);
-            workspaceService.Load(new SlnxWorkspaceDescriptor
+            workspaceService.Load(new WorkspaceDescriptor
             {
                 RootPath = tempRoot,
                 SolutionFilePath = Path.Combine(tempRoot, "Game.slnx"),
@@ -88,7 +88,7 @@ public class ScenePersistenceServiceTests
             var manifestService = new EditorManifestService();
             registry = new FileSystemRegistry(new FileSystemService());
             var workspaceService = new WorkspaceService(registry, manifestService);
-            workspaceService.Load(new SlnxWorkspaceDescriptor
+            workspaceService.Load(new WorkspaceDescriptor
             {
                 RootPath = tempRoot,
                 SolutionFilePath = Path.Combine(tempRoot, "Game.slnx"),
@@ -141,7 +141,7 @@ public class ScenePersistenceServiceTests
             var manifestService = new EditorManifestService();
             registry = new FileSystemRegistry(new FileSystemService());
             var workspaceService = new WorkspaceService(registry, manifestService);
-            workspaceService.Load(new SlnxWorkspaceDescriptor
+            workspaceService.Load(new WorkspaceDescriptor
             {
                 RootPath = tempRoot,
                 SolutionFilePath = Path.Combine(tempRoot, "Game.slnx"),

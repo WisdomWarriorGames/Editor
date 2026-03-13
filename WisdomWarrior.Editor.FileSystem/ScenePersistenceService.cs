@@ -81,17 +81,17 @@ public class ScenePersistenceService(
 
     private void PersistLastActiveScene(string scenePath)
     {
-        var root = _workspaceService.ProjectRoot;
+        var root = _workspaceService.WorkspaceRoot;
         if (string.IsNullOrWhiteSpace(root))
             return;
 
         if (!_workspaceService.TryGetProjectRelativePath(scenePath, out var relativeScenePath))
             return;
 
-        var manifest = _manifestService.TryLoad(root) ?? _manifestService.CreateDefault(_workspaceService.GetCurrentModuleRelativePath());
+        var manifest = _manifestService.TryLoad(root) ?? _manifestService.CreateDefault(_workspaceService.GetCurrentProjectRelativePath());
         if (string.IsNullOrWhiteSpace(manifest.DefaultProject))
         {
-            manifest.DefaultProject = _workspaceService.GetCurrentModuleRelativePath();
+            manifest.DefaultProject = _workspaceService.GetCurrentProjectRelativePath();
         }
 
         manifest.LastActiveScene = relativeScenePath;

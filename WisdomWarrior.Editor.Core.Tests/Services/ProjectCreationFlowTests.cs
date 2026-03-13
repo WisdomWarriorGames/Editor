@@ -5,47 +5,21 @@ namespace WisdomWarrior.Editor.Core.Tests.Services;
 public class ProjectCreationFlowTests
 {
     [Fact]
-    public void LegacyCreateSolution_KeepsLegacyProjectShape()
-    {
-        var tempRoot = CreateTempRoot();
-
-        try
-        {
-            var projectService = new ProjectService();
-            var manifest = projectService.CreateSolution(tempRoot, "Legacy Game");
-            var rootPath = projectService.GetRootPath(tempRoot, "Legacy Game");
-
-            Assert.NotNull(manifest);
-            Assert.True(Directory.Exists(Path.Combine(rootPath, "LegacyGame")));
-            Assert.True(Directory.Exists(Path.Combine(rootPath, "LegacyGame.Game")));
-            Assert.True(File.Exists(Path.Combine(rootPath, "LegacyGame.Game", "CurrentScene.scene.json")));
-            Assert.True(File.Exists(Path.Combine(rootPath, "LegacyGame.manifest.json")));
-            Assert.True(Directory.EnumerateFiles(rootPath, "*.sln*", SearchOption.TopDirectoryOnly).Any());
-        }
-        finally
-        {
-            if (Directory.Exists(tempRoot))
-            {
-                Directory.Delete(tempRoot, true);
-            }
-        }
-    }
-
-    [Fact]
-    public void SlnxCreateSolution_CreatesSeparateSlnxWorkspaceShape()
+    public void CreateSolution_CreatesWorkspaceShape()
     {
         var tempRoot = CreateTempRoot();
         FileSystemRegistry? registry = null;
 
         try
         {
-            var projectService = new SlnxProjectService();
-            var workspace = projectService.CreateSolution(tempRoot, "Slnx Game");
+            var workspaceCreationService = new WorkspaceCreationService();
+            var workspace = workspaceCreationService.CreateSolution(tempRoot, "Workspace Game");
 
             Assert.EndsWith(".slnx", workspace.SolutionFilePath, StringComparison.OrdinalIgnoreCase);
             Assert.True(File.Exists(workspace.SolutionFilePath));
             Assert.True(Directory.Exists(Path.Combine(workspace.RootPath, workspace.DefaultProjectPath)));
-            Assert.False(Directory.Exists(Path.Combine(workspace.RootPath, "SlnxGame.Game")));
+            Assert.False(Directory.Exists(Path.Combine(workspace.RootPath, "WorkspaceGame.Game")));
+            Assert.False(Directory.EnumerateFiles(workspace.RootPath, "*.manifest.json", SearchOption.TopDirectoryOnly).Any());
 
             var projectFiles = Directory.GetFiles(workspace.RootPath, "*.csproj", SearchOption.AllDirectories);
             Assert.Single(projectFiles);
@@ -73,8 +47,8 @@ public class ProjectCreationFlowTests
 
             workspaceService.Load(workspace);
 
-            Assert.Equal(workspace.RootPath, workspaceService.ProjectRoot);
-            Assert.Equal(Path.Combine(workspace.RootPath, workspace.DefaultProjectPath), workspaceService.CurrentModuleRoot);
+            Assert.Equal(workspace.RootPath, workspaceService.WorkspaceRoot);
+            Assert.Equal(Path.Combine(workspace.RootPath, workspace.DefaultProjectPath), workspaceService.CurrentProjectRoot);
             Assert.Equal(string.Empty, workspaceService.ActiveScene);
         }
         finally
@@ -89,7 +63,7 @@ public class ProjectCreationFlowTests
     }
 
     [Fact]
-    public void SlnxWorkspaceLoad_WhenManifestMissing_FallsBackToDescriptorDefaults()
+    public void WorkspaceLoad_WhenManifestMissing_FallsBackToDescriptorDefaults()
     {
         var tempRoot = CreateTempRoot();
         FileSystemRegistry? registry = null;
@@ -97,8 +71,8 @@ public class ProjectCreationFlowTests
         try
         {
             var manifestService = new EditorManifestService();
-            var projectService = new SlnxProjectService(manifestService);
-            var workspace = projectService.CreateSolution(tempRoot, "Missing Manifest Game");
+            var workspaceCreationService = new WorkspaceCreationService(manifestService);
+            var workspace = workspaceCreationService.CreateSolution(tempRoot, "Missing Manifest Game");
 
             File.Delete(manifestService.GetManifestPath(workspace.RootPath));
 
@@ -106,7 +80,7 @@ public class ProjectCreationFlowTests
             var workspaceService = new WorkspaceService(registry, manifestService);
             workspaceService.Load(workspace);
 
-            Assert.Equal(Path.Combine(workspace.RootPath, workspace.DefaultProjectPath), workspaceService.CurrentModuleRoot);
+            Assert.Equal(Path.Combine(workspace.RootPath, workspace.DefaultProjectPath), workspaceService.CurrentProjectRoot);
             Assert.Equal(string.Empty, workspaceService.ActiveScene);
         }
         finally
@@ -120,7 +94,7 @@ public class ProjectCreationFlowTests
     }
 
     [Fact]
-    public void SlnxWorkspaceLoad_WhenManifestInvalidJson_FallsBackToDescriptorDefaults()
+    public void WorkspaceLoad_WhenManifestInvalidJson_FallsBackToDescriptorDefaults()
     {
         var tempRoot = CreateTempRoot();
         FileSystemRegistry? registry = null;
@@ -128,8 +102,8 @@ public class ProjectCreationFlowTests
         try
         {
             var manifestService = new EditorManifestService();
-            var projectService = new SlnxProjectService(manifestService);
-            var workspace = projectService.CreateSolution(tempRoot, "Invalid Manifest Game");
+            var workspaceCreationService = new WorkspaceCreationService(manifestService);
+            var workspace = workspaceCreationService.CreateSolution(tempRoot, "Invalid Manifest Game");
 
             File.WriteAllText(manifestService.GetManifestPath(workspace.RootPath), "{ invalid json");
 
@@ -137,7 +111,7 @@ public class ProjectCreationFlowTests
             var workspaceService = new WorkspaceService(registry, manifestService);
             workspaceService.Load(workspace);
 
-            Assert.Equal(Path.Combine(workspace.RootPath, workspace.DefaultProjectPath), workspaceService.CurrentModuleRoot);
+            Assert.Equal(Path.Combine(workspace.RootPath, workspace.DefaultProjectPath), workspaceService.CurrentProjectRoot);
             Assert.Equal(string.Empty, workspaceService.ActiveScene);
         }
         finally
@@ -151,7 +125,7 @@ public class ProjectCreationFlowTests
     }
 
     [Fact]
-    public void SlnxWorkspaceLoad_WhenManifestDefaultProjectInvalid_FallsBackToDescriptorDefaults()
+    public void WorkspaceLoad_WhenManifestDefaultProjectInvalid_FallsBackToDescriptorDefaults()
     {
         var tempRoot = CreateTempRoot();
         FileSystemRegistry? registry = null;
@@ -159,8 +133,8 @@ public class ProjectCreationFlowTests
         try
         {
             var manifestService = new EditorManifestService();
-            var projectService = new SlnxProjectService(manifestService);
-            var workspace = projectService.CreateSolution(tempRoot, "Invalid Default Project Game");
+            var workspaceCreationService = new WorkspaceCreationService(manifestService);
+            var workspace = workspaceCreationService.CreateSolution(tempRoot, "Invalid Default Project Game");
 
             manifestService.Save(workspace.RootPath, new EditorManifest
             {
@@ -172,7 +146,7 @@ public class ProjectCreationFlowTests
             var workspaceService = new WorkspaceService(registry, manifestService);
             workspaceService.Load(workspace);
 
-            Assert.Equal(Path.Combine(workspace.RootPath, workspace.DefaultProjectPath), workspaceService.CurrentModuleRoot);
+            Assert.Equal(Path.Combine(workspace.RootPath, workspace.DefaultProjectPath), workspaceService.CurrentProjectRoot);
             Assert.Equal(string.Empty, workspaceService.ActiveScene);
         }
         finally
@@ -186,7 +160,7 @@ public class ProjectCreationFlowTests
     }
 
     [Fact]
-    public void SlnxWorkspaceLoad_UsesManifestDefaultProject_WhenValid()
+    public void WorkspaceLoad_UsesManifestDefaultProject_WhenValid()
     {
         var tempRoot = CreateTempRoot();
         FileSystemRegistry? registry = null;
@@ -194,8 +168,8 @@ public class ProjectCreationFlowTests
         try
         {
             var manifestService = new EditorManifestService();
-            var projectService = new SlnxProjectService(manifestService);
-            var workspace = projectService.CreateSolution(tempRoot, "Manifest Default Project Game");
+            var workspaceCreationService = new WorkspaceCreationService(manifestService);
+            var workspace = workspaceCreationService.CreateSolution(tempRoot, "Manifest Default Project Game");
 
             var alternateProjectRelativePath = "AlternateProject";
             var alternateProjectPath = Path.Combine(workspace.RootPath, alternateProjectRelativePath);
@@ -212,7 +186,7 @@ public class ProjectCreationFlowTests
             var workspaceService = new WorkspaceService(registry, manifestService);
             workspaceService.Load(workspace);
 
-            Assert.Equal(Path.Combine(workspace.RootPath, alternateProjectRelativePath), workspaceService.CurrentModuleRoot);
+            Assert.Equal(Path.Combine(workspace.RootPath, alternateProjectRelativePath), workspaceService.CurrentProjectRoot);
         }
         finally
         {

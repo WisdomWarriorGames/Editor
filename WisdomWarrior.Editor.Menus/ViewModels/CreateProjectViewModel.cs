@@ -1,4 +1,4 @@
-﻿using Avalonia.Controls;
+using Avalonia.Controls;
 using Avalonia.Platform.Storage;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -6,7 +6,7 @@ using WisdomWarrior.Editor.FileSystem;
 
 namespace WisdomWarrior.Editor.Menus.ViewModels;
 
-public partial class CreateProjectViewModel(ProjectService projectService, WorkspaceService workspaceService) : ObservableObject
+public partial class CreateProjectViewModel(WorkspaceCreationService workspaceCreationService, WorkspaceService workspaceService) : ObservableObject
 {
     [ObservableProperty] private bool _isLoading;
     [ObservableProperty] private string _gameName = "MyNewGame";
@@ -35,12 +35,10 @@ public partial class CreateProjectViewModel(ProjectService projectService, Works
 
         IsLoading = true;
 
-        await Task.Run(() =>
-        {
-            var manifest = projectService.CreateSolution(ProjectPath, GameName);
-            var root = projectService.GetRootPath(ProjectPath, GameName);
-            workspaceService.Load(manifest, root);
-        });
+        var workspace = await Task.Run(() =>
+            workspaceCreationService.CreateSolution(ProjectPath, GameName));
+
+        workspaceService.Load(workspace);
 
         IsLoading = false;
         window.Close(true);

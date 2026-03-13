@@ -6,9 +6,7 @@
     <Menu Background="Transparent">
         <MenuItem Header="File" Cursor="Hand">
             <MenuItem Header="Create New Game" Command="{Binding CreateNewGameCommand}" />
-            <MenuItem Header="Create New Game (.slnx)" Command="{Binding CreateNewGameSlnxCommand}" />
-            <MenuItem Header="Open Game Solution (.slnx)" Command="{Binding OpenGameSolutionCommand}" />
-            <MenuItem Header="Open Game Project (Legacy Manifest)" Command="{Binding OpenGameProjectCommand}" />
+            <MenuItem Header="Open Game Solution" Command="{Binding OpenGameCommand}" />
         </MenuItem>
     </Menu>
 </UserControl>

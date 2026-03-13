@@ -59,12 +59,15 @@ public partial class SceneHierarchyViewModel : ObservableObject
 
     private void OnSceneReady()
     {
-        ClearCurrentSelectionState();
-        Scenes.Clear();
+        Dispatcher.UIThread.Post(() =>
+        {
+            ClearCurrentSelectionState();
+            Scenes.Clear();
 
-        _activeSceneNode = new SceneNodeViewModel(_sceneTracker, _selectionManager, SaveActiveScene);
-        Scenes.Add(_activeSceneNode);
-        Dispatcher.UIThread.Post(SyncRootEntities);
+            _activeSceneNode = new SceneNodeViewModel(_sceneTracker, _selectionManager, SaveActiveScene);
+            Scenes.Add(_activeSceneNode);
+            SyncRootEntities();
+        });
     }
 
     private void SaveActiveScene()

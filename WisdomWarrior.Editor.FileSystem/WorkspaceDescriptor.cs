@@ -1,6 +1,6 @@
 namespace WisdomWarrior.Editor.FileSystem;
 
-public class SlnxWorkspaceDescriptor
+public class WorkspaceDescriptor
 {
     public string RootPath { get; init; } = string.Empty;
     public string SolutionFilePath { get; init; } = string.Empty;

@@ -1,5 +1,3 @@
-using System.Text.Json;
-using WisdomWarrior.Editor.Core;
 using WisdomWarrior.Editor.Core.Helpers;
 
 namespace WisdomWarrior.Editor.FileSystem;
@@ -8,70 +6,38 @@ public class WorkspaceService(FileSystemRegistry registry, EditorManifestService
 {
     private readonly FileSystemRegistry _currentRegistry = registry;
     private readonly EditorManifestService _manifestService = manifestService;
-    private Manifest? _project;
     private string _activeScenePath = string.Empty;
 
-    public string ProjectRoot { get; private set; } = string.Empty;
-    public string CurrentModuleRoot { get; private set; } = string.Empty;
+    public string WorkspaceRoot { get; private set; } = string.Empty;
+    public string CurrentProjectRoot { get; private set; } = string.Empty;
     public string ActiveScene => string.IsNullOrWhiteSpace(_activeScenePath)
         ? string.Empty
         : Path.Combine(
-            ProjectRoot,
+            WorkspaceRoot,
             _activeScenePath
                 .Replace('/', Path.DirectorySeparatorChar)
                 .Replace('\\', Path.DirectorySeparatorChar));
 
     public event Action<FileSystemRegistry>? WorkspaceInitialized;
 
-    public void Load(string pathToManifest)
-    {
-        var json = File.ReadAllText(pathToManifest);
-        _project = JsonSerializer.Deserialize<Manifest>(json);
-
-        var baseDirectory = Path.GetDirectoryName(pathToManifest)!;
-        Load(_project, baseDirectory);
-    }
-
-    public void Load(Manifest? manifest, string rootPath)
-    {
-        _project = manifest;
-
-        if (_project == null)
-        {
-            return;
-        }
-
-        ProjectRoot = rootPath;
-        _activeScenePath = _project.ActiveScene;
-        AssetPathContext.Configure(ProjectRoot, null);
-
-        if (_project.Modules.Count > 0)
-        {
-            var module = _project.Modules[0];
-            var path = Path.Combine(rootPath, module.Path);
-            ChangeModule(path);
-        }
-    }
-
-    public void Load(SlnxWorkspaceDescriptor? workspace)
+    public void Load(WorkspaceDescriptor? workspace)
     {
         if (workspace == null)
         {
             return;
         }
 
-        _project = null;
-        ProjectRoot = workspace.RootPath;
-        AssetPathContext.Configure(ProjectRoot, null);
+        WorkspaceRoot = workspace.RootPath;
+        AssetPathContext.Configure(WorkspaceRoot, null);
 
-        var manifest = _manifestService.TryLoad(ProjectRoot);
+        var manifest = _manifestService.TryLoad(WorkspaceRoot);
 
         var defaultProjectRelativePath = ResolveDefaultProjectPath(manifest, workspace);
-        var defaultProjectPath = Path.Combine(ProjectRoot, defaultProjectRelativePath);
+        var defaultProjectPath = Path.Combine(WorkspaceRoot, defaultProjectRelativePath);
 
         if (!IsValidProjectDirectory(defaultProjectPath))
         {
-            defaultProjectPath = Path.Combine(ProjectRoot, workspace.DefaultProjectPath);
+            defaultProjectPath = Path.Combine(WorkspaceRoot, workspace.DefaultProjectPath);
         }
 
         _activeScenePath = ResolveActiveScenePath(manifest, workspace);
@@ -82,10 +48,10 @@ public class WorkspaceService(FileSystemRegistry registry, EditorManifestService
             return;
         }
 
-        ChangeModule(defaultProjectPath);
+        ChangeProject(defaultProjectPath);
     }
 
-    private static string ResolveDefaultProjectPath(EditorManifest? manifest, SlnxWorkspaceDescriptor workspace)
+    private static string ResolveDefaultProjectPath(EditorManifest? manifest, WorkspaceDescriptor workspace)
     {
         var candidate = manifest?.DefaultProject;
         if (string.IsNullOrWhiteSpace(candidate) || Path.IsPathRooted(candidate))
@@ -96,7 +62,7 @@ public class WorkspaceService(FileSystemRegistry registry, EditorManifestService
         return candidate.Replace('/', Path.DirectorySeparatorChar).Replace('\\', Path.DirectorySeparatorChar);
     }
 
-    private static string ResolveActiveScenePath(EditorManifest? manifest, SlnxWorkspaceDescriptor workspace)
+    private static string ResolveActiveScenePath(EditorManifest? manifest, WorkspaceDescriptor workspace)
     {
         var candidate = manifest?.LastActiveScene;
         if (string.IsNullOrWhiteSpace(candidate) || Path.IsPathRooted(candidate))
@@ -123,11 +89,11 @@ public class WorkspaceService(FileSystemRegistry registry, EditorManifestService
         return Directory.EnumerateFiles(path, "*.csproj", SearchOption.TopDirectoryOnly).Any();
     }
 
-    public void ChangeModule(string path)
+    public void ChangeProject(string path)
     {
         _currentRegistry.Initialize(path);
-        CurrentModuleRoot = path;
-        AssetPathContext.Configure(ProjectRoot, CurrentModuleRoot);
+        CurrentProjectRoot = path;
+        AssetPathContext.Configure(WorkspaceRoot, CurrentProjectRoot);
         WorkspaceInitialized?.Invoke(_currentRegistry);
     }
 
@@ -152,12 +118,12 @@ public class WorkspaceService(FileSystemRegistry registry, EditorManifestService
             }
         }
 
-        if (Directory.Exists(CurrentModuleRoot))
+        if (Directory.Exists(CurrentProjectRoot))
         {
-            return CurrentModuleRoot;
+            return CurrentProjectRoot;
         }
 
-        return Directory.Exists(ProjectRoot) ? ProjectRoot : string.Empty;
+        return Directory.Exists(WorkspaceRoot) ? WorkspaceRoot : string.Empty;
     }
 
     public bool IsValidSceneSaveDirectory(string directoryPath)
@@ -183,10 +149,10 @@ public class WorkspaceService(FileSystemRegistry registry, EditorManifestService
     {
         relativePath = string.Empty;
 
-        if (string.IsNullOrWhiteSpace(ProjectRoot) || string.IsNullOrWhiteSpace(absolutePath))
+        if (string.IsNullOrWhiteSpace(WorkspaceRoot) || string.IsNullOrWhiteSpace(absolutePath))
             return false;
 
-        var fullProjectRoot = Path.GetFullPath(ProjectRoot);
+        var fullProjectRoot = Path.GetFullPath(WorkspaceRoot);
         var fullPath = Path.GetFullPath(absolutePath);
 
         if (!IsUnderPath(fullPath, fullProjectRoot))
@@ -197,22 +163,22 @@ public class WorkspaceService(FileSystemRegistry registry, EditorManifestService
         return true;
     }
 
-    public string GetCurrentModuleRelativePath()
+    public string GetCurrentProjectRelativePath()
     {
-        if (string.IsNullOrWhiteSpace(CurrentModuleRoot))
+        if (string.IsNullOrWhiteSpace(CurrentProjectRoot))
             return string.Empty;
 
-        return TryGetProjectRelativePath(CurrentModuleRoot, out var relativePath)
+        return TryGetProjectRelativePath(CurrentProjectRoot, out var relativePath)
             ? relativePath
             : string.Empty;
     }
 
     private IReadOnlyList<string> GetProjectDirectories()
     {
-        if (string.IsNullOrWhiteSpace(ProjectRoot) || !Directory.Exists(ProjectRoot))
+        if (string.IsNullOrWhiteSpace(WorkspaceRoot) || !Directory.Exists(WorkspaceRoot))
             return [];
 
-        return Directory.EnumerateFiles(ProjectRoot, "*.csproj", SearchOption.AllDirectories)
+        return Directory.EnumerateFiles(WorkspaceRoot, "*.csproj", SearchOption.AllDirectories)
             .Select(Path.GetDirectoryName)
             .Where(path => !string.IsNullOrWhiteSpace(path))
             .Select(Path.GetFullPath)

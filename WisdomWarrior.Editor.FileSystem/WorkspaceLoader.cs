@@ -2,11 +2,11 @@ using System.Xml.Linq;
 
 namespace WisdomWarrior.Editor.FileSystem;
 
-public class SlnxWorkspaceLoader(EditorManifestService manifestService)
+public class WorkspaceLoader(EditorManifestService manifestService)
 {
     private readonly EditorManifestService _manifestService = manifestService;
 
-    public SlnxWorkspaceDescriptor Load(string solutionPath)
+    public WorkspaceDescriptor Load(string solutionPath)
     {
         if (string.IsNullOrWhiteSpace(solutionPath))
             throw new ArgumentException("Solution path is required.", nameof(solutionPath));
@@ -23,7 +23,7 @@ public class SlnxWorkspaceLoader(EditorManifestService manifestService)
 
         EnsureManifestExists(rootPath, defaultProject);
 
-        return new SlnxWorkspaceDescriptor
+        return new WorkspaceDescriptor
         {
             RootPath = rootPath,
             SolutionFilePath = solutionPath,

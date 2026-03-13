@@ -4,6 +4,7 @@ namespace WisdomWarrior.Editor.Core.ShadowTree;
 
 public class EntityTracker
 {
+    private readonly object _syncRoot = new();
     private readonly GameEntity _entity;
 
     private readonly List<ComponentTracker> _components = new();
@@ -15,9 +16,38 @@ public class EntityTracker
 
     public event Action? OnStructureChanged;
     public GameEntity EngineEntity => _entity;
-    public IReadOnlyList<EntityTracker> TrackedChildren => _children;
-    public IReadOnlyList<ComponentTracker> TrackedComponents => _components;
-    public string? Name => _lastName;
+    public IReadOnlyList<EntityTracker> TrackedChildren
+    {
+        get
+        {
+            lock (_syncRoot)
+            {
+                return _children.ToArray();
+            }
+        }
+    }
+
+    public IReadOnlyList<ComponentTracker> TrackedComponents
+    {
+        get
+        {
+            lock (_syncRoot)
+            {
+                return _components.ToArray();
+            }
+        }
+    }
+
+    public string? Name
+    {
+        get
+        {
+            lock (_syncRoot)
+            {
+                return _lastName;
+            }
+        }
+    }
 
     public EntityTracker(GameEntity entity)
     {
@@ -29,46 +59,60 @@ public class EntityTracker
 
     public void AddEntity(GameEntity entity)
     {
-        _entity.AddEntity(entity);
+        lock (_syncRoot)
+        {
+            _entity.AddEntity(entity);
+        }
     }
 
     public bool Update()
     {
         var isDirty = false;
         var structureChanged = false;
+        Action? onStructureChanged = null;
+        ComponentTracker[] components;
+        EntityTracker[] children;
 
-        if (_entity.Name != _lastName)
+        lock (_syncRoot)
         {
-            _lastName = _entity.Name;
-            isDirty = true;
+            if (_entity.Name != _lastName)
+            {
+                _lastName = _entity.Name;
+                isDirty = true;
+            }
+
+            if (_entity.Components.Count != _lastComponentCount)
+            {
+                SyncComponents();
+                structureChanged = true;
+                isDirty = true;
+            }
+
+            if (_entity.Children.Count != _lastChildCount)
+            {
+                SyncChildren();
+                structureChanged = true;
+                isDirty = true;
+            }
+
+            if (structureChanged)
+            {
+                onStructureChanged = OnStructureChanged;
+            }
+
+            components = _components.ToArray();
+            children = _children.ToArray();
         }
 
-        if (_entity.Components.Count != _lastComponentCount)
-        {
-            SyncComponents();
-            structureChanged = true;
-            isDirty = true;
-        }
+        onStructureChanged?.Invoke();
 
-        if (_entity.Children.Count != _lastChildCount)
-        {
-            SyncChildren();
-            structureChanged = true;
-            isDirty = true;
-        }
-
-        if (structureChanged)
-        {
-            OnStructureChanged?.Invoke();
-        }
-
-        foreach (var comp in _components)
+        foreach (var comp in components)
         {
             comp.Update();
             if (comp.IsDirty) isDirty = true;
         }
 
-        foreach (var child in _children)
+        foreach (var child in children)
         {
             if (child.Update()) isDirty = true;
         }
@@ -78,24 +122,33 @@ public class EntityTracker
 
     public void AcknowledgeSaved()
     {
-        _lastName = _entity.Name;
+        ComponentTracker[] components;
+        EntityTracker[] children;
 
-        if (_entity.Components.Count != _lastComponentCount)
+        lock (_syncRoot)
         {
-            SyncComponents();
+            _lastName = _entity.Name;
+
+            if (_entity.Components.Count != _lastComponentCount)
+            {
+                SyncComponents();
+            }
+
+            if (_entity.Children.Count != _lastChildCount)
+            {
+                SyncChildren();
+            }
+
+            components = _components.ToArray();
+            children = _children.ToArray();
         }
 
-        if (_entity.Children.Count != _lastChildCount)
-        {
-            SyncChildren();
-        }
-
-        foreach (var component in _components)
+        foreach (var component in components)
         {
             component.AcknowledgeSaved();
         }
 
-        foreach (var child in _children)
+        foreach (var child in children)
         {
             child.AcknowledgeSaved();
         }
