@@ -4,6 +4,7 @@ using WisdomWarrior.Engine.Core;
 using WisdomWarrior.Engine.Core.Assets;
 using WisdomWarrior.Engine.Core.Components;
 using WisdomWarrior.Engine.Core.Interfaces;
+using WisdomWarrior.Engine.Core.Systems;
 using EngineSize = WisdomWarrior.Engine.Core.DataTypes.Size;
 
 namespace WisdomWarrior.Editor.Core.Tests.Engine;
@@ -65,6 +66,7 @@ public class EntityDetachmentTests
     public void RemovedEntities_AreNotRendered()
     {
         var scene = new Scene { Name = "RenderDetachScene" };
+        scene.AddSystem(new SpriteRenderSystem());
         var root = CreateEntityWithSprite("Root", "Assets/root.png");
         var child = CreateEntityWithSprite("Child", "Assets/child.png");
         root.AddEntity(child);

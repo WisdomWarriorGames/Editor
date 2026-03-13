@@ -51,6 +51,7 @@ public class CurrentSceneManager
 
         var options = new JsonSerializerOptions { IncludeFields = true };
         options.Converters.Add(new ComponentConverter());
+        options.Converters.Add(new SystemConverter());
         options.Converters.Add(new SystemDrawingColorJsonConverter());
 
         var json = File.ReadAllText(path);
@@ -145,6 +146,7 @@ public class CurrentSceneManager
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
         };
         options.Converters.Add(new ComponentConverter());
+        options.Converters.Add(new SystemConverter());
         options.Converters.Add(new SystemDrawingColorJsonConverter());
 
         try

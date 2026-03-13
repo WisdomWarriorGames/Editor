@@ -32,6 +32,8 @@ public class SceneHierarchyViewModelTests
             currentSceneManager.CreateInMemoryScene("Scene1");
             currentSceneManager.CreateInMemoryScene("Scene1");
 
+            SpinWait.SpinUntil(() => sceneHierarchyViewModel.Scenes.Count == 1, TimeSpan.FromSeconds(1));
+
             Assert.Single(sceneHierarchyViewModel.Scenes);
             Assert.Equal("Scene1", sceneHierarchyViewModel.Scenes[0].Name);
         }

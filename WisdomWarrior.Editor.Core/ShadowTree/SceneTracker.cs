@@ -7,11 +7,14 @@ public class SceneTracker
     private readonly object _syncRoot = new();
     private Scene? _activeScene;
     private readonly List<EntityTracker> _rootEntities = new();
+    private readonly List<SystemTracker> _systems = new();
     private int _lastRootCount;
+    private int _lastSystemCount;
     private string? _lastName;
     private bool _isDirty;
 
     public event Action? OnSceneModified;
+    public event Action? OnStructureChanged;
 
     public IReadOnlyList<EntityTracker> TrackedRoots
     {
@@ -20,6 +23,17 @@ public class SceneTracker
             lock (_syncRoot)
             {
                 return _rootEntities.ToArray();
+            }
+        }
+    }
+
+    public IReadOnlyList<SystemTracker> TrackedSystems
+    {
+        get
+        {
+            lock (_syncRoot)
+            {
+                return _systems.ToArray();
             }
         }
     }
@@ -53,6 +67,7 @@ public class SceneTracker
             _activeScene = scene;
             _lastName = scene.Name;
             SyncRoots();
+            SyncSystems();
             _isDirty = false;
         }
     }
@@ -88,11 +103,36 @@ public class SceneTracker
         Update();
     }
 
+    public void AddSystem(WisdomWarrior.Engine.Core.Systems.System system)
+    {
+        lock (_syncRoot)
+        {
+            if (_activeScene == null) return;
+            if (_activeScene.Systems.Contains(system)) return;
+            _activeScene.AddSystem(system);
+        }
+
+        Update();
+    }
+
+    public void RemoveSystem(WisdomWarrior.Engine.Core.Systems.System system)
+    {
+        lock (_syncRoot)
+        {
+            if (_activeScene == null) return;
+            _activeScene.RemoveSystem(system);
+        }
+
+        Update();
+    }
+
     public void Update()
     {
         EntityTracker[] rootTrackers;
         var detectedChanges = false;
         Action? onSceneModified = null;
+        Action? onStructureChanged = null;
+        SystemTracker[] systems;
 
         lock (_syncRoot)
         {
@@ -108,14 +148,34 @@ public class SceneTracker
             {
                 SyncRoots();
                 detectedChanges = true;
+                onStructureChanged = OnStructureChanged;
+            }
+
+            if (_activeScene.Systems.Count != _lastSystemCount)
+            {
+                SyncSystems();
+                detectedChanges = true;
+                onStructureChanged = OnStructureChanged;
             }
 
             rootTrackers = _rootEntities.ToArray();
+            systems = _systems.ToArray();
         }
+
+        onStructureChanged?.Invoke();
 
         foreach (var rootTracker in rootTrackers)
         {
             if (rootTracker.Update())
+            {
+                detectedChanges = true;
+            }
+        }
+
+        foreach (var systemTracker in systems)
+        {
+            systemTracker.Update();
+            if (systemTracker.IsDirty)
             {
                 detectedChanges = true;
             }
@@ -136,6 +196,7 @@ public class SceneTracker
     public void AcknowledgeSaved()
     {
         EntityTracker[] rootTrackers;
+        SystemTracker[] systemTrackers;
 
         lock (_syncRoot)
         {
@@ -147,13 +208,20 @@ public class SceneTracker
 
             _lastName = _activeScene.Name;
             SyncRoots();
+            SyncSystems();
             rootTrackers = _rootEntities.ToArray();
+            systemTrackers = _systems.ToArray();
             _isDirty = false;
         }
 
         foreach (var rootTracker in rootTrackers)
         {
             rootTracker.AcknowledgeSaved();
+        }
+
+        foreach (var systemTracker in systemTrackers)
+        {
+            systemTracker.AcknowledgeSaved();
         }
     }
 
@@ -202,6 +270,33 @@ public class SceneTracker
         _rootEntities.AddRange(syncedRoots);
 
         _lastRootCount = currentEngineRoots.Count;
+    }
+
+    private void SyncSystems()
+    {
+        if (_activeScene == null) return;
+
+        var currentSystems = _activeScene.Systems;
+        var syncedSystems = new List<SystemTracker>(currentSystems.Count);
+
+        foreach (var engineSystem in currentSystems)
+        {
+            var existingTracker = _systems.FirstOrDefault(t => t.EngineSystem == engineSystem);
+
+            if (existingTracker != null)
+            {
+                syncedSystems.Add(existingTracker);
+            }
+            else
+            {
+                syncedSystems.Add(new SystemTracker(engineSystem));
+            }
+        }
+
+        _systems.Clear();
+        _systems.AddRange(syncedSystems);
+
+        _lastSystemCount = currentSystems.Count;
     }
 
     private static EntityTracker? FindTrackerByEntity(EntityTracker tracker, GameEntity entity)

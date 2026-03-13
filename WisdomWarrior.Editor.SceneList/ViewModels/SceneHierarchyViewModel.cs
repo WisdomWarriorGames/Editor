@@ -39,6 +39,7 @@ public partial class SceneHierarchyViewModel : ObservableObject
         _sceneTracker = _sceneManager.Tracker;
 
         _sceneTracker.OnSceneModified += OnSceneModified;
+        _sceneTracker.OnStructureChanged += OnSceneStructureChanged;
         _sceneManager.CurrentSceneReady += OnSceneReady;
         _selectionManager.OnSelectionChanged += OnSelectionChanged;
     }
@@ -62,7 +63,7 @@ public partial class SceneHierarchyViewModel : ObservableObject
 
     private void OnSceneReady()
     {
-        Dispatcher.UIThread.Post(() =>
+        void RefreshSceneNodes()
         {
             ClearCurrentSelectionState();
             Scenes.Clear();
@@ -74,7 +75,15 @@ public partial class SceneHierarchyViewModel : ObservableObject
                 RenameActiveScene);
             Scenes.Add(_activeSceneNode);
             SyncRootEntities();
-        });
+        }
+
+        if (Dispatcher.UIThread.CheckAccess())
+        {
+            RefreshSceneNodes();
+            return;
+        }
+
+        Dispatcher.UIThread.InvokeAsync(RefreshSceneNodes).GetAwaiter().GetResult();
     }
 
     private void SaveActiveScene()
@@ -104,6 +113,11 @@ public partial class SceneHierarchyViewModel : ObservableObject
     }
 
     private void OnSceneModified()
+    {
+        Dispatcher.UIThread.Post(SyncRootEntities);
+    }
+
+    private void OnSceneStructureChanged()
     {
         Dispatcher.UIThread.Post(SyncRootEntities);
     }

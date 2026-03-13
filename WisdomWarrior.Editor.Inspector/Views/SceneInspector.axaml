@@ -1,11 +1,11 @@
-﻿<UserControl xmlns="https://github.com/avaloniaui"
+<UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:viewModels="clr-namespace:WisdomWarrior.Editor.Inspector.ViewModels"
              xmlns:suki="https://github.com/kikipoulet/SukiUI"
              xmlns:views="clr-namespace:WisdomWarrior.Editor.Inspector.Views"
-             x:DataType="viewModels:EntityInspectorViewModel"
-             x:Class="WisdomWarrior.Editor.Inspector.Views.EntityInspector"
-             x:Name="EntityInspectorControl">
+             x:DataType="viewModels:SceneInspectorViewModel"
+             x:Class="WisdomWarrior.Editor.Inspector.Views.SceneInspector"
+             x:Name="SceneInspectorControl">
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -19,16 +19,16 @@
     </UserControl.Resources>
     <Grid RowDefinitions="Auto, *">
         <ScrollViewer Grid.Row="1">
-            <StackPanel Spacing="2">
-
-                <suki:GlassCard IsVisible="{Binding Entity, Converter={x:Static ObjectConverters.IsNull}}"
-                                VerticalAlignment="Center" HorizontalAlignment="Stretch">
-                    <TextBlock Text="Select an entity to view components."
+            <StackPanel Spacing="6">
+                <suki:GlassCard IsVisible="{Binding Scene, Converter={x:Static ObjectConverters.IsNull}}"
+                                VerticalAlignment="Center"
+                                HorizontalAlignment="Stretch">
+                    <TextBlock Text="Select a scene to view systems."
                                HorizontalAlignment="Center"
                                Classes="Description" />
                 </suki:GlassCard>
 
-                <ItemsControl ItemsSource="{Binding Components}">
+                <ItemsControl ItemsSource="{Binding Systems}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
                             <suki:GlassCard Padding="5"
@@ -36,23 +36,14 @@
                                             CornerRadius="4"
                                             IsAnimated="False">
                                 <StackPanel>
-                                    <Grid ColumnDefinitions="Auto, *, Auto" Margin="0,0,0,2">
-
-                                        <CheckBox Grid.Column="0"
-                                                  IsChecked="{Binding Active}"
-                                                  Margin="0,0,2,0">
-                                            <CheckBox.RenderTransform>
-                                                <ScaleTransform ScaleX="0.6" ScaleY="0.6" />
-                                            </CheckBox.RenderTransform>
-                                        </CheckBox>
-
-                                        <TextBlock Grid.Column="1"
+                                    <Grid ColumnDefinitions="*, Auto" Margin="0,0,0,2">
+                                        <TextBlock Grid.Column="0"
                                                    Text="{Binding Name}"
                                                    FontWeight="Bold"
                                                    FontSize="10"
                                                    VerticalAlignment="Center" />
 
-                                        <Button Grid.Column="2"
+                                        <Button Grid.Column="1"
                                                 Width="16"
                                                 Height="16"
                                                 Padding="0"
@@ -63,13 +54,15 @@
                                                 VerticalContentAlignment="Center"
                                                 VerticalAlignment="Center"
                                                 Theme="{DynamicResource SukiFlatButtonTheme}"
-                                                Command="{Binding #EntityInspectorControl.((viewModels:EntityInspectorViewModel)DataContext).RemoveComponentCommand}"
+                                                Command="{Binding #SceneInspectorControl.((viewModels:SceneInspectorViewModel)DataContext).RemoveSystemCommand}"
                                                 CommandParameter="{Binding}">
-                                            <TextBlock Text="🗑" FontSize="10" HorizontalAlignment="Center"
+                                            <TextBlock Text="X"
+                                                       FontSize="10"
+                                                       HorizontalAlignment="Center"
                                                        VerticalAlignment="Center" />
                                         </Button>
                                     </Grid>
-
+                                    
                                     <views:ComponentEditor DataContext="{Binding}" />
                                 </StackPanel>
                             </suki:GlassCard>

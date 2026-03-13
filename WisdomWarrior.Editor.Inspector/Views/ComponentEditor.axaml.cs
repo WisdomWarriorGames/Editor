@@ -22,7 +22,7 @@ public partial class ComponentEditor : UserControl
     {
         base.OnDataContextChanged(e);
 
-        if (DataContext is not ComponentTracker tracker) return;
+        if (DataContext is not IInspectableObjectTracker tracker) return;
 
         PropertiesStack.Children.Clear();
 

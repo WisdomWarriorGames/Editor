@@ -5,6 +5,7 @@ using WisdomWarrior.Editor.Core.Tests.TestInfrastructure;
 using WisdomWarrior.Engine.Core;
 using WisdomWarrior.Engine.Core.Assets;
 using WisdomWarrior.Engine.Core.Components;
+using WisdomWarrior.Engine.Core.Systems;
 using EngineSize = WisdomWarrior.Engine.Core.DataTypes.Size;
 
 namespace WisdomWarrior.Editor.Core.Tests.Serialization;
@@ -43,6 +44,7 @@ public class SceneSerializationTests
         root.AddEntity(child);
 
         scene.AddEntity(root);
+        scene.AddSystem(new SpriteRenderSystem());
 
         var options = TestJsonOptions.Create(writeIndented: true);
         var json = JsonSerializer.Serialize(scene, options);
@@ -50,6 +52,9 @@ public class SceneSerializationTests
         Assert.Contains("\"$type\"", json);
         Assert.Contains("\"Transform\"", json);
         Assert.Contains("\"Sprite\"", json);
+        Assert.Contains("\"SpriteRenderSystem\"", json);
+        Assert.DoesNotContain("\"RenderSystems\"", json);
+        Assert.DoesNotContain("\"BehaviourSystems\"", json);
         Assert.Contains("#800A141E", json);
 
         var deserialized = JsonSerializer.Deserialize<Scene>(json, options);
@@ -59,6 +64,10 @@ public class SceneSerializationTests
 
         Assert.Equal("SceneAlpha", deserialized.Name);
         Assert.Single(deserialized.Entities);
+        Assert.Single(deserialized.Systems);
+        Assert.Single(deserialized.RenderSystems);
+        Assert.IsType<SpriteRenderSystem>(deserialized.Systems[0]);
+        Assert.Same(deserialized, deserialized.Systems[0].Scene);
 
         var loadedRoot = deserialized.Entities[0];
         Assert.Equal("Player", loadedRoot.Name);
@@ -94,6 +103,26 @@ public class SceneSerializationTests
                          "Children": []
                        }
                      ]
+                   }
+                   """;
+
+        var options = TestJsonOptions.Create();
+
+        Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<Scene>(json, options));
+    }
+
+    [Fact]
+    public void Scene_Deserialize_WithUnknownSystemType_ThrowsJsonException()
+    {
+        var json = """
+                   {
+                     "Name": "BrokenScene",
+                     "Systems": [
+                       {
+                         "$type": "MissingSystem"
+                       }
+                     ],
+                     "Entities": []
                    }
                    """;
 

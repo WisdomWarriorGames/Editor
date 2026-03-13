@@ -1,5 +1,6 @@
 using System.Threading;
 using WisdomWarrior.Engine.Core.Components;
+using WisdomWarrior.Engine.Core.Systems;
 
 namespace WisdomWarrior.Editor.Core.Tests.TestInfrastructure;
 
@@ -12,6 +13,7 @@ public static class TestComponentRegistry
         if (Interlocked.Exchange(ref _bootstrapped, 1) == 0)
         {
             ComponentRegistry.Bootstrap();
+            SystemRegistry.Bootstrap();
         }
     }
 }

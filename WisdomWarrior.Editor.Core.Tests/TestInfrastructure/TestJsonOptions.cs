@@ -14,6 +14,7 @@ public static class TestJsonOptions
         };
 
         options.Converters.Add(new ComponentConverter());
+        options.Converters.Add(new SystemConverter());
         options.Converters.Add(new SystemDrawingColorJsonConverter());
 
         return options;
