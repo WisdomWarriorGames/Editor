@@ -126,6 +126,7 @@ public class CurrentSceneManager
     {
         while (_isTicking)
         {
+            ActiveScene?.ResolveDependencies();
             Tracker.Update();
 
             var delayMs = 1000 / TicksPerSecond;
