@@ -8,6 +8,7 @@
         <suki:SukiTheme Locale="en-GB" ThemeColor="Blue" />
         <StyleInclude Source="avares://IconPacks.Avalonia.Material/Material.axaml" />
         <StyleInclude Source="avares://Avalonia.Controls.ColorPicker/Themes/Fluent/Fluent.xaml" />
+        <StyleInclude Source="avares://WisdomWarrior.Editor.Shell/Styles/PopupMenuStyles.axaml" />
     </Application.Styles>
 
 </Application>
