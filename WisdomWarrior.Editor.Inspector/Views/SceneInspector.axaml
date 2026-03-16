@@ -13,13 +13,15 @@
                 <ResourceInclude Source="avares://WisdomWarrior.Editor.Inspector/Resources/FloatTemplate.axaml" />
                 <ResourceInclude Source="avares://WisdomWarrior.Editor.Inspector/Resources/SizeTemplate.axaml" />
                 <ResourceInclude Source="avares://WisdomWarrior.Editor.Inspector/Resources/ColourTemplate.axaml" />
+                <ResourceInclude Source="avares://WisdomWarrior.Editor.Inspector/Resources/BoolTemplate.axaml" />
+                <ResourceInclude Source="avares://WisdomWarrior.Editor.Inspector/Resources/EnumTemplate.axaml" />
                 <ResourceInclude Source="avares://WisdomWarrior.Editor.Inspector/Resources/ImageAssetTemplate.axaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </UserControl.Resources>
     <Grid RowDefinitions="Auto, *">
         <ScrollViewer Grid.Row="1">
-            <StackPanel Spacing="6">
+            <StackPanel Spacing="2">
                 <suki:GlassCard IsVisible="{Binding Scene, Converter={x:Static ObjectConverters.IsNull}}"
                                 VerticalAlignment="Center"
                                 HorizontalAlignment="Stretch">
@@ -56,7 +58,7 @@
                                                 Theme="{DynamicResource SukiFlatButtonTheme}"
                                                 Command="{Binding #SceneInspectorControl.((viewModels:SceneInspectorViewModel)DataContext).RemoveSystemCommand}"
                                                 CommandParameter="{Binding}">
-                                            <TextBlock Text="X"
+                                            <TextBlock Text="🗑"
                                                        FontSize="10"
                                                        HorizontalAlignment="Center"
                                                        VerticalAlignment="Center" />

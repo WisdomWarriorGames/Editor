@@ -4,6 +4,7 @@ using WisdomWarrior.Engine.Core;
 using WisdomWarrior.Engine.Core.Assets;
 using WisdomWarrior.Engine.Core.Components;
 using WisdomWarrior.Engine.Core.Interfaces;
+using WisdomWarrior.Engine.Core.Rendering;
 using EngineSize = WisdomWarrior.Engine.Core.DataTypes.Size;
 
 namespace WisdomWarrior.Editor.Core.Tests.Engine;
@@ -151,7 +152,7 @@ public class EngineTexturePreloadTests
         public List<HashSet<string>> PreloadBatches { get; } = [];
         public List<string> EventOrder { get; } = [];
 
-        public void Begin()
+        public void Begin(RenderBatchSettings settings)
         {
             EventOrder.Add("Begin");
         }

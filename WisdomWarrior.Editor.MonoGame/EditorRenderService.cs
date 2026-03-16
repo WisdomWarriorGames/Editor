@@ -3,6 +3,7 @@ using System.Numerics;
 using Microsoft.Xna.Framework.Graphics;
 using WisdomWarrior.Editor.Core.Helpers;
 using WisdomWarrior.Engine.Core.Interfaces;
+using WisdomWarrior.Engine.Core.Rendering;
 using WisdomWarrior.Engine.MonoGame;
 
 namespace WisdomWarrior.Editor.MonoGame;
@@ -22,9 +23,21 @@ public class EditorRenderService : IRenderService
         FlushPendingPreloads();
     }
 
-    public void Begin()
+    public void Begin(RenderBatchSettings settings)
     {
-        _spriteBatch?.Begin();
+        if (_spriteBatch == null)
+        {
+            return;
+        }
+
+        var beginArgs = SpriteBatchBeginSettingsConverter.ToMonoGame(settings);
+        _spriteBatch.Begin(
+            sortMode: beginArgs.SortMode,
+            blendState: beginArgs.BlendState,
+            samplerState: beginArgs.SamplerState,
+            depthStencilState: beginArgs.DepthStencilState,
+            rasterizerState: beginArgs.RasterizerState,
+            transformMatrix: beginArgs.TransformMatrix);
     }
 
     public void End()

@@ -4,6 +4,7 @@ using WisdomWarrior.Engine.Core;
 using WisdomWarrior.Engine.Core.Assets;
 using WisdomWarrior.Engine.Core.Components;
 using WisdomWarrior.Engine.Core.Interfaces;
+using WisdomWarrior.Engine.Core.Rendering;
 using WisdomWarrior.Engine.Core.Systems;
 using EngineSize = WisdomWarrior.Engine.Core.DataTypes.Size;
 
@@ -101,6 +102,8 @@ public class SceneSystemRuntimeTests
         var renderService = new SpyRenderService();
         scene.Draw(renderService);
 
+        Assert.Single(renderService.BeginSettings);
+        Assert.Equal(new RenderBatchSettings(), renderService.BeginSettings[0]);
         Assert.Single(renderService.Draws);
         var draw = renderService.Draws[0];
         Assert.Equal("Assets/hero.png", draw.TexturePath);
@@ -110,6 +113,49 @@ public class SceneSystemRuntimeTests
         Assert.Equal(Color.Red, draw.Colour);
         Assert.Equal(45f, draw.Rotation);
         Assert.Equal(new Vector2(2f, 3f), draw.Scale);
+    }
+
+    [Fact]
+    public void SpriteRenderSystem_PassesConfiguredBatchSettingsToRenderService()
+    {
+        var scene = new Scene { Name = "ConfiguredSpriteScene" };
+        var system = new SpriteRenderSystem
+        {
+            BatchSettings = new RenderBatchSettings
+            {
+                SortMode = RenderBatchSortMode.BackToFront,
+                BlendMode = RenderBlendMode.Additive,
+                SamplerMode = RenderSamplerMode.PointWrap,
+                DepthStencilMode = RenderDepthStencilMode.DepthRead,
+                RasterizerMode = RenderRasterizerMode.CullNone,
+                UseTransformMatrix = true,
+                TransformMatrix = Matrix4x4.CreateTranslation(5f, 6f, 7f)
+            }
+        };
+
+        scene.AddSystem(system);
+        scene.AddEntity(new GameEntity
+        {
+            Name = "Hero",
+            Components =
+            [
+                new Transform(),
+                new Sprite
+                {
+                    Image = new ImageAsset
+                    {
+                        AssetPath = "Assets/hero.png",
+                        Dimensions = new EngineSize(32, 16)
+                    }
+                }
+            ]
+        });
+
+        var renderService = new SpyRenderService();
+        scene.Draw(renderService);
+
+        Assert.Single(renderService.BeginSettings);
+        Assert.Equal(system.BatchSettings, renderService.BeginSettings[0]);
     }
 
     private sealed class CountingRenderSystem : RenderSystem
@@ -147,10 +193,12 @@ public class SceneSystemRuntimeTests
 
     private sealed class SpyRenderService : IRenderService
     {
+        public List<RenderBatchSettings> BeginSettings { get; } = [];
         public List<DrawCall> Draws { get; } = [];
 
-        public void Begin()
+        public void Begin(RenderBatchSettings settings)
         {
+            BeginSettings.Add(settings);
         }
 
         public void End()

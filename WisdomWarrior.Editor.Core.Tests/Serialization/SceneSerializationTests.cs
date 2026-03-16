@@ -5,6 +5,7 @@ using WisdomWarrior.Editor.Core.Tests.TestInfrastructure;
 using WisdomWarrior.Engine.Core;
 using WisdomWarrior.Engine.Core.Assets;
 using WisdomWarrior.Engine.Core.Components;
+using WisdomWarrior.Engine.Core.Rendering;
 using WisdomWarrior.Engine.Core.Systems;
 using EngineSize = WisdomWarrior.Engine.Core.DataTypes.Size;
 
@@ -84,6 +85,37 @@ public class SceneSerializationTests
         var loadedSprite = loadedRoot.Components.OfType<Sprite>().Single();
         Assert.Equal(Color.FromArgb(128, 10, 20, 30), loadedSprite.Colour);
         Assert.Equal(new EngineSize(64, 32), loadedSprite.Size);
+    }
+
+    [Fact]
+    public void Scene_RoundTrip_PreservesRenderBatchSettings()
+    {
+        var scene = new Scene { Name = "RenderSettingsScene" };
+        var system = new SpriteRenderSystem
+        {
+            BatchSettings = new RenderBatchSettings
+            {
+                SortMode = RenderBatchSortMode.FrontToBack,
+                BlendMode = RenderBlendMode.NonPremultiplied,
+                SamplerMode = RenderSamplerMode.AnisotropicWrap,
+                DepthStencilMode = RenderDepthStencilMode.Default,
+                RasterizerMode = RenderRasterizerMode.WireFrame,
+                UseTransformMatrix = true,
+                TransformMatrix = Matrix4x4.CreateScale(2f) * Matrix4x4.CreateTranslation(4f, 5f, 6f)
+            }
+        };
+
+        scene.AddSystem(system);
+
+        var options = TestJsonOptions.Create(writeIndented: true);
+        var json = JsonSerializer.Serialize(scene, options);
+        var deserialized = JsonSerializer.Deserialize<Scene>(json, options);
+
+        Assert.NotNull(deserialized);
+        deserialized!.Initialize();
+
+        var loadedSystem = Assert.IsType<SpriteRenderSystem>(Assert.Single(deserialized.Systems));
+        Assert.Equal(system.BatchSettings, loadedSystem.BatchSettings);
     }
 
     [Fact]

@@ -4,6 +4,7 @@ using WisdomWarrior.Engine.Core;
 using WisdomWarrior.Engine.Core.Assets;
 using WisdomWarrior.Engine.Core.Components;
 using WisdomWarrior.Engine.Core.Interfaces;
+using WisdomWarrior.Engine.Core.Rendering;
 using WisdomWarrior.Engine.Core.Systems;
 using EngineSize = WisdomWarrior.Engine.Core.DataTypes.Size;
 
@@ -118,7 +119,7 @@ public class EntityDetachmentTests
     {
         public int DrawCount { get; private set; }
 
-        public void Begin()
+        public void Begin(RenderBatchSettings settings)
         {
         }
 

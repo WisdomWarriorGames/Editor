@@ -1,84 +1,135 @@
-﻿using System;
-using System.Drawing;
+using System;
 using System.Numerics;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml.Templates;
 using Avalonia.Threading;
-using WisdomWarrior.Editor.Core.ShadowTree;
 using WisdomWarrior.Editor.Inspector.Models;
 using WisdomWarrior.Engine.Core.Assets;
+using DrawingColor = System.Drawing.Color;
 using Size = WisdomWarrior.Engine.Core.DataTypes.Size;
 
 namespace WisdomWarrior.Editor.Inspector.Helpers;
 
 public static class PropertyEditors
 {
-    public static Control CreateVector2Editor(this UserControl control, PropertyTracker prop)
+    public static bool SupportsDirectEditor(Type propertyType)
     {
-        return BuildEditor<Vector2, Vector2ViewModel>(
+        return propertyType switch
+        {
+            Type t when t == typeof(Vector2) => true,
+            Type t when t == typeof(float) => true,
+            Type t when t == typeof(Size) => true,
+            Type t when t == typeof(DrawingColor) => true,
+            Type t when t == typeof(ImageAsset) => true,
+            Type t when t == typeof(bool) => true,
+            Type t when t.IsEnum => true,
+            _ => false
+        };
+    }
+
+    public static Control CreateEditorControl(this UserControl control, IInspectorProperty prop)
+    {
+        return prop.PropertyType switch
+        {
+            Type t when t == typeof(Vector2) => control.CreateVector2Editor(prop),
+            Type t when t == typeof(float) => control.CreateFloatEditor(prop),
+            Type t when t == typeof(Size) => control.CreateSizeEditor(prop),
+            Type t when t == typeof(DrawingColor) => control.CreateColourEditor(prop),
+            Type t when t == typeof(ImageAsset) => control.CreateImageAssetEditor(prop),
+            Type t when t == typeof(bool) => control.CreateBoolEditor(prop),
+            Type t when t.IsEnum => control.CreateEnumEditor(prop),
+            _ => CreateUnsupportedEditor()
+        };
+    }
+
+    public static Control CreateVector2Editor(this UserControl control, IInspectorProperty prop)
+    {
+        return BuildEditor(
             control,
             prop,
             "Vector2Template",
-            (val, setter) => new Vector2ViewModel(val, setter),
-            (vm, val) => vm.UpdateFromEngine(val)
-        );
+            new Vector2ViewModel((Vector2)prop.GetValue()!, newValue => prop.SetValue(newValue)),
+            viewModel => viewModel.UpdateFromEngine((Vector2)prop.GetValue()!));
     }
 
-    public static Control CreateFloatEditor(this UserControl control, PropertyTracker prop)
+    public static Control CreateFloatEditor(this UserControl control, IInspectorProperty prop)
     {
-        return BuildEditor<float, FloatViewModel>(
+        return BuildEditor(
             control,
             prop,
             "FloatTemplate",
-            (val, setter) => new FloatViewModel(val, setter),
-            (vm, val) => vm.UpdateFromEngine(val)
-        );
+            new FloatViewModel((float)prop.GetValue()!, newValue => prop.SetValue(newValue)),
+            viewModel => viewModel.UpdateFromEngine((float)prop.GetValue()!));
     }
 
-    public static Control CreateSizeEditor(this UserControl control, PropertyTracker prop)
+    public static Control CreateSizeEditor(this UserControl control, IInspectorProperty prop)
     {
-        return BuildEditor<Size, SizeViewModel>(
+        return BuildEditor(
             control,
             prop,
             "SizeTemplate",
-            (val, setter) => new SizeViewModel(val, setter),
-            (vm, val) => vm.UpdateFromEngine(val)
-        );
+            new SizeViewModel((Size)prop.GetValue()!, newValue => prop.SetValue(newValue)),
+            viewModel => viewModel.UpdateFromEngine((Size)prop.GetValue()!));
     }
 
-    public static Control CreateColourEditor(this UserControl control, PropertyTracker prop)
+    public static Control CreateColourEditor(this UserControl control, IInspectorProperty prop)
     {
-        return BuildEditor<Color, ColourViewModel>(
+        return BuildEditor(
             control,
             prop,
             "ColourTemplate",
-            (val, setter) => new ColourViewModel(val, setter),
-            (vm, val) => vm.UpdateFromEngine(val)
-        );
+            new ColourViewModel((DrawingColor)prop.GetValue()!, newValue => prop.SetValue(newValue)),
+            viewModel => viewModel.UpdateFromEngine((DrawingColor)prop.GetValue()!));
     }
 
-    public static Control CreateImageAssetEditor(this UserControl control, PropertyTracker prop)
+    public static Control CreateImageAssetEditor(this UserControl control, IInspectorProperty prop)
     {
-        return BuildEditor<ImageAsset, ImageAssetViewModel>(
+        return BuildEditor(
             control,
             prop,
             "ImageAssetTemplate",
-            (val, setter) => new ImageAssetViewModel(val, setter),
-            (vm, val) => vm.UpdateFromEngine(val)
-        );
+            new ImageAssetViewModel((ImageAsset)prop.GetValue()!, newValue => prop.SetValue(newValue)),
+            viewModel => viewModel.UpdateFromEngine((ImageAsset)prop.GetValue()!));
     }
 
-    private static Control BuildEditor<TValue, TViewModel>(
-        UserControl control,
-        PropertyTracker prop,
-        string templateKey,
-        Func<TValue, Action<TValue>, TViewModel> viewModelFactory,
-        Action<TViewModel, TValue> updateViewModelAction)
+    public static Control CreateEnumEditor(this UserControl control, IInspectorProperty prop)
     {
-        var currentValue = (TValue)prop.GetValue()!;
+        var currentValue = prop.GetValue() ?? throw new InvalidOperationException("Enum property value cannot be null.");
 
-        var viewModel = viewModelFactory(currentValue, (newValue) => prop.SetValue(newValue));
+        return BuildEditor(
+            control,
+            prop,
+            "EnumTemplate",
+            new EnumPropertyViewModel(prop.PropertyType, currentValue, newValue => prop.SetValue(newValue)),
+            viewModel => viewModel.UpdateFromEngine(prop.GetValue() ?? currentValue));
+    }
 
+    public static Control CreateBoolEditor(this UserControl control, IInspectorProperty prop)
+    {
+        return BuildEditor(
+            control,
+            prop,
+            "BoolTemplate",
+            new BoolPropertyViewModel((bool)prop.GetValue()!, newValue => prop.SetValue(newValue)),
+            viewModel => viewModel.UpdateFromEngine((bool)prop.GetValue()!));
+    }
+
+    public static Control CreateUnsupportedEditor()
+    {
+        return new TextBlock
+        {
+            Text = "Unsupported Type",
+            FontStyle = Avalonia.Media.FontStyle.Italic
+        };
+    }
+
+    private static Control BuildEditor<TViewModel>(
+        UserControl control,
+        IInspectorProperty prop,
+        string templateKey,
+        TViewModel viewModel,
+        Action<TViewModel> updateViewModelAction)
+    {
         var editor = new ContentControl
         {
             DataContext = viewModel,
@@ -86,13 +137,11 @@ public static class PropertyEditors
             ContentTemplate = control.FindResource(templateKey) as DataTemplate
         };
 
-        Action updateAction = () => { updateViewModelAction(viewModel, (TValue)prop.GetValue()!); };
-        editor.Tag = updateAction;
-
-        Action<object?> valueChangedHandler = (newValue) => { Dispatcher.UIThread.Post(updateAction); };
+        Action updateAction = () => updateViewModelAction(viewModel);
+        Action<object?> valueChangedHandler = _ => Dispatcher.UIThread.Post(updateAction);
         prop.OnValueChanged += valueChangedHandler;
 
-        editor.DetachedFromVisualTree += (s, e) => { prop.OnValueChanged -= valueChangedHandler; };
+        editor.DetachedFromVisualTree += (_, _) => { prop.OnValueChanged -= valueChangedHandler; };
 
         return editor;
     }
