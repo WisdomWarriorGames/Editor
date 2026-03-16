@@ -9,13 +9,17 @@ public partial class EntityInspectorViewModel : ObservableObject
 {
     [ObservableProperty] private EntityTracker? _entity;
     public IEnumerable<ComponentTracker> Components => Entity?.TrackedComponents.ToList() ?? Enumerable.Empty<ComponentTracker>();
-    public IEnumerable<string> AvailableComponentNames => ComponentRegistry.GetRegisteredKeys();
+    public IEnumerable<string> AvailableComponentNames => ComponentRegistry.GetRegisteredKeys().Where(CanAddComponentType);
 
     public EntityInspectorViewModel(EntityTracker entity)
     {
         _entity = entity;
 
-        _entity.OnStructureChanged += () => OnPropertyChanged(nameof(Components));
+        _entity.OnStructureChanged += () =>
+        {
+            OnPropertyChanged(nameof(Components));
+            OnPropertyChanged(nameof(AvailableComponentNames));
+        };
     }
 
     [RelayCommand]
@@ -35,5 +39,22 @@ public partial class EntityInspectorViewModel : ObservableObject
         if (tracker == null || Entity == null) return;
 
         Entity.EngineEntity.RemoveComponent(tracker.EngineComponent);
+    }
+
+    private bool CanAddComponentType(string componentName)
+    {
+        var componentType = ComponentRegistry.GetType(componentName);
+        if (componentType == null || Entity == null)
+        {
+            return false;
+        }
+
+        var limitToOne = componentType.GetCustomAttributes(typeof(WisdomWarrior.Engine.Core.Attributes.LimitToOneAttribute), inherit: true).Length > 0;
+        if (!limitToOne)
+        {
+            return true;
+        }
+
+        return !Entity.EngineEntity.Components.Any(component => component.GetType() == componentType);
     }
 }

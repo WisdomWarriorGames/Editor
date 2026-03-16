@@ -159,12 +159,146 @@ public class AttachmentDependencyTests
         Assert.Single(scene.GetEntitiesWith<SiblingDependencyComponent>());
     }
 
+    [Fact]
+    public void AddComponent_LimitToOne_PreventsDuplicateExactTypes()
+    {
+        var entity = new GameEntity { Name = "Player" };
+
+        entity.AddComponent(new LimitedComponent());
+        entity.AddComponent(new LimitedComponent());
+
+        Assert.Single(entity.Components.OfType<LimitedComponent>());
+    }
+
+    [Fact]
+    public void AddSystem_LimitToOne_PreventsDuplicateExactTypes()
+    {
+        var scene = new Scene { Name = "LimitSystems" };
+
+        scene.AddSystem(new LimitedSystem());
+        scene.AddSystem(new LimitedSystem());
+
+        Assert.Single(scene.Systems.OfType<LimitedSystem>());
+    }
+
+    [Fact]
+    public void AddComponent_WithoutLimitToOne_StillAllowsDuplicates()
+    {
+        var entity = new GameEntity { Name = "Player" };
+
+        entity.AddComponent(new MultiAllowedComponent());
+        entity.AddComponent(new MultiAllowedComponent());
+
+        Assert.Equal(2, entity.Components.OfType<MultiAllowedComponent>().Count());
+    }
+
+    [Fact]
+    public void AddSystem_WithoutLimitToOne_StillAllowsDuplicates()
+    {
+        var scene = new Scene { Name = "MultiSystems" };
+
+        scene.AddSystem(new MultiAllowedSystem());
+        scene.AddSystem(new MultiAllowedSystem());
+
+        Assert.Equal(2, scene.Systems.OfType<MultiAllowedSystem>().Count());
+    }
+
+    [Fact]
+    public void SceneInitialize_LimitToOne_RemovesExistingDuplicateComponentsAndSystems_KeepingFirst()
+    {
+        var firstComponent = new LimitedComponent { Name = "First" };
+        var secondComponent = new LimitedComponent { Name = "Second" };
+        var firstSystem = new LimitedSystem { Name = "FirstSystem" };
+        var secondSystem = new LimitedSystem { Name = "SecondSystem" };
+
+        var entity = new GameEntity
+        {
+            Name = "Player",
+            Components = [firstComponent, secondComponent]
+        };
+
+        var scene = new Scene
+        {
+            Name = "InitializeLimitScene",
+            Entities = [entity],
+            Systems = [firstSystem, secondSystem]
+        };
+
+        scene.Initialize();
+
+        var keptComponent = Assert.Single(entity.Components.OfType<LimitedComponent>());
+        var keptSystem = Assert.Single(scene.Systems.OfType<LimitedSystem>());
+
+        Assert.Same(firstComponent, keptComponent);
+        Assert.Same(firstSystem, keptSystem);
+        Assert.Same(entity, keptComponent.Parent);
+        Assert.Null(secondComponent.Parent);
+        Assert.Same(scene, keptSystem.Scene);
+        Assert.Null(secondSystem.Scene);
+        Assert.Single(scene.GetEntitiesWith<LimitedComponent>());
+        Assert.Same(entity, scene.GetEntitiesWith<LimitedComponent>().Single());
+        Assert.Single(scene.BehaviourSystems.OfType<LimitedSystem>());
+    }
+
+    [Fact]
+    public void SceneUpdate_LimitToOne_RemovesDuplicatesAddedOutsideAttachApi_AndRepairsCache()
+    {
+        var scene = new Scene { Name = "LimitUpdateScene" };
+        var entity = new GameEntity { Name = "Player" };
+        scene.AddEntity(entity);
+        scene.Initialize();
+
+        var firstComponent = new LimitedComponent { Name = "First" };
+        var secondComponent = new LimitedComponent { Name = "Second" };
+        entity.Components.Add(firstComponent);
+        entity.Components.Add(secondComponent);
+        scene.Systems.Add(new LimitedSystem { Name = "FirstSystem" });
+        scene.Systems.Add(new LimitedSystem { Name = "SecondSystem" });
+
+        scene.Update();
+
+        var keptComponent = Assert.Single(entity.Components.OfType<LimitedComponent>());
+        var keptSystem = Assert.Single(scene.Systems.OfType<LimitedSystem>());
+
+        Assert.Same(firstComponent, keptComponent);
+        Assert.Same(entity, keptComponent.Parent);
+        Assert.Single(scene.GetEntitiesWith<LimitedComponent>());
+        Assert.Same(entity, scene.GetEntitiesWith<LimitedComponent>().Single());
+        Assert.Same(scene, keptSystem.Scene);
+        Assert.Single(scene.BehaviourSystems.OfType<LimitedSystem>());
+    }
+
+    [Fact]
+    public void ResolveDependencies_WithLimitToOneRequiredType_DoesNotCreateDuplicates()
+    {
+        var scene = new Scene { Name = "LimitedDependencyScene" };
+        var entity = new GameEntity { Name = "Player" };
+        scene.AddEntity(entity);
+        entity.AddComponent(new LimitedDependencyComponent());
+
+        entity.AddComponent(new RequiresLimitedComponent());
+        scene.AddSystem(new RequiresLimitedSystem());
+
+        Assert.Single(entity.Components.OfType<LimitedDependencyComponent>());
+        Assert.Single(scene.Systems.OfType<LimitedSystem>());
+    }
+
     [RequireComponent(typeof(SiblingDependencyComponent))]
     public sealed class RequiresSiblingComponent : Component
     {
     }
 
     public sealed class SiblingDependencyComponent : Component
+    {
+    }
+
+    [LimitToOne]
+    public sealed class LimitedComponent : Component
+    {
+        public string? Name { get; set; }
+    }
+
+    public sealed class MultiAllowedComponent : Component
     {
     }
 
@@ -192,6 +326,31 @@ public class AttachmentDependencyTests
     }
 
     public sealed class SecondRequiredSystem : BehaviourSystem
+    {
+        public override void OnStart()
+        {
+        }
+
+        public override void Update()
+        {
+        }
+    }
+
+    [LimitToOne]
+    public sealed class LimitedSystem : BehaviourSystem
+    {
+        public string? Name { get; set; }
+
+        public override void OnStart()
+        {
+        }
+
+        public override void Update()
+        {
+        }
+    }
+
+    public sealed class MultiAllowedSystem : BehaviourSystem
     {
         public override void OnStart()
         {
@@ -319,6 +478,29 @@ public class AttachmentDependencyTests
     [RequireComponent(typeof(BaseDependencyComponent))]
     public sealed class RequiresBaseDependencyComponent : Component
     {
+    }
+
+    [LimitToOne]
+    public sealed class LimitedDependencyComponent : Component
+    {
+    }
+
+    [RequireComponent(typeof(LimitedDependencyComponent))]
+    [RequireSystem(typeof(LimitedSystem))]
+    public sealed class RequiresLimitedComponent : Component
+    {
+    }
+
+    [RequireSystem(typeof(LimitedSystem))]
+    public sealed class RequiresLimitedSystem : BehaviourSystem
+    {
+        public override void OnStart()
+        {
+        }
+
+        public override void Update()
+        {
+        }
     }
 
     [RequireComponent(typeof(SiblingDependencyComponent))]

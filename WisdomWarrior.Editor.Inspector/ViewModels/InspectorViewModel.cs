@@ -35,6 +35,11 @@ public partial class InspectorViewModel : ObservableObject
 
     private void OnSelectionChanged(object? obj)
     {
+        if (CurrentContent is System.ComponentModel.INotifyPropertyChanged oldContent)
+        {
+            oldContent.PropertyChanged -= OnCurrentContentPropertyChanged;
+        }
+
         if (obj == null)
         {
             CurrentContent = null;
@@ -51,6 +56,11 @@ public partial class InspectorViewModel : ObservableObject
             _ => ((ObservableObject?)null, "No Selection")
         };
 
+        if (CurrentContent is System.ComponentModel.INotifyPropertyChanged newContent)
+        {
+            newContent.PropertyChanged += OnCurrentContentPropertyChanged;
+        }
+
         NotifySelectionPropertiesChanged();
     }
 
@@ -59,5 +69,14 @@ public partial class InspectorViewModel : ObservableObject
         OnPropertyChanged(nameof(CanAddItems));
         OnPropertyChanged(nameof(AvailableAddNames));
         OnPropertyChanged(nameof(AddItemCommand));
+    }
+
+    private void OnCurrentContentPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName is nameof(EntityInspectorViewModel.AvailableComponentNames)
+            or nameof(SceneInspectorViewModel.AvailableSystemNames))
+        {
+            OnPropertyChanged(nameof(AvailableAddNames));
+        }
     }
 }

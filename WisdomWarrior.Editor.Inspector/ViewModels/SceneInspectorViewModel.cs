@@ -10,12 +10,16 @@ public partial class SceneInspectorViewModel : ObservableObject
     [ObservableProperty] private SceneTracker? _scene;
 
     public IEnumerable<SystemTracker> Systems => Scene?.TrackedSystems.ToList() ?? Enumerable.Empty<SystemTracker>();
-    public IEnumerable<string> AvailableSystemNames => SystemRegistry.GetRegisteredKeys();
+    public IEnumerable<string> AvailableSystemNames => SystemRegistry.GetRegisteredKeys().Where(CanAddSystemType);
 
     public SceneInspectorViewModel(SceneTracker scene)
     {
         _scene = scene;
-        _scene.OnStructureChanged += () => OnPropertyChanged(nameof(Systems));
+        _scene.OnStructureChanged += () =>
+        {
+            OnPropertyChanged(nameof(Systems));
+            OnPropertyChanged(nameof(AvailableSystemNames));
+        };
     }
 
     [RelayCommand]
@@ -35,5 +39,22 @@ public partial class SceneInspectorViewModel : ObservableObject
         if (tracker == null || Scene == null) return;
 
         Scene.RemoveSystem(tracker.EngineSystem);
+    }
+
+    private bool CanAddSystemType(string systemName)
+    {
+        var systemType = SystemRegistry.GetType(systemName);
+        if (systemType == null || Scene?.ActiveScene == null)
+        {
+            return false;
+        }
+
+        var limitToOne = systemType.GetCustomAttributes(typeof(WisdomWarrior.Engine.Core.Attributes.LimitToOneAttribute), inherit: true).Length > 0;
+        if (!limitToOne)
+        {
+            return true;
+        }
+
+        return !Scene.ActiveScene.Systems.Any(system => system.GetType() == systemType);
     }
 }
