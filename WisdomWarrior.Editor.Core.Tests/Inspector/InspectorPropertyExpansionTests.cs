@@ -112,6 +112,14 @@ public class InspectorPropertyExpansionTests
         }
     }
 
+    [Fact]
+    public void ReflectionCache_DoesNotTreatIndexerPropertiesAsTrackable()
+    {
+        var properties = WisdomWarrior.Editor.Core.Helpers.ReflectionCache.GetTrackableProperties(typeof(System.Numerics.Matrix4x4));
+
+        Assert.Empty(properties);
+    }
+
     private static List<TrackerInspectorProperty> CreateRootProperties(TestRenderSystem system)
     {
         var tracker = new SystemTracker(system);

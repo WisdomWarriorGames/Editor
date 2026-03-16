@@ -13,7 +13,7 @@ public static class ReflectionCache
         return _propertyCache.GetOrAdd(componentType, type =>
         {
             return type.GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                .Where(p => p.CanRead && p.CanWrite)
+                .Where(p => p.CanRead && p.CanWrite && p.GetIndexParameters().Length == 0)
                 .ToArray();
         });
     }
