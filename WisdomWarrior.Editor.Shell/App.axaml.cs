@@ -4,6 +4,7 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Microsoft.Extensions.DependencyInjection;
 using WisdomWarrior.Editor.FileSystem;
+using WisdomWarrior.Editor.Menus.Services;
 using WisdomWarrior.Editor.Shell.ViewModels;
 using WisdomWarrior.Engine.Core.Components;
 using WisdomWarrior.Engine.Core.Systems;
@@ -28,6 +29,8 @@ public partial class App : Application
 
         ComponentRegistry.Bootstrap();
         SystemRegistry.Bootstrap();
+
+        ServiceProvider.GetRequiredService<EditorThemeService>().EnsureInitialized();
 
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {

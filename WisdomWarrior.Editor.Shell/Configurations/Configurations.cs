@@ -3,6 +3,7 @@ using WisdomWarrior.Editor.AssetBrowser.Configurations;
 using WisdomWarrior.Editor.Core;
 using WisdomWarrior.Editor.Core.Services;
 using WisdomWarrior.Editor.FileSystem;
+using WisdomWarrior.Editor.Menus.Services;
 using WisdomWarrior.Editor.Inspector.ViewModels;
 using WisdomWarrior.Editor.Menus.ViewModels;
 using WisdomWarrior.Editor.MonoGame.ViewModels;
@@ -17,6 +18,8 @@ public static class Configurations
     {
         services.AddSingleton<FileSystemService>();
         services.AddSingleton<EditorManifestService>();
+        services.AddSingleton<IEditorSettingsPathProvider, EditorSettingsPathProvider>();
+        services.AddSingleton<EditorSettingsService>();
         services.AddTransient<WorkspaceCreationService>();
         services.AddTransient<WorkspaceLoader>();
         services.AddSingleton<ScenePersistenceService>();
@@ -30,6 +33,7 @@ public static class Configurations
         services.AddSingleton<SceneHierarchyViewModel>();
         services.AddSingleton<FileMenuViewModel>();
         services.AddSingleton<InspectorViewModel>();
+        services.AddSingleton<EditorThemeService>();
 
         services.AddSingleton<CurrentSceneManager>();
         services.AddSingleton<SelectionManager>();

@@ -5,6 +5,7 @@ using Avalonia.Platform.Storage;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using WisdomWarrior.Editor.FileSystem;
+using WisdomWarrior.Editor.Menus.Services;
 using WisdomWarrior.Editor.Menus.Views;
 
 namespace WisdomWarrior.Editor.Menus.ViewModels;
@@ -12,8 +13,11 @@ namespace WisdomWarrior.Editor.Menus.ViewModels;
 public partial class FileMenuViewModel(
     WorkspaceCreationService workspaceCreationService,
     WorkspaceLoader workspaceLoader,
-    WorkspaceService workspaceService) : ObservableObject
+    WorkspaceService workspaceService,
+    EditorThemeService editorThemeService) : ObservableObject
 {
+    private SettingsWindow? _settingsWindow;
+
     [RelayCommand]
     private async Task OpenGame()
     {
@@ -57,5 +61,43 @@ public partial class FileMenuViewModel(
         {
             await view.ShowDialog<bool>(desktop.MainWindow);
         }
+    }
+
+    [RelayCommand]
+    private void OpenSettings()
+    {
+        if (Application.Current?.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop)
+        {
+            return;
+        }
+
+        if (_settingsWindow is { IsVisible: true })
+        {
+            _settingsWindow.Activate();
+            return;
+        }
+
+        var settingsWindow = new SettingsWindow
+        {
+            DataContext = new SettingsWindowViewModel(editorThemeService)
+        };
+
+        settingsWindow.Closed += (_, _) =>
+        {
+            if (ReferenceEquals(_settingsWindow, settingsWindow))
+            {
+                _settingsWindow = null;
+            }
+        };
+
+        _settingsWindow = settingsWindow;
+
+        if (desktop.MainWindow != null)
+        {
+            settingsWindow.Show(desktop.MainWindow);
+            return;
+        }
+
+        settingsWindow.Show();
     }
 }

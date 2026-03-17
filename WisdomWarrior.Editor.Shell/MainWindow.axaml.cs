@@ -1,8 +1,6 @@
 using Avalonia.Controls;
 using Avalonia.Platform.Storage;
-using Avalonia.Styling;
 using System.Threading.Tasks;
-using SukiUI;
 using SukiUI.Controls;
 using SukiUI.Toasts;
 using WisdomWarrior.Editor.Core;
@@ -18,8 +16,6 @@ public partial class MainWindow : SukiWindow
     public MainWindow()
     {
         InitializeComponent();
-
-        SukiTheme.GetInstance().ChangeBaseTheme(ThemeVariant.Dark);
         Closing += OnClosing;
     }
 

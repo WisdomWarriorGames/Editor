@@ -1,17 +1,21 @@
 <Styles xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
+    <Styles.Resources>
+        <SolidColorBrush x:Key="PopupMenuBackgroundBrush" Color="#FF1A1C22" />
+    </Styles.Resources>
+
     <Style Selector="PopupRoot">
-        <Setter Property="Background" Value="{DynamicResource SukiBackground}" />
+        <Setter Property="Background" Value="{StaticResource PopupMenuBackgroundBrush}" />
     </Style>
 
     <Style Selector="PopupRoot Border">
-        <Setter Property="Background" Value="{DynamicResource SukiBackground}" />
+        <Setter Property="Background" Value="{StaticResource PopupMenuBackgroundBrush}" />
         <Setter Property="BorderBrush" Value="{DynamicResource SukiBorderBrush}" />
     </Style>
 
     <Style Selector="ContextMenu">
-        <Setter Property="Background" Value="{DynamicResource SukiBackground}" />
+        <Setter Property="Background" Value="{StaticResource PopupMenuBackgroundBrush}" />
         <Setter Property="BorderBrush" Value="{DynamicResource SukiBorderBrush}" />
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="Foreground" Value="White" />
@@ -19,7 +23,7 @@
     </Style>
 
     <Style Selector="MenuFlyoutPresenter">
-        <Setter Property="Background" Value="{DynamicResource SukiBackground}" />
+        <Setter Property="Background" Value="{StaticResource PopupMenuBackgroundBrush}" />
         <Setter Property="BorderBrush" Value="{DynamicResource SukiBorderBrush}" />
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="Foreground" Value="White" />
@@ -27,7 +31,7 @@
     </Style>
 
     <Style Selector="FlyoutPresenter">
-        <Setter Property="Background" Value="{DynamicResource SukiBackground}" />
+        <Setter Property="Background" Value="{StaticResource PopupMenuBackgroundBrush}" />
         <Setter Property="BorderBrush" Value="{DynamicResource SukiBorderBrush}" />
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="Foreground" Value="White" />
@@ -40,7 +44,7 @@
 
     <Style Selector="MenuItem">
         <Setter Property="Foreground" Value="White" />
-        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Background" Value="{StaticResource PopupMenuBackgroundBrush}" />
     </Style>
 
     <Style Selector="MenuItem:pointerover">
