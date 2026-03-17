@@ -1,9 +1,10 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using Avalonia.Platform.Storage;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using WisdomWarrior.Editor.AssetBrowser.Services;
 using WisdomWarrior.Editor.Core.Helpers;
 using WisdomWarrior.Editor.Core.Services;
 using WisdomWarrior.Editor.FileSystem;
@@ -13,23 +14,27 @@ namespace WisdomWarrior.Editor.AssetBrowser.ViewModels;
 
 public partial class DirectoryViewModel : ObservableObject
 {
-    private const int MAX_BREADCRUMBS = 4;
+    private const int MaxBreadcrumbs = 4;
 
     private readonly FileSystemService _fileSystemService;
+    private readonly IAssetClipboardActionService _clipboardActionService;
     private readonly SelectionManager _selectionManager;
-    private FileSystemRegistry _registry;
+    private FileSystemRegistry _registry = null!;
 
-    [ObservableProperty] private string _rootDir;
+    [ObservableProperty] private string _rootDir = "Assets";
 
     public ObservableCollection<AssetViewModel> SelectedItems { get; } = [];
     public ObservableCollection<AssetViewModel> Assets { get; } = [];
-    public ObservableCollection<BreadcrumbViewModel> Breadcrumbs { get; set; } = new();
+    public ObservableCollection<BreadcrumbViewModel> Breadcrumbs { get; } = [];
 
-    public DirectoryViewModel(FileSystemService fileSystemService, SelectionManager selectionManager)
+    public DirectoryViewModel(
+        FileSystemService fileSystemService,
+        IAssetClipboardActionService clipboardActionService,
+        SelectionManager selectionManager)
     {
         _fileSystemService = fileSystemService;
+        _clipboardActionService = clipboardActionService;
         _selectionManager = selectionManager;
-        RootDir = "Assets";
     }
 
     public void Initialize(FileSystemRegistry registry)
@@ -41,6 +46,21 @@ public partial class DirectoryViewModel : ObservableObject
         Refresh();
     }
 
+    public void Navigate(AssetViewModel asset)
+    {
+        if (!asset.IsFolder)
+        {
+            return;
+        }
+
+        _registry.SetCurrentNode(asset.FullPath);
+    }
+
+    public void RemoveNew(AssetViewModel asset)
+    {
+        Assets.Remove(asset);
+    }
+
     private void OnRegistryUpdated()
     {
         Dispatcher.UIThread.InvokeAsync(Refresh);
@@ -49,7 +69,10 @@ public partial class DirectoryViewModel : ObservableObject
     private async void Refresh()
     {
         var activeNode = _registry.CurrentNode;
-        if (activeNode == null) return;
+        if (activeNode == null)
+        {
+            return;
+        }
 
         Assets.Clear();
         SetupBreadcrumbs();
@@ -57,14 +80,13 @@ public partial class DirectoryViewModel : ObservableObject
         await Task.Run(() =>
         {
             var sortedChildren = activeNode.Children
-                .OrderByDescending(a => a.IsFolder)
-                .ThenBy(a => a.Name)
+                .OrderByDescending(child => child.IsFolder)
+                .ThenBy(child => child.Name)
                 .ToList();
 
             foreach (var child in sortedChildren)
             {
-                var vm = new AssetViewModel(child, _fileSystemService, _selectionManager);
-
+                var vm = new AssetViewModel(child, _fileSystemService, _clipboardActionService, _selectionManager);
                 Dispatcher.UIThread.Post(() =>
                 {
                     if (_registry.CurrentNode == activeNode)
@@ -79,48 +101,42 @@ public partial class DirectoryViewModel : ObservableObject
     private void SetupBreadcrumbs()
     {
         var activeNode = _registry.CurrentNode;
-        if (activeNode == null) return;
+        if (activeNode == null)
+        {
+            return;
+        }
 
         Breadcrumbs.Clear();
 
-        var breadcrumbs = new List<BreadcrumbViewModel>();
-        breadcrumbs.Add(new BreadcrumbViewModel(activeNode.Name, activeNode.FullPath, _fileSystemService, _registry));
+        var breadcrumbs = new List<BreadcrumbViewModel>
+        {
+            new(activeNode.Name, activeNode.FullPath, _fileSystemService, _clipboardActionService, _registry)
+        };
 
         while (activeNode.Parent != null)
         {
             activeNode = activeNode.Parent;
-            breadcrumbs.Add(new BreadcrumbViewModel(activeNode.Name, activeNode.FullPath, _fileSystemService, _registry));
+            breadcrumbs.Add(new BreadcrumbViewModel(activeNode.Name, activeNode.FullPath, _fileSystemService, _clipboardActionService, _registry));
         }
 
         breadcrumbs.Reverse();
-        if (!breadcrumbs.Any()) return;
-
-        if (breadcrumbs.Count <= MAX_BREADCRUMBS)
+        if (breadcrumbs.Count <= MaxBreadcrumbs)
         {
-            foreach (var breadcrumb in breadcrumbs) Breadcrumbs.Add(breadcrumb);
+            foreach (var breadcrumb in breadcrumbs)
+            {
+                Breadcrumbs.Add(breadcrumb);
+            }
+
             return;
         }
 
         Breadcrumbs.Add(breadcrumbs[0]);
-        var b3 = breadcrumbs[^3];
-        Breadcrumbs.Add(new BreadcrumbViewModel("...", b3.FullPath, _fileSystemService, _registry));
+        Breadcrumbs.Add(new BreadcrumbViewModel("...", breadcrumbs[^3].FullPath, _fileSystemService, _clipboardActionService, _registry));
 
-        for (int i = breadcrumbs.Count - (MAX_BREADCRUMBS - 1); i < breadcrumbs.Count; i++)
+        for (var index = breadcrumbs.Count - (MaxBreadcrumbs - 1); index < breadcrumbs.Count; index++)
         {
-            Breadcrumbs.Add(breadcrumbs[i]);
+            Breadcrumbs.Add(breadcrumbs[index]);
         }
-    }
-
-    public void Navigate(AssetViewModel asset)
-    {
-        if (!asset.IsFolder) return;
-
-        _registry.SetCurrentNode(asset.FullPath);
-    }
-
-    public void RemoveNew(AssetViewModel asset)
-    {
-        Assets.Remove(asset);
     }
 
     private bool CanAcceptDrop(object? droppedItem)
@@ -129,9 +145,26 @@ public partial class DirectoryViewModel : ObservableObject
     }
 
     [RelayCommand(CanExecute = nameof(CanAcceptDrop))]
-    private async Task AcceptDropAsync(object? droppedItem)
+    private void AcceptDrop(object? droppedItem)
     {
         droppedItem.ProcessFileSystemDropAsync(_registry.CurrentNode.FullPath, _fileSystemService);
+    }
+
+    [RelayCommand]
+    private async Task CopySelected()
+    {
+        await _clipboardActionService.CopyPathsAsync(SelectedItems.Select(item => item.FullPath).ToArray());
+    }
+
+    [RelayCommand]
+    private async Task PasteHere()
+    {
+        if (_registry?.CurrentNode == null)
+        {
+            return;
+        }
+
+        await _clipboardActionService.PasteIntoAsync(_registry.CurrentNode.FullPath);
     }
 
     [RelayCommand]
@@ -139,12 +172,14 @@ public partial class DirectoryViewModel : ObservableObject
     {
         foreach (var asset in Assets)
         {
-            if (asset.IsValid)
+            if (!asset.IsValid)
             {
-                asset.IsNew = false;
-                asset.CommitEdit();
-                asset.CancelEdit();
+                continue;
             }
+
+            asset.IsNew = false;
+            asset.CommitEdit();
+            asset.CancelEdit();
         }
 
         SelectedItems.Clear();
@@ -169,29 +204,37 @@ public partial class DirectoryViewModel : ObservableObject
     [RelayCommand]
     public void CreateFolder()
     {
-        if (_registry == null || _registry.CurrentNode == null) return;
+        if (_registry?.CurrentNode == null)
+        {
+            return;
+        }
 
-        var baseName = "New Folder";
+        const string baseName = "New Folder";
         var finalName = baseName;
         var count = 1;
 
-        while (_registry.CurrentNode.Children.Any(x => x.Name == finalName))
+        while (_registry.CurrentNode.Children.Any(child => child.Name == finalName))
         {
             finalName = $"{baseName} ({count++})";
         }
 
-        var dir = Path.Combine(_registry.CurrentNode.FullPath, finalName);
-        Assets.Add(new AssetViewModel(dir, finalName, _fileSystemService, RemoveNew));
+        var directoryPath = Path.Combine(_registry.CurrentNode.FullPath, finalName);
+        Assets.Add(new AssetViewModel(directoryPath, finalName, _fileSystemService, _clipboardActionService, RemoveNew));
     }
 
     [RelayCommand]
     public void OpenFolder()
     {
-        if (_registry == null || _registry.CurrentNode == null) return;
+        if (_registry?.CurrentNode == null)
+        {
+            return;
+        }
 
         var path = _registry.CurrentNode.FullPath;
-
-        if (string.IsNullOrEmpty(path) || !Directory.Exists(path)) return;
+        if (string.IsNullOrEmpty(path) || !Directory.Exists(path))
+        {
+            return;
+        }
 
         Process.Start(new ProcessStartInfo
         {

@@ -7,6 +7,11 @@
             Background="Transparent" 
             BorderThickness="2"
             CornerRadius="4">
+        <Border.ContextMenu>
+            <ContextMenu>
+                <MenuItem Header="Paste" Command="{Binding PasteHereCommand}" />
+            </ContextMenu>
+        </Border.ContextMenu>
         <StackPanel Orientation="Horizontal" Spacing="2">
 
             <Button Classes="Basic"

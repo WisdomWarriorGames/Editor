@@ -14,6 +14,9 @@ public class CurrentSceneManager
     private string? _registeredSceneName;
     private bool _isDirty;
     private readonly System.Timers.Timer _saveTimer;
+    private readonly object _tickLock = new();
+    private CancellationTokenSource? _tickCancellation;
+    private Task? _tickTask;
 
     private int _ticksPerSecond = 20;
     private bool _isTicking;
@@ -116,21 +119,38 @@ public class CurrentSceneManager
 
     public void StartTicking()
     {
-        if (_isTicking) return;
-        _isTicking = true;
+        lock (_tickLock)
+        {
+            if (_isTicking) return;
 
-        _ = Task.Run(EditorTickLoop);
+            _isTicking = true;
+            _tickCancellation = new CancellationTokenSource();
+            _tickTask = Task.Factory
+                .StartNew(
+                    () => EditorTickLoop(_tickCancellation.Token),
+                    _tickCancellation.Token,
+                    TaskCreationOptions.LongRunning,
+                    TaskScheduler.Default)
+                .Unwrap();
+        }
     }
 
-    private async Task EditorTickLoop()
+    private async Task EditorTickLoop(CancellationToken cancellationToken)
     {
-        while (_isTicking)
+        while (!cancellationToken.IsCancellationRequested)
         {
             ActiveScene?.ResolveDependencies();
             Tracker.Update();
 
             var delayMs = 1000 / TicksPerSecond;
-            await Task.Delay(delayMs);
+            try
+            {
+                await Task.Delay(delayMs, cancellationToken);
+            }
+            catch (OperationCanceledException)
+            {
+                break;
+            }
         }
     }
 
@@ -231,7 +251,23 @@ public class CurrentSceneManager
 
     public void StopTicking()
     {
-        _isTicking = false;
+        CancellationTokenSource? tickCancellation;
+        lock (_tickLock)
+        {
+            if (!_isTicking)
+            {
+                _saveTimer.Stop();
+                return;
+            }
+
+            _isTicking = false;
+            tickCancellation = _tickCancellation;
+            _tickCancellation = null;
+            _tickTask = null;
+        }
+
+        tickCancellation?.Cancel();
+        tickCancellation?.Dispose();
         _saveTimer.Stop();
     }
 

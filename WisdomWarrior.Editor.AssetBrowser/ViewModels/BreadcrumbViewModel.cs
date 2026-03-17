@@ -1,7 +1,6 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using SukiUI.Toasts;
-using WisdomWarrior.Editor.Core;
+using WisdomWarrior.Editor.AssetBrowser.Services;
 using WisdomWarrior.Editor.Core.Helpers;
 using WisdomWarrior.Editor.FileSystem;
 using WisdomWarrior.Editor.FileSystem.Helpers;
@@ -11,15 +10,22 @@ namespace WisdomWarrior.Editor.AssetBrowser.ViewModels;
 public partial class BreadcrumbViewModel : ObservableObject
 {
     private readonly FileSystemService _fileSystemService;
+    private readonly IAssetClipboardActionService _clipboardActionService;
     private readonly FileSystemRegistry _registry;
 
     [ObservableProperty] private string _name = string.Empty;
 
-    public string FullPath { get; set; }
+    public string FullPath { get; }
 
-    public BreadcrumbViewModel(string name, string fullPath, FileSystemService fileSystemService, FileSystemRegistry registry)
+    public BreadcrumbViewModel(
+        string name,
+        string fullPath,
+        FileSystemService fileSystemService,
+        IAssetClipboardActionService clipboardActionService,
+        FileSystemRegistry registry)
     {
         _fileSystemService = fileSystemService;
+        _clipboardActionService = clipboardActionService;
         _registry = registry;
         Name = name;
         FullPath = fullPath;
@@ -27,15 +33,19 @@ public partial class BreadcrumbViewModel : ObservableObject
 
     private bool CanAcceptDrop(object? droppedItem)
     {
-        if (droppedItem.CanAccept<AssetViewModel>()) return true;
-
-        return false;
+        return droppedItem.CanAccept<AssetViewModel>();
     }
 
     [RelayCommand(CanExecute = nameof(CanAcceptDrop))]
-    private async Task AcceptDrop(object? droppedItem)
+    private void AcceptDrop(object? droppedItem)
     {
         droppedItem.ProcessFileSystemDropAsync(FullPath, _fileSystemService);
+    }
+
+    [RelayCommand]
+    private async Task PasteHere()
+    {
+        await _clipboardActionService.PasteIntoAsync(FullPath);
     }
 
     [RelayCommand]

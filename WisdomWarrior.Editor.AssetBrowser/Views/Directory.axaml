@@ -45,12 +45,15 @@
 
                     <ListBox.ContextMenu>
                         <ContextMenu>
+                            <MenuItem Header="Paste" Command="{Binding PasteHereCommand}" />
                             <MenuItem Header="Create New Folder" Command="{Binding CreateFolderCommand}" />
                             <MenuItem Header="Open in Explorer" Command="{Binding OpenFolderCommand}" />
                         </ContextMenu>
                     </ListBox.ContextMenu>
 
                     <ListBox.KeyBindings>
+                        <KeyBinding Gesture="Ctrl+C" Command="{Binding CopySelectedCommand}" />
+                        <KeyBinding Gesture="Ctrl+V" Command="{Binding PasteHereCommand}" />
                         <KeyBinding Gesture="Delete" Command="{Binding DeleteSelectedCommand}" />
                         <KeyBinding Gesture="Escape" Command="{Binding ResetChangesCommand}" />
                     </ListBox.KeyBindings>

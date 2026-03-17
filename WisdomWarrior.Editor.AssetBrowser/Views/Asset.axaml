@@ -27,6 +27,10 @@
 
             <suki:GlassCard.ContextMenu>
                 <ContextMenu>
+                    <MenuItem Header="Copy" Command="{Binding CopyCommand}" />
+                    <MenuItem Header="Paste Into"
+                              Command="{Binding PasteIntoCommand}"
+                              IsVisible="{Binding IsFolder}" />
                     <MenuItem Header="Rename (F2)" Command="{Binding BeginEditCommand}" />
                     <MenuItem Header="Delete" Command="{Binding DeleteCommand}" />
                     <MenuItem Header="Open in Explorer" Command="{Binding OpenInExplorerCommand}" />

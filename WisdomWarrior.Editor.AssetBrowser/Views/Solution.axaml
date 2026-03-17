@@ -1,4 +1,4 @@
-﻿<UserControl xmlns="https://github.com/avaloniaui"
+<UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:viewModels="clr-namespace:WisdomWarrior.Editor.AssetBrowser.ViewModels"
              xmlns:models="clr-namespace:WisdomWarrior.Editor.FileSystem.Models;assembly=WisdomWarrior.Editor.FileSystem"
@@ -12,19 +12,42 @@
                    Opacity="0.5"
                    Margin="5"
                    FontSize="11" />
-        
-        <TreeView ItemsSource="{Binding FileSystemRoot}"
+
+        <TreeView x:Name="SolutionTree"
+                  ItemsSource="{Binding FileSystemRoot}"
                   SelectedItem="{Binding SelectedNode, Mode=TwoWay}">
-            
+
+            <TreeView.KeyBindings>
+                <KeyBinding Gesture="Ctrl+C"
+                            Command="{Binding CopyFolderCommand}"
+                            CommandParameter="{Binding SelectedNode}" />
+                <KeyBinding Gesture="Ctrl+V"
+                            Command="{Binding PasteIntoFolderCommand}"
+                            CommandParameter="{Binding SelectedNode}" />
+            </TreeView.KeyBindings>
+
             <TreeView.Styles>
                 <Style Selector="TreeViewItem">
                     <Setter Property="IsExpanded" Value="True" />
                 </Style>
             </TreeView.Styles>
-            
+
             <TreeView.DataTemplates>
                 <TreeDataTemplate DataType="models:FileSystemNode" ItemsSource="{Binding Folders}">
-                    <TextBlock FontSize="10" Text="{Binding Name}" />
+                    <Border Background="Transparent">
+                        <Border.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="Copy"
+                                          Command="{Binding DataContext.CopyFolderCommand, ElementName=SolutionTree}"
+                                          CommandParameter="{Binding}" />
+                                <MenuItem Header="Paste"
+                                          Command="{Binding DataContext.PasteIntoFolderCommand, ElementName=SolutionTree}"
+                                          CommandParameter="{Binding}" />
+                            </ContextMenu>
+                        </Border.ContextMenu>
+
+                        <TextBlock FontSize="10" Text="{Binding Name}" />
+                    </Border>
                 </TreeDataTemplate>
             </TreeView.DataTemplates>
         </TreeView>

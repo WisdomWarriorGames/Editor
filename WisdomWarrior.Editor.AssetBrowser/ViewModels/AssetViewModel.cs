@@ -1,9 +1,10 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using Avalonia.Media.Imaging;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using WisdomWarrior.Editor.AssetBrowser.Helpers;
+using WisdomWarrior.Editor.AssetBrowser.Services;
 using WisdomWarrior.Editor.Core.Helpers;
 using WisdomWarrior.Editor.Core.Models;
 using WisdomWarrior.Editor.Core.Services;
@@ -16,18 +17,18 @@ namespace WisdomWarrior.Editor.AssetBrowser.ViewModels;
 public partial class AssetViewModel : ObservableObject, IDroppableAsset, IAssetDropData
 {
     public FileSystemNode? Node { get; }
+
     private readonly FileSystemService _fileSystemService;
+    private readonly IAssetClipboardActionService _clipboardActionService;
     private readonly SelectionManager? _selectionManager;
-    private readonly Action<AssetViewModel> _cancelEdit;
+    private readonly Action<AssetViewModel>? _cancelEdit;
 
-    [ObservableProperty] private bool _isSelected = false;
-
-    [ObservableProperty] private string _name;
-    [ObservableProperty] private string _extension;
+    [ObservableProperty] private bool _isSelected;
+    [ObservableProperty] private string _name = string.Empty;
+    [ObservableProperty] private string _extension = string.Empty;
     [ObservableProperty] private bool _isFolder;
-
-    [ObservableProperty] private string _tempName;
-    [ObservableProperty] private bool _isEditing = false;
+    [ObservableProperty] private string _tempName = string.Empty;
+    [ObservableProperty] private bool _isEditing;
     [ObservableProperty] private bool _isValid = true;
 
     [ObservableProperty]
@@ -38,23 +39,29 @@ public partial class AssetViewModel : ObservableObject, IDroppableAsset, IAssetD
 
     public string DisplayName => Name;
 
-    public bool IsNew = false;
+    public bool IsNew { get; set; }
+
     public string FullPath { get; private set; }
 
     public string Icon => IsFolder ? "📁" : "📄";
 
-    public bool IsImage => AssetHelpers.IsImage(Extension.ToLower());
+    public bool IsImage => AssetHelpers.IsImage(Extension.ToLowerInvariant());
 
-    public bool IsAudio => Extension.ToLower() switch
+    public bool IsAudio => Extension.ToLowerInvariant() switch
     {
         ".wav" or ".mp3" or ".ogg" or ".flac" or ".m4a" or ".wma" => true,
         _ => false
     };
 
-    public AssetViewModel(FileSystemNode node, FileSystemService fileSystemService, SelectionManager selectionManager)
+    public AssetViewModel(
+        FileSystemNode node,
+        FileSystemService fileSystemService,
+        IAssetClipboardActionService clipboardActionService,
+        SelectionManager selectionManager)
     {
         Node = node;
         _fileSystemService = fileSystemService;
+        _clipboardActionService = clipboardActionService;
         _selectionManager = selectionManager;
 
         Name = node.Name;
@@ -65,18 +72,62 @@ public partial class AssetViewModel : ObservableObject, IDroppableAsset, IAssetD
         InitializeThumbnail();
     }
 
-    public AssetViewModel(string directory, string name, FileSystemService fileSystemService, Action<AssetViewModel> cancelEdit)
+    public AssetViewModel(
+        string directory,
+        string name,
+        FileSystemService fileSystemService,
+        IAssetClipboardActionService clipboardActionService,
+        Action<AssetViewModel> cancelEdit)
     {
         TempName = name;
         IsFolder = true;
         IsEditing = true;
         FullPath = directory;
         _fileSystemService = fileSystemService;
+        _clipboardActionService = clipboardActionService;
         _cancelEdit = cancelEdit;
         IsNew = true;
 
         ValidateName(name);
         InitializeThumbnail();
+    }
+
+    public Task ProcessAsync(string destinationDirectory, IProgress<string>? progress = null)
+    {
+        _fileSystemService.Move(destinationDirectory, FullPath, progress);
+        return Task.CompletedTask;
+    }
+
+    public async Task<Bitmap?> LoadThumbnailAsync(string path, int width = 128)
+    {
+        var attempts = 0;
+        while (attempts < 5)
+        {
+            try
+            {
+                return await Task.Run(() =>
+                {
+                    using var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
+                    return Bitmap.DecodeToWidth(stream, width);
+                });
+            }
+            catch (IOException)
+            {
+                attempts++;
+                await Task.Delay(100);
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+
+        return null;
+    }
+
+    partial void OnTempNameChanged(string value)
+    {
+        ValidateName(value);
     }
 
     private void InitializeThumbnail()
@@ -111,38 +162,6 @@ public partial class AssetViewModel : ObservableObject, IDroppableAsset, IAssetD
         }
     }
 
-    public async Task<Bitmap?> LoadThumbnailAsync(string path, int width = 128)
-    {
-        int attempts = 0;
-        while (attempts < 5)
-        {
-            try
-            {
-                return await Task.Run(() =>
-                {
-                    using var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
-                    return Bitmap.DecodeToWidth(stream, width);
-                });
-            }
-            catch (IOException)
-            {
-                attempts++;
-                await Task.Delay(100);
-            }
-            catch (Exception)
-            {
-                return null;
-            }
-        }
-
-        return null;
-    }
-
-    partial void OnTempNameChanged(string value)
-    {
-        ValidateName(value);
-    }
-
     private void ValidateName(string value)
     {
         if (string.IsNullOrWhiteSpace(value))
@@ -152,11 +171,13 @@ public partial class AssetViewModel : ObservableObject, IDroppableAsset, IAssetD
         }
 
         var directory = Path.GetDirectoryName(FullPath);
-        if (directory == null) return;
+        if (directory == null)
+        {
+            return;
+        }
 
         var fullName = IsFolder ? value : $"{value}{Extension}";
         var newPath = Path.Combine(directory, fullName);
-
         var exists = Directory.Exists(newPath) || File.Exists(newPath);
 
         if (IsNew && exists)
@@ -166,28 +187,35 @@ public partial class AssetViewModel : ObservableObject, IDroppableAsset, IAssetD
         }
 
         var isDifferentFile = !string.Equals(FullPath, newPath, StringComparison.OrdinalIgnoreCase);
-
         IsValid = !(exists && isDifferentFile);
     }
 
     private bool CanAcceptDrop(object? droppedItem)
     {
-        if (!IsFolder) return false;
+        return IsFolder && droppedItem.CanAccept(this);
+    }
 
-        if (droppedItem.CanAccept(this)) return true;
-
-        return false;
+    private bool CanPasteInto()
+    {
+        return IsFolder;
     }
 
     [RelayCommand(CanExecute = nameof(CanAcceptDrop))]
-    private async Task AcceptDrop(object? droppedItem)
+    private void AcceptDrop(object? droppedItem)
     {
         droppedItem.ProcessFileSystemDropAsync(FullPath, _fileSystemService);
     }
 
-    public async Task ProcessAsync(string destinationDirectory, IProgress<string>? progress = null)
+    [RelayCommand]
+    private async Task Copy()
     {
-        _fileSystemService.Move(destinationDirectory, FullPath, progress);
+        await _clipboardActionService.CopyPathsAsync([FullPath]);
+    }
+
+    [RelayCommand(CanExecute = nameof(CanPasteInto))]
+    private async Task PasteInto()
+    {
+        await _clipboardActionService.PasteIntoAsync(FullPath);
     }
 
     [RelayCommand]
@@ -212,8 +240,11 @@ public partial class AssetViewModel : ObservableObject, IDroppableAsset, IAssetD
     [RelayCommand]
     public void CommitEdit()
     {
-        if (string.IsNullOrEmpty(TempName)) return;
-        if (!IsValid) return;
+        if (string.IsNullOrEmpty(TempName) || !IsValid)
+        {
+            return;
+        }
+
         if (string.Equals(TempName, Name, StringComparison.InvariantCultureIgnoreCase))
         {
             CancelEdit();
@@ -248,14 +279,11 @@ public partial class AssetViewModel : ObservableObject, IDroppableAsset, IAssetD
     [RelayCommand]
     public void OpenInExplorer()
     {
-        var path = FullPath;
-
-        if (!IsFolder)
+        var path = IsFolder ? FullPath : Path.GetDirectoryName(FullPath);
+        if (string.IsNullOrEmpty(path) || !Directory.Exists(path))
         {
-            path = Path.GetDirectoryName(path);
+            return;
         }
-
-        if (string.IsNullOrEmpty(path) || !Directory.Exists(path)) return;
 
         Process.Start(new ProcessStartInfo
         {
@@ -268,8 +296,10 @@ public partial class AssetViewModel : ObservableObject, IDroppableAsset, IAssetD
     [RelayCommand]
     public void ViewProperties()
     {
-        if (_selectionManager == null) return;
-        if (Node == null) return;
+        if (_selectionManager == null || Node == null)
+        {
+            return;
+        }
 
         _selectionManager.SetSelection(Node);
     }
