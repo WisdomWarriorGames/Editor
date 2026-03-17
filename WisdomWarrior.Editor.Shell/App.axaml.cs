@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using WisdomWarrior.Editor.FileSystem;
 using WisdomWarrior.Editor.Shell.ViewModels;
 using WisdomWarrior.Engine.Core.Components;
+using WisdomWarrior.Engine.Core.Systems;
 
 namespace WisdomWarrior.Editor.Shell;
 
@@ -26,6 +27,7 @@ public partial class App : Application
         ServiceProvider = services.BuildServiceProvider();
 
         ComponentRegistry.Bootstrap();
+        SystemRegistry.Bootstrap();
 
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {

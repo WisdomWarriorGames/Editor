@@ -24,6 +24,8 @@ public class FileSystemService
         ".tmp"
     };
 
+    public event Action<FileSystemPathRenamedEvent>? PathRenamed;
+
     public void CreateFolder(string dir, string name)
     {
         var fullPath = Path.Combine(dir, name);
@@ -52,6 +54,7 @@ public class FileSystemService
         }
 
         Directory.Move(dir, destPath);
+        RaisePathRenamed(dir, destPath, isDirectory: true);
     }
 
     public bool FolderExists(string dir, string newName)
@@ -93,6 +96,7 @@ public class FileSystemService
         var destPath = Path.Combine(parent!, newName);
 
         File.Move(fileFullPath, destPath);
+        RaisePathRenamed(fileFullPath, destPath, isDirectory: false);
     }
 
     public void Move(string targetDirectory, string sourceAssetPath, IProgress<string>? progress = null)
@@ -117,6 +121,7 @@ public class FileSystemService
             if (!File.Exists(destinationPath))
             {
                 File.Move(sourceAssetPath, destinationPath);
+                RaisePathRenamed(sourceAssetPath, destinationPath, isDirectory: false);
             }
         }
         else if (isDir)
@@ -124,8 +129,22 @@ public class FileSystemService
             if (!Directory.Exists(destinationPath))
             {
                 Directory.Move(sourceAssetPath, destinationPath);
+                RaisePathRenamed(sourceAssetPath, destinationPath, isDirectory: true);
             }
         }
+    }
+
+    private void RaisePathRenamed(string oldPath, string newPath, bool isDirectory)
+    {
+        if (string.Equals(oldPath, newPath, StringComparison.OrdinalIgnoreCase))
+            return;
+
+        PathRenamed?.Invoke(new FileSystemPathRenamedEvent
+        {
+            OldPath = oldPath,
+            NewPath = newPath,
+            IsDirectory = isDirectory
+        });
     }
 
     public async Task CopyAsset(string targetDirectory, string sourceAssetPath, IProgress<string>? progress = null)

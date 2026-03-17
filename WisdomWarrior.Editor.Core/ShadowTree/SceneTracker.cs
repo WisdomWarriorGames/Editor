@@ -4,41 +4,123 @@ namespace WisdomWarrior.Editor.Core.ShadowTree;
 
 public class SceneTracker
 {
+    private readonly object _syncRoot = new();
     private Scene? _activeScene;
     private readonly List<EntityTracker> _rootEntities = new();
+    private readonly List<SystemTracker> _systems = new();
     private int _lastRootCount;
+    private int _lastSystemCount;
     private string? _lastName;
+    private bool _isDirty;
 
     public event Action? OnSceneModified;
+    public event Action? OnStructureChanged;
 
-    public IReadOnlyList<EntityTracker> TrackedRoots => _rootEntities;
-    public Scene? ActiveScene => _activeScene;
+    public IReadOnlyList<EntityTracker> TrackedRoots
+    {
+        get
+        {
+            lock (_syncRoot)
+            {
+                return _rootEntities.ToArray();
+            }
+        }
+    }
+
+    public IReadOnlyList<SystemTracker> TrackedSystems
+    {
+        get
+        {
+            lock (_syncRoot)
+            {
+                return _systems.ToArray();
+            }
+        }
+    }
+
+    public Scene? ActiveScene
+    {
+        get
+        {
+            lock (_syncRoot)
+            {
+                return _activeScene;
+            }
+        }
+    }
+
+    public bool IsDirty
+    {
+        get
+        {
+            lock (_syncRoot)
+            {
+                return _isDirty;
+            }
+        }
+    }
 
     public void TrackScene(Scene scene)
     {
-        _activeScene = scene;
-        _lastName = scene.Name;
-        SyncRoots();
+        lock (_syncRoot)
+        {
+            _activeScene = scene;
+            _lastName = scene.Name;
+            SyncRoots();
+            SyncSystems();
+            _isDirty = false;
+        }
     }
 
     public void AddEntity(GameEntity entity)
     {
-        if (_activeScene == null) return;
-        if (_activeScene.Entities.Contains(entity)) return;
-        _activeScene.AddEntity(entity);
+        lock (_syncRoot)
+        {
+            if (_activeScene == null) return;
+            if (_activeScene.Entities.Contains(entity)) return;
+            _activeScene.AddEntity(entity);
+        }
 
         Update();
     }
 
     public void RemoveEntity(GameEntity entity)
     {
-        if (entity.Parent != null)
+        lock (_syncRoot)
         {
-            entity.Parent.Children.Remove(entity);
+            if (_activeScene == null) return;
+
+            if (entity.Parent != null)
+            {
+                entity.Parent.RemoveEntity(entity);
+            }
+            else
+            {
+                _activeScene.RemoveEntity(entity);
+            }
         }
-        else if (_activeScene != null)
+
+        Update();
+    }
+
+    public void AddSystem(WisdomWarrior.Engine.Core.Systems.System system)
+    {
+        lock (_syncRoot)
         {
-            _activeScene.Entities.Remove(entity);
+            if (_activeScene == null) return;
+            if (_activeScene.Systems.Contains(system)) return;
+            _activeScene.AddSystem(system);
+        }
+
+        Update();
+    }
+
+    public void RemoveSystem(WisdomWarrior.Engine.Core.Systems.System system)
+    {
+        lock (_syncRoot)
+        {
+            if (_activeScene == null) return;
+            _activeScene.RemoveSystem(system);
         }
 
         Update();
@@ -46,34 +128,121 @@ public class SceneTracker
 
     public void Update()
     {
-        if (_activeScene == null) return;
+        EntityTracker[] rootTrackers;
+        var detectedChanges = false;
+        Action? onSceneModified = null;
+        Action? onStructureChanged = null;
+        SystemTracker[] systems;
 
-        var isSceneDirty = false;
-
-        if (_activeScene.Name != _lastName)
+        lock (_syncRoot)
         {
-            _lastName = _activeScene.Name;
-            isSceneDirty = true;
+            if (_activeScene == null) return;
+
+            if (_activeScene.Name != _lastName)
+            {
+                _lastName = _activeScene.Name;
+                detectedChanges = true;
+            }
+
+            if (_activeScene.Entities.Count != _lastRootCount)
+            {
+                SyncRoots();
+                detectedChanges = true;
+                onStructureChanged = OnStructureChanged;
+            }
+
+            if (_activeScene.Systems.Count != _lastSystemCount)
+            {
+                SyncSystems();
+                detectedChanges = true;
+                onStructureChanged = OnStructureChanged;
+            }
+
+            rootTrackers = _rootEntities.ToArray();
+            systems = _systems.ToArray();
         }
 
-        if (_activeScene.Entities.Count != _lastRootCount)
-        {
-            SyncRoots();
-            isSceneDirty = true;
-        }
+        onStructureChanged?.Invoke();
 
-        foreach (var rootTracker in _rootEntities)
+        foreach (var rootTracker in rootTrackers)
         {
             if (rootTracker.Update())
             {
-                isSceneDirty = true;
+                detectedChanges = true;
             }
         }
 
-        if (isSceneDirty)
+        foreach (var systemTracker in systems)
         {
-            OnSceneModified?.Invoke();
+            systemTracker.Update();
+            if (systemTracker.IsDirty)
+            {
+                detectedChanges = true;
+            }
         }
+
+        lock (_syncRoot)
+        {
+            if (!detectedChanges) return;
+            if (_isDirty) return;
+
+            _isDirty = true;
+            onSceneModified = OnSceneModified;
+        }
+
+        onSceneModified?.Invoke();
+    }
+
+    public void AcknowledgeSaved()
+    {
+        EntityTracker[] rootTrackers;
+        SystemTracker[] systemTrackers;
+
+        lock (_syncRoot)
+        {
+            if (_activeScene == null)
+            {
+                _isDirty = false;
+                return;
+            }
+
+            _lastName = _activeScene.Name;
+            SyncRoots();
+            SyncSystems();
+            rootTrackers = _rootEntities.ToArray();
+            systemTrackers = _systems.ToArray();
+            _isDirty = false;
+        }
+
+        foreach (var rootTracker in rootTrackers)
+        {
+            rootTracker.AcknowledgeSaved();
+        }
+
+        foreach (var systemTracker in systemTrackers)
+        {
+            systemTracker.AcknowledgeSaved();
+        }
+    }
+
+    public EntityTracker? FindTrackerByEntity(GameEntity entity)
+    {
+        EntityTracker[] rootTrackers;
+        lock (_syncRoot)
+        {
+            rootTrackers = _rootEntities.ToArray();
+        }
+
+        foreach (var rootTracker in rootTrackers)
+        {
+            var match = FindTrackerByEntity(rootTracker, entity);
+            if (match != null)
+            {
+                return match;
+            }
+        }
+
+        return null;
     }
 
     private void SyncRoots()
@@ -101,5 +270,51 @@ public class SceneTracker
         _rootEntities.AddRange(syncedRoots);
 
         _lastRootCount = currentEngineRoots.Count;
+    }
+
+    private void SyncSystems()
+    {
+        if (_activeScene == null) return;
+
+        var currentSystems = _activeScene.Systems;
+        var syncedSystems = new List<SystemTracker>(currentSystems.Count);
+
+        foreach (var engineSystem in currentSystems)
+        {
+            var existingTracker = _systems.FirstOrDefault(t => t.EngineSystem == engineSystem);
+
+            if (existingTracker != null)
+            {
+                syncedSystems.Add(existingTracker);
+            }
+            else
+            {
+                syncedSystems.Add(new SystemTracker(engineSystem));
+            }
+        }
+
+        _systems.Clear();
+        _systems.AddRange(syncedSystems);
+
+        _lastSystemCount = currentSystems.Count;
+    }
+
+    private static EntityTracker? FindTrackerByEntity(EntityTracker tracker, GameEntity entity)
+    {
+        if (ReferenceEquals(tracker.EngineEntity, entity))
+        {
+            return tracker;
+        }
+
+        foreach (var childTracker in tracker.TrackedChildren)
+        {
+            var match = FindTrackerByEntity(childTracker, entity);
+            if (match != null)
+            {
+                return match;
+            }
+        }
+
+        return null;
     }
 }

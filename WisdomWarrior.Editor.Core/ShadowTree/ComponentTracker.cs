@@ -5,14 +5,14 @@ using Component = WisdomWarrior.Engine.Core.Component; // Assuming your base Com
 
 namespace WisdomWarrior.Editor.Core.ShadowTree;
 
-public class ComponentTracker : INotifyPropertyChanged
+public class ComponentTracker : INotifyPropertyChanged, IInspectableObjectTracker
 {
     private readonly List<PropertyTracker> _properties = new();
 
     public Component EngineComponent { get; }
 
     public bool IsDirty => _properties.Any(p => p.IsDirty);
-    public List<PropertyTracker> Properties => _properties;
+    public IReadOnlyList<PropertyTracker> Properties => _properties;
 
     public string Name => EngineComponent.GetType().Name;
 
@@ -59,6 +59,14 @@ public class ComponentTracker : INotifyPropertyChanged
         foreach (var p in _properties)
         {
             p.CheckForChanges();
+        }
+    }
+
+    public void AcknowledgeSaved()
+    {
+        foreach (var property in _properties)
+        {
+            property.AcknowledgeSaved();
         }
     }
 

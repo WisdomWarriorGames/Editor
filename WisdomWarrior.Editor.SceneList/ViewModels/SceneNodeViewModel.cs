@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Input;
 using WisdomWarrior.Editor.Core.Helpers;
 using WisdomWarrior.Editor.Core.Services;
 using WisdomWarrior.Editor.Core.ShadowTree;
+using WisdomWarrior.Editor.FileSystem;
 using WisdomWarrior.Editor.SceneList.Helpers;
 using WisdomWarrior.Engine.Core;
 
@@ -13,6 +14,8 @@ public partial class SceneNodeViewModel : ObservableObject
 {
     private readonly SceneTracker _tracker;
     private readonly SelectionManager _selectionManager;
+    private readonly Action _saveScene;
+    private readonly Func<string, SceneRenameResult> _renameScene;
 
     [ObservableProperty] private string _name = "Loading...";
     [ObservableProperty] private bool _isExpanded = true;
@@ -23,10 +26,16 @@ public partial class SceneNodeViewModel : ObservableObject
 
     public ObservableCollection<EntityViewModel> Children { get; } = new();
 
-    public SceneNodeViewModel(SceneTracker tracker, SelectionManager selectionManager)
+    public SceneNodeViewModel(
+        SceneTracker tracker,
+        SelectionManager selectionManager,
+        Action saveScene,
+        Func<string, SceneRenameResult> renameScene)
     {
         _tracker = tracker;
         _selectionManager = selectionManager;
+        _saveScene = saveScene;
+        _renameScene = renameScene;
         SyncName();
     }
 
@@ -40,14 +49,6 @@ public partial class SceneNodeViewModel : ObservableObject
         if (value == true)
         {
             _selectionManager.SetSelection(_tracker);
-        }
-    }
-
-    partial void OnNameChanged(string value)
-    {
-        if (_tracker.ActiveScene != null && _tracker.ActiveScene.Name != value)
-        {
-            _tracker.ActiveScene.Name = value;
         }
     }
 
@@ -75,8 +76,13 @@ public partial class SceneNodeViewModel : ObservableObject
             return;
         }
 
-        Name = TempName;
+        var result = _renameScene.Invoke(TempName);
+        if (!result.Success)
+        {
+            return;
+        }
 
+        SyncName();
         CancelEdit();
     }
 
@@ -84,6 +90,12 @@ public partial class SceneNodeViewModel : ObservableObject
     public void AddEntity()
     {
         _tracker.AddEntity(new GameEntity());
+    }
+
+    [RelayCommand]
+    public void SaveScene()
+    {
+        _saveScene.Invoke();
     }
 
     private bool CanAcceptDrop(object? droppedItem)

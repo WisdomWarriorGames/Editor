@@ -1,4 +1,4 @@
-﻿<UserControl xmlns="https://github.com/avaloniaui"
+<UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:viewModels="clr-namespace:WisdomWarrior.Editor.Inspector.ViewModels"
              xmlns:views="clr-namespace:WisdomWarrior.Editor.Inspector.Views"
@@ -13,7 +13,7 @@
                 <Run Text=")" />
             </TextBlock>
 
-            <Panel Grid.Column="1" IsVisible="{Binding IsEntitySelected}" Margin="0,0,4,0">
+            <Panel Grid.Column="1" IsVisible="{Binding CanAddItems}" Margin="0,0,4,0">
                 <Button Content="+"
                         Width="16"
                         Height="16"
@@ -24,16 +24,14 @@
                         HorizontalContentAlignment="Center"
                         VerticalContentAlignment="Center"
                         VerticalAlignment="Center"
-                        Theme="{DynamicResource SukiFlatButtonTheme}"
-                        DataContext="{Binding CurrentContent}">
+                        Theme="{DynamicResource SukiFlatButtonTheme}">
                     <Button.Flyout>
-                        <MenuFlyout ItemsSource="{Binding AvailableComponentNames}">
+                        <MenuFlyout ItemsSource="{Binding AvailableAddNames}">
                             <MenuFlyout.ItemContainerTheme>
                                 <ControlTheme TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
                                     <Setter Property="Header" Value="{Binding}" />
-
                                     <Setter Property="Command"
-                                            Value="{Binding $parent[Button].((viewModels:EntityInspectorViewModel)DataContext).AddComponentCommand}" />
+                                            Value="{Binding $parent[Button].((viewModels:InspectorViewModel)DataContext).AddItemCommand}" />
                                     <Setter Property="CommandParameter" Value="{Binding}" />
                                 </ControlTheme>
                             </MenuFlyout.ItemContainerTheme>
@@ -45,18 +43,13 @@
 
         <ContentControl Content="{Binding CurrentContent}">
             <ContentControl.DataTemplates>
-
                 <DataTemplate DataType="{x:Type viewModels:EntityInspectorViewModel}">
                     <views:EntityInspector />
                 </DataTemplate>
 
-                <!-- <DataTemplate DataType="{x:Type viewModels:AssetInspectorViewModel}"> -->
-                <!--     <StackPanel> -->
-                <!--         <TextBlock Text="Asset Properties" FontWeight="Bold" /> -->
-                <!--         <TextBlock Text="{Binding File.FullPath}" /> -->
-                <!--     </StackPanel> -->
-                <!-- </DataTemplate> -->
-
+                <DataTemplate DataType="{x:Type viewModels:SceneInspectorViewModel}">
+                    <views:SceneInspector />
+                </DataTemplate>
             </ContentControl.DataTemplates>
         </ContentControl>
     </StackPanel>

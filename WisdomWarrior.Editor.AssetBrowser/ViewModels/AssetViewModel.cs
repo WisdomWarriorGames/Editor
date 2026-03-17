@@ -13,7 +13,7 @@ using WisdomWarrior.Editor.FileSystem.Models;
 
 namespace WisdomWarrior.Editor.AssetBrowser.ViewModels;
 
-public partial class AssetViewModel : ObservableObject, IDroppableAsset, IHasFileSystemNode
+public partial class AssetViewModel : ObservableObject, IDroppableAsset, IAssetDropData
 {
     public FileSystemNode? Node { get; }
     private readonly FileSystemService _fileSystemService;
@@ -39,7 +39,7 @@ public partial class AssetViewModel : ObservableObject, IDroppableAsset, IHasFil
     public string DisplayName => Name;
 
     public bool IsNew = false;
-    public string FullPath;
+    public string FullPath { get; private set; }
 
     public string Icon => IsFolder ? "📁" : "📄";
 

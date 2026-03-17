@@ -1,0 +1,8 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:models="clr-namespace:WisdomWarrior.Editor.Inspector.Models">
+    <DataTemplate x:Key="EnumTemplate" DataType="models:EnumPropertyViewModel">
+        <ComboBox ItemsSource="{Binding Values}"
+                  SelectedItem="{Binding Value}" />
+    </DataTemplate>
+</ResourceDictionary>

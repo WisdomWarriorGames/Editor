@@ -13,6 +13,8 @@
                 <ResourceInclude Source="avares://WisdomWarrior.Editor.Inspector/Resources/FloatTemplate.axaml" />
                 <ResourceInclude Source="avares://WisdomWarrior.Editor.Inspector/Resources/SizeTemplate.axaml" />
                 <ResourceInclude Source="avares://WisdomWarrior.Editor.Inspector/Resources/ColourTemplate.axaml" />
+                <ResourceInclude Source="avares://WisdomWarrior.Editor.Inspector/Resources/BoolTemplate.axaml" />
+                <ResourceInclude Source="avares://WisdomWarrior.Editor.Inspector/Resources/EnumTemplate.axaml" />
                 <ResourceInclude Source="avares://WisdomWarrior.Editor.Inspector/Resources/ImageAssetTemplate.axaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
@@ -20,14 +22,13 @@
     <Grid RowDefinitions="Auto, *">
         <ScrollViewer Grid.Row="1">
             <StackPanel Spacing="2">
-
                 <suki:GlassCard IsVisible="{Binding Entity, Converter={x:Static ObjectConverters.IsNull}}"
                                 VerticalAlignment="Center" HorizontalAlignment="Stretch">
                     <TextBlock Text="Select an entity to view components."
                                HorizontalAlignment="Center"
                                Classes="Description" />
                 </suki:GlassCard>
-
+                
                 <ItemsControl ItemsSource="{Binding Components}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
@@ -70,11 +71,7 @@
                                         </Button>
                                     </Grid>
 
-                                    <Border Height="1" Background="{DynamicResource SukiBorderBrush}" Opacity="0.5"
-                                            Margin="0,0,0,2" />
-
                                     <views:ComponentEditor DataContext="{Binding}" />
-
                                 </StackPanel>
                             </suki:GlassCard>
                         </DataTemplate>

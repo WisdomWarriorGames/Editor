@@ -1,9 +1,8 @@
-﻿using System.Numerics;
+using System.Numerics;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using WisdomWarrior.Editor.Core.Helpers;
-using WisdomWarrior.Editor.FileSystem.Helpers;
-using WisdomWarrior.Editor.FileSystem.Models;
+using WisdomWarrior.Editor.Core.Models;
 using WisdomWarrior.Engine.Core.Assets;
 using WisdomWarrior.Engine.Core.DataTypes;
 
@@ -49,17 +48,35 @@ public partial class ImageAssetViewModel : ObservableObject
 
     private bool CanAcceptDrop(object? droppedItem)
     {
-        if (droppedItem is not IHasFileSystemNode node) return false;
-
-        return AssetHelpers.IsImage(node.Node.Extension);
+        return droppedItem
+            .GetPayloadItems<IAssetDropData>()
+            .Any(IsImageAssetDrop);
     }
 
     [RelayCommand(CanExecute = nameof(CanAcceptDrop))]
     private Task AcceptDrop(object? droppedItem)
     {
-        if (droppedItem is not IHasFileSystemNode node) return Task.CompletedTask;
-        Path = node.Node.FullPath;
+        var droppedAsset = droppedItem
+            .GetPayloadItems<IAssetDropData>()
+            .FirstOrDefault(IsImageAssetDrop);
+
+        if (droppedAsset == null)
+        {
+            return Task.CompletedTask;
+        }
+
+        Path = droppedAsset.FullPath;
 
         return Task.CompletedTask;
+    }
+
+    private static bool IsImageAssetDrop(IAssetDropData assetDrop)
+    {
+        if (assetDrop.IsFolder)
+        {
+            return false;
+        }
+
+        return AssetHelpers.IsImage(assetDrop.Extension);
     }
 }

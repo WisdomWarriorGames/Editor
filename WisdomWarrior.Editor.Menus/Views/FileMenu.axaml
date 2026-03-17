@@ -6,7 +6,7 @@
     <Menu Background="Transparent">
         <MenuItem Header="File" Cursor="Hand">
             <MenuItem Header="Create New Game" Command="{Binding CreateNewGameCommand}" />
-            <MenuItem Header="Open Game Project" Command="{Binding OpenGameProjectCommand}" />
+            <MenuItem Header="Open Game Solution" Command="{Binding OpenGameCommand}" />
         </MenuItem>
     </Menu>
 </UserControl>

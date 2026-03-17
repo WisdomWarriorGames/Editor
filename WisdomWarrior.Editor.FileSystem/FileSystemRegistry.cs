@@ -16,6 +16,7 @@ public class FileSystemRegistry : IDisposable
     public Dictionary<string, FileSystemNode> Directories { get; } = new();
     public event Action? RegistryUpdated;
     public event Action? FileSystemChanged;
+    public event Action<FileSystemPathRenamedEvent>? PathRenamed;
     public event Action<FileSystemNode>? CurrentNodeChanged;
 
     private readonly System.Timers.Timer _registryUpdateTimer;
@@ -195,6 +196,8 @@ public class FileSystemRegistry : IDisposable
 
     private void HandleRenamed(string oldPath, string newPath)
     {
+        FileSystemPathRenamedEvent? pathRenamed = null;
+
         lock (_lock)
         {
             if (!Nodes.TryGetValue(oldPath, out var node))
@@ -202,6 +205,13 @@ public class FileSystemRegistry : IDisposable
                 HandleCreated(newPath);
                 return;
             }
+
+            pathRenamed = new FileSystemPathRenamedEvent
+            {
+                OldPath = oldPath,
+                NewPath = newPath,
+                IsDirectory = node.IsFolder
+            };
 
             UpdatePathsRecursive(node, oldPath, newPath);
 
@@ -224,6 +234,11 @@ public class FileSystemRegistry : IDisposable
                     newParent.Children.Add(node);
                 }
             }
+        }
+
+        if (pathRenamed != null)
+        {
+            PathRenamed?.Invoke(pathRenamed);
         }
 
         RequestUIUpdate();

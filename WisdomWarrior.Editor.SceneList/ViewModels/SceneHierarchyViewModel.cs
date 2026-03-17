@@ -1,10 +1,13 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using SukiUI.Toasts;
+using WisdomWarrior.Editor.Core;
 using WisdomWarrior.Editor.Core.Helpers;
 using WisdomWarrior.Editor.Core.Services;
 using WisdomWarrior.Editor.Core.ShadowTree;
+using WisdomWarrior.Editor.FileSystem;
 using WisdomWarrior.Editor.SceneList.Helpers;
 
 namespace WisdomWarrior.Editor.SceneList.ViewModels;
@@ -14,35 +17,99 @@ public partial class SceneHierarchyViewModel : ObservableObject
     private readonly SceneTracker _sceneTracker;
     private readonly CurrentSceneManager _sceneManager;
     private readonly SelectionManager _selectionManager;
+    private readonly ScenePersistenceService _scenePersistenceService;
+    private readonly ScenePathSynchronizationService _scenePathSynchronizationService;
 
     public ObservableCollection<SceneNodeViewModel> Scenes { get; } = new();
 
-    private SceneNodeViewModel _activeSceneNode;
+    private SceneNodeViewModel? _activeSceneNode;
+    private SceneNodeViewModel? _selectedSceneNode;
+    private EntityViewModel? _selectedEntityNode;
 
-    public SceneHierarchyViewModel(CurrentSceneManager sceneManager, SelectionManager selectionManager)
+    public SceneHierarchyViewModel(
+        CurrentSceneManager sceneManager,
+        SelectionManager selectionManager,
+        ScenePersistenceService scenePersistenceService,
+        ScenePathSynchronizationService scenePathSynchronizationService)
     {
         _sceneManager = sceneManager;
         _selectionManager = selectionManager;
+        _scenePersistenceService = scenePersistenceService;
+        _scenePathSynchronizationService = scenePathSynchronizationService;
         _sceneTracker = _sceneManager.Tracker;
 
         _sceneTracker.OnSceneModified += OnSceneModified;
+        _sceneTracker.OnStructureChanged += OnSceneStructureChanged;
         _sceneManager.CurrentSceneReady += OnSceneReady;
         _selectionManager.OnSelectionChanged += OnSelectionChanged;
     }
 
     private void OnSelectionChanged(object? obj)
     {
-        if (obj is not EntityTracker && obj is not SceneTracker)
+        if (obj is EntityTracker entityTracker)
         {
-            Dispatcher.UIThread.Post(ResetChanges);
+            Dispatcher.UIThread.Post(() => ApplyEntitySelection(entityTracker));
+            return;
         }
+
+        if (obj is SceneTracker sceneTracker && ReferenceEquals(sceneTracker, _sceneTracker))
+        {
+            Dispatcher.UIThread.Post(ApplySceneSelection);
+            return;
+        }
+
+        Dispatcher.UIThread.Post(ResetChanges);
     }
 
     private void OnSceneReady()
     {
-        _activeSceneNode = new SceneNodeViewModel(_sceneTracker, _selectionManager);
-        Scenes.Add(_activeSceneNode);
-        Dispatcher.UIThread.Post(SyncRootEntities);
+        void RefreshSceneNodes()
+        {
+            ClearCurrentSelectionState();
+            Scenes.Clear();
+
+            _activeSceneNode = new SceneNodeViewModel(
+                _sceneTracker,
+                _selectionManager,
+                SaveActiveScene,
+                RenameActiveScene);
+            Scenes.Add(_activeSceneNode);
+            SyncRootEntities();
+        }
+
+        if (Dispatcher.UIThread.CheckAccess())
+        {
+            RefreshSceneNodes();
+            return;
+        }
+
+        Dispatcher.UIThread.InvokeAsync(RefreshSceneNodes).GetAwaiter().GetResult();
+    }
+
+    private void SaveActiveScene()
+    {
+        var saved = _scenePersistenceService.TrySaveSceneToPreferredDirectory();
+        if (saved)
+            return;
+
+        EditorUI.ToastManager.CreateToast()
+            .WithTitle("Unable to save scene in the selected folder.")
+            .Queue();
+    }
+
+    private SceneRenameResult RenameActiveScene(string newSceneName)
+    {
+        var result = _scenePathSynchronizationService.RenameActiveScene(newSceneName);
+        if (result.Success)
+        {
+            return result;
+        }
+
+        EditorUI.ToastManager.CreateToast()
+            .WithTitle(result.ErrorMessage ?? "Unable to rename scene.")
+            .Queue();
+
+        return result;
     }
 
     private void OnSceneModified()
@@ -50,8 +117,18 @@ public partial class SceneHierarchyViewModel : ObservableObject
         Dispatcher.UIThread.Post(SyncRootEntities);
     }
 
+    private void OnSceneStructureChanged()
+    {
+        Dispatcher.UIThread.Post(SyncRootEntities);
+    }
+
     private void SyncRootEntities()
     {
+        if (_activeSceneNode == null)
+        {
+            return;
+        }
+
         _activeSceneNode.SyncName();
         var currentTrackers = _sceneTracker.TrackedRoots;
         var rootList = _activeSceneNode.Children;
@@ -90,6 +167,9 @@ public partial class SceneHierarchyViewModel : ObservableObject
                 ResetEntityRecursive(entity);
             }
         }
+
+        _selectedSceneNode = null;
+        _selectedEntityNode = null;
     }
 
     public void ClearSelection()
@@ -97,7 +177,7 @@ public partial class SceneHierarchyViewModel : ObservableObject
         _selectionManager.Clear();
     }
 
-    private void ResetEntityRecursive(EntityViewModel entity)
+    private static void ResetEntityRecursive(EntityViewModel entity)
     {
         entity.CommitEdit();
         entity.IsSelected = false;
@@ -119,5 +199,75 @@ public partial class SceneHierarchyViewModel : ObservableObject
     public void AcceptDrop(object? droppedObject)
     {
         droppedObject.ProcessEntityDrop(this, _sceneTracker);
+    }
+
+    private void ApplyEntitySelection(EntityTracker targetTracker)
+    {
+        if (_activeSceneNode == null)
+        {
+            return;
+        }
+
+        ClearCurrentSelectionState();
+        _activeSceneNode.IsExpanded = true;
+
+        var selectedEntity = TrySelectEntityRecursive(_activeSceneNode.Children, targetTracker);
+        if (selectedEntity == null)
+        {
+            return;
+        }
+
+        _selectedEntityNode = selectedEntity;
+    }
+
+    private void ApplySceneSelection()
+    {
+        if (_activeSceneNode == null)
+        {
+            return;
+        }
+
+        ClearCurrentSelectionState();
+        _activeSceneNode.IsSelected = true;
+        _activeSceneNode.IsExpanded = true;
+        _selectedSceneNode = _activeSceneNode;
+    }
+
+    private void ClearCurrentSelectionState()
+    {
+        if (_selectedSceneNode != null)
+        {
+            _selectedSceneNode.IsSelected = false;
+            _selectedSceneNode = null;
+        }
+
+        if (_selectedEntityNode != null)
+        {
+            _selectedEntityNode.IsSelected = false;
+            _selectedEntityNode = null;
+        }
+    }
+
+    private static EntityViewModel? TrySelectEntityRecursive(
+        IEnumerable<EntityViewModel> entities,
+        EntityTracker targetTracker)
+    {
+        foreach (var entity in entities)
+        {
+            if (ReferenceEquals(entity.Tracker, targetTracker))
+            {
+                entity.IsSelected = true;
+                return entity;
+            }
+
+            var selectedChild = TrySelectEntityRecursive(entity.Children, targetTracker);
+            if (selectedChild != null)
+            {
+                entity.IsExpanded = true;
+                return selectedChild;
+            }
+        }
+
+        return null;
     }
 }
