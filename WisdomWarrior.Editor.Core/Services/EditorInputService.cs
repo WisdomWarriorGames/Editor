@@ -33,6 +33,7 @@ public class EditorInputService
 
     public bool IsPointerOver(Vector2 targetPosition, float radius)
     {
-        return Vector2.Distance(MousePosition, targetPosition) <= radius;
+        var delta = MousePosition - targetPosition;
+        return delta.LengthSquared() <= (radius * radius);
     }
 }

@@ -26,6 +26,7 @@ public partial class MonoGameView : UserControl
     protected override void OnPointerPressed(PointerPressedEventArgs e)
     {
         if (DataContext is not MonoGameViewModel viewModel) return;
+
         var input = viewModel.InputService;
         var pointerPosition = GetPointerPosition(e);
         input.MousePosition = pointerPosition;
@@ -35,6 +36,7 @@ public partial class MonoGameView : UserControl
         {
             input.SetLeftMouseDown(true);
             viewModel.TrySelectEntityAtViewportPoint(pointerPosition);
+            e.Pointer.Capture(this);
             Cursor = HiddenCursor;
         }
 
@@ -47,6 +49,7 @@ public partial class MonoGameView : UserControl
     protected override void OnPointerReleased(PointerReleasedEventArgs e)
     {
         if (DataContext is not MonoGameViewModel viewModel) return;
+
         var input = viewModel.InputService;
         var pointerPosition = GetPointerPosition(e);
         input.MousePosition = pointerPosition;
@@ -55,6 +58,11 @@ public partial class MonoGameView : UserControl
         if (!props.IsLeftButtonPressed)
         {
             input.SetLeftMouseDown(false);
+            if (ReferenceEquals(e.Pointer.Captured, this))
+            {
+                e.Pointer.Capture(null);
+            }
+
             Cursor = ArrowCursor;
         }
 

@@ -4,7 +4,6 @@ using WisdomWarrior.Editor.MonoGame.Overlays;
 using WisdomWarrior.Editor.MonoGame.Selection;
 using WisdomWarrior.Editor.MonoGame.Tools;
 using WisdomWarrior.Engine.Core;
-using WisdomWarrior.Engine.Core.Components;
 using WisdomWarrior.Engine.MonoGame;
 using Vector2 = System.Numerics.Vector2;
 
@@ -22,7 +21,6 @@ public class EditorRuntime : Game
     private readonly EditorRenderService _renderService;
     private readonly Engine.Core.Engine _engine;
     private readonly SceneSpriteHitTestService _sceneSpriteHitTestService = new();
-    private Guid? _preparedSceneId;
 
     public EditorRuntime(ToolContext context)
     {
@@ -30,6 +28,9 @@ public class EditorRuntime : Game
         _overlayManager = new OverlayManager(context);
         _toolManager = new ToolManager(context);
         _graphics = new GraphicsDeviceManager(this);
+        _graphics.SynchronizeWithVerticalRetrace = true;
+        IsFixedTimeStep = true;
+        TargetElapsedTime = TimeSpan.FromSeconds(1d / 60d);
 
         _renderService = new EditorRenderService();
         _engine = new Engine.Core.Engine(_renderService);
@@ -42,7 +43,6 @@ public class EditorRuntime : Game
         _textureManager = new TextureManager(GraphicsDevice);
         _renderService.LoadContent(_spriteBatch, _textureManager);
         _engine.LoadContent();
-        PrepareActiveSceneForInteraction();
         _overlayManager.Load(GraphicsDevice);
 
         base.LoadContent();
@@ -50,7 +50,7 @@ public class EditorRuntime : Game
 
     protected override void Update(GameTime gameTime)
     {
-        PrepareActiveSceneForInteraction();
+        _engine.Update();
         _toolManager.Update();
         _context.Input.AdvanceFrame();
 
@@ -80,8 +80,6 @@ public class EditorRuntime : Game
 
     public GameEntity? HitTestEntityAtViewportPoint(Vector2 viewportPosition)
     {
-        PrepareActiveSceneForInteraction();
-
         var activeScene = SceneManager.GetCurrentScene();
         if (activeScene == null)
         {
@@ -89,31 +87,5 @@ public class EditorRuntime : Game
         }
 
         return _sceneSpriteHitTestService.HitTest(activeScene, viewportPosition, _renderService.CanRenderTexture);
-    }
-
-    public void PrepareActiveSceneForInteraction()
-    {
-        var activeScene = SceneManager.GetCurrentScene();
-        if (activeScene == null)
-        {
-            _preparedSceneId = null;
-            return;
-        }
-
-        if (_preparedSceneId == activeScene.Id)
-        {
-            return;
-        }
-
-        var texturePaths = activeScene.GetEntitiesWith<Sprite>()
-            .SelectMany(entity => entity.Components.OfType<Sprite>())
-            .Select(sprite => sprite.Image?.AssetPath)
-            .Where(path => !string.IsNullOrWhiteSpace(path))
-            .Cast<string>()
-            .Distinct(StringComparer.OrdinalIgnoreCase)
-            .ToList();
-
-        _renderService.PreloadTextures(texturePaths);
-        _preparedSceneId = activeScene.Id;
     }
 }

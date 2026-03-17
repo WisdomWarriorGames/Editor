@@ -11,7 +11,6 @@
                  x:Class="WisdomWarrior.Editor.Shell.MainWindow"
                  x:DataType="viewModels:MainWindowViewModel"
                  Title=""
-                 TransparencyLevelHint="Mica"
                  ExtendClientAreaToDecorationsHint="True"
                  WindowState="Maximized"
                  WindowStartupLocation="CenterScreen"

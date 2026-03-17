@@ -19,7 +19,7 @@ public class TranslateTool : IEditorTool
             return;
         }
 
-        var transform = entity.Components.OfType<Transform>().FirstOrDefault();
+        var transform = entity.GetComponent<Transform>();
         if (transform == null)
         {
             _isDragging = false;

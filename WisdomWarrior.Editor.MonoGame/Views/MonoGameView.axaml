@@ -1,7 +1,9 @@
-﻿<UserControl xmlns="https://github.com/avaloniaui"
+<UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:viewModels="clr-namespace:WisdomWarrior.Editor.MonoGame.ViewModels"
              xmlns:monoGame="clr-namespace:AvaloniaInside.MonoGame;assembly=AvaloniaInside.MonoGame"
-             x:Class="WisdomWarrior.Editor.MonoGame.Views.MonoGameView">
+             x:Class="WisdomWarrior.Editor.MonoGame.Views.MonoGameView"
+             x:DataType="viewModels:MonoGameViewModel">
 
     <monoGame:MonoGameControl Game="{Binding CurrentGame}" />
 
