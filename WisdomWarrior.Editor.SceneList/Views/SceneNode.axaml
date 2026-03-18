@@ -13,6 +13,7 @@
     </UserControl.ContextMenu>
 
     <Border dragAndDrop:DropTarget.DropCommand="{Binding AcceptDropCommand}"
+            Classes.selected="{Binding IsSelected}"
             Background="Transparent" 
             BorderThickness="2"
             CornerRadius="4">
@@ -26,6 +27,7 @@
                     <TextBlock Text="{Binding Name}"
                                FontWeight="Bold"
                                FontSize="10"
+                               Foreground="{DynamicResource EditorTreeTextBrush}"
                                IsVisible="{Binding !IsEditing}"
                                VerticalAlignment="Center"
                                Margin="0" />
@@ -36,6 +38,7 @@
                              AttachedToVisualTree="OnTextBoxLoaded"
                              FontWeight="Bold"
                              FontSize="10"
+                             Foreground="{DynamicResource EditorTreeTextBrush}"
                              Background="Transparent"
                              BorderThickness="0"
                              MinHeight="0"
@@ -66,6 +69,18 @@
     <UserControl.Styles>
         <Style Selector="Border:dragover">
             <Setter Property="BorderBrush" Value="#2196F3" />
+        </Style>
+
+        <Style Selector="Border.selected">
+            <Setter Property="Background" Value="{DynamicResource EditorTreeSelectionBackgroundBrush}" />
+        </Style>
+
+        <Style Selector="Border.selected TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource EditorTreeSelectionForegroundBrush}" />
+        </Style>
+
+        <Style Selector="Border.selected TextBox">
+            <Setter Property="Foreground" Value="{DynamicResource EditorTreeSelectionForegroundBrush}" />
         </Style>
     </UserControl.Styles>
 </UserControl>

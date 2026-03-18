@@ -31,7 +31,7 @@
         <Grid Grid.Column="0" RowDefinitions="8*, 8, 3*">
 
             <Border Grid.Row="0"
-                    Background="#050505"
+                    Background="{DynamicResource SukiAlternativeBackground}"
                     BorderBrush="{DynamicResource SukiBorderBrush}">
                 <Grid>
                     <monogame:MonoGameView DataContext="{Binding MonoGameWindow}" />

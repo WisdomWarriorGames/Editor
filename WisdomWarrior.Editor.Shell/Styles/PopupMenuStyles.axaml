@@ -1,64 +1,104 @@
 <Styles xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
-    <Styles.Resources>
-        <SolidColorBrush x:Key="PopupMenuBackgroundBrush" Color="#FF1A1C22" />
-    </Styles.Resources>
-
     <Style Selector="PopupRoot">
-        <Setter Property="Background" Value="{StaticResource PopupMenuBackgroundBrush}" />
+        <Setter Property="Background" Value="{DynamicResource EditorPopupBackgroundBrush}" />
     </Style>
 
     <Style Selector="PopupRoot Border">
-        <Setter Property="Background" Value="{StaticResource PopupMenuBackgroundBrush}" />
-        <Setter Property="BorderBrush" Value="{DynamicResource SukiBorderBrush}" />
+        <Setter Property="Background" Value="{DynamicResource EditorPopupBackgroundBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource EditorPopupBorderBrush}" />
     </Style>
 
     <Style Selector="ContextMenu">
-        <Setter Property="Background" Value="{StaticResource PopupMenuBackgroundBrush}" />
-        <Setter Property="BorderBrush" Value="{DynamicResource SukiBorderBrush}" />
+        <Setter Property="Background" Value="{DynamicResource EditorPopupBackgroundBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource EditorPopupBorderBrush}" />
         <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="Foreground" Value="White" />
+        <Setter Property="Foreground" Value="{DynamicResource EditorPopupItemForegroundBrush}" />
         <Setter Property="Padding" Value="4" />
+    </Style>
+
+    <Style Selector="ContextMenu /template/ Border">
+        <Setter Property="Background" Value="{DynamicResource EditorPopupBackgroundBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource EditorPopupBorderBrush}" />
     </Style>
 
     <Style Selector="MenuFlyoutPresenter">
-        <Setter Property="Background" Value="{StaticResource PopupMenuBackgroundBrush}" />
-        <Setter Property="BorderBrush" Value="{DynamicResource SukiBorderBrush}" />
+        <Setter Property="Background" Value="{DynamicResource EditorPopupBackgroundBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource EditorPopupBorderBrush}" />
         <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="Foreground" Value="White" />
+        <Setter Property="Foreground" Value="{DynamicResource EditorPopupItemForegroundBrush}" />
         <Setter Property="Padding" Value="4" />
+    </Style>
+
+    <Style Selector="MenuFlyoutPresenter /template/ Border">
+        <Setter Property="Background" Value="{DynamicResource EditorPopupBackgroundBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource EditorPopupBorderBrush}" />
     </Style>
 
     <Style Selector="FlyoutPresenter">
-        <Setter Property="Background" Value="{StaticResource PopupMenuBackgroundBrush}" />
-        <Setter Property="BorderBrush" Value="{DynamicResource SukiBorderBrush}" />
+        <Setter Property="Background" Value="{DynamicResource EditorPopupBackgroundBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource EditorPopupBorderBrush}" />
         <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="Foreground" Value="White" />
+        <Setter Property="Foreground" Value="{DynamicResource EditorPopupItemForegroundBrush}" />
         <Setter Property="Padding" Value="4" />
     </Style>
 
-    <Style Selector="Menu">
-        <Setter Property="Foreground" Value="White" />
+    <Style Selector="FlyoutPresenter /template/ Border">
+        <Setter Property="Background" Value="{DynamicResource EditorPopupBackgroundBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource EditorPopupBorderBrush}" />
     </Style>
 
-    <Style Selector="MenuItem">
-        <Setter Property="Foreground" Value="White" />
-        <Setter Property="Background" Value="{StaticResource PopupMenuBackgroundBrush}" />
+    <Style Selector="Menu">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{DynamicResource EditorPopupItemForegroundBrush}" />
+    </Style>
+
+    <Style Selector="Menu > MenuItem">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{DynamicResource EditorPopupItemForegroundBrush}" />
+    </Style>
+
+    <Style Selector="MenuFlyoutPresenter MenuItem">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{DynamicResource EditorPopupItemForegroundBrush}" />
+    </Style>
+
+    <Style Selector="ContextMenu MenuItem">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{DynamicResource EditorPopupItemForegroundBrush}" />
+    </Style>
+
+    <Style Selector="FlyoutPresenter MenuItem">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{DynamicResource EditorPopupItemForegroundBrush}" />
+    </Style>
+
+    <Style Selector="MenuItem /template/ ContentPresenter">
+        <Setter Property="Foreground" Value="{DynamicResource EditorPopupItemForegroundBrush}" />
+    </Style>
+
+    <Style Selector="MenuItem:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource EditorPopupItemHoverBackgroundBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource EditorPopupItemHoverForegroundBrush}" />
+    </Style>
+
+    <Style Selector="MenuItem:selected /template/ ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource EditorPopupItemHoverBackgroundBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource EditorPopupItemHoverForegroundBrush}" />
     </Style>
 
     <Style Selector="MenuItem:pointerover">
-        <Setter Property="Background" Value="#2E5BFF" />
-        <Setter Property="Foreground" Value="White" />
+        <Setter Property="Background" Value="{DynamicResource EditorPopupItemHoverBackgroundBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource EditorPopupItemHoverForegroundBrush}" />
     </Style>
 
     <Style Selector="MenuItem:selected">
-        <Setter Property="Background" Value="#2E5BFF" />
-        <Setter Property="Foreground" Value="White" />
+        <Setter Property="Background" Value="{DynamicResource EditorPopupItemHoverBackgroundBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource EditorPopupItemHoverForegroundBrush}" />
     </Style>
 
     <Style Selector="MenuItem:disabled">
-        <Setter Property="Foreground" Value="#88FFFFFF" />
         <Setter Property="Opacity" Value="0.7" />
     </Style>
 </Styles>

@@ -33,10 +33,20 @@
                     <Style Selector="TreeViewItem">
                         <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
                         <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
-
+                        <Setter Property="Background" Value="Transparent" />
+                        <Setter Property="Foreground" Value="{DynamicResource EditorTreeTextBrush}" />
                         <Setter Property="Padding" Value="0" />
                         <Setter Property="HorizontalAlignment" Value="Stretch" />
                     </Style>
+
+                    <Style Selector="TreeViewItem:pointerover /template/ ContentPresenter">
+                        <Setter Property="Background" Value="Transparent" />
+                    </Style>
+
+                    <Style Selector="TreeViewItem:selected /template/ ContentPresenter">
+                        <Setter Property="Background" Value="Transparent" />
+                    </Style>
+
                     <Style Selector="TreeView:dragover">
                         <Setter Property="BorderBrush" Value="#2196F3" />
                     </Style>

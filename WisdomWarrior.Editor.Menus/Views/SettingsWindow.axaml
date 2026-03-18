@@ -20,7 +20,7 @@
                                FontSize="22"
                                FontWeight="SemiBold" />
                     <TextBlock Text="Configure editor-wide preferences."
-                               Foreground="{DynamicResource SukiSecondaryTextBrush}" />
+                               Opacity="0.78" />
                 </StackPanel>
 
                 <suki:GlassCard Padding="18"
@@ -33,7 +33,7 @@
                             <TextBlock Text="Editor Theme" FontWeight="SemiBold" />
                             <TextBlock Text="Choose the base theme for the editor window."
                                        TextWrapping="Wrap"
-                                       Foreground="{DynamicResource SukiSecondaryTextBrush}" />
+                                       Opacity="0.78" />
                         </StackPanel>
 
                         <ComboBox Grid.Column="1"
@@ -55,7 +55,7 @@
                            Margin="12,8,12,0"
                            FontSize="14"
                            FontWeight="SemiBold"
-                           Foreground="{DynamicResource SukiSecondaryTextBrush}" />
+                           Opacity="0.78" />
 
                 <ListBox ItemsSource="{Binding Categories}"
                          SelectedItem="{Binding SelectedCategory}"

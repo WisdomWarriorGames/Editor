@@ -25,22 +25,13 @@
                             CornerRadius="2"
                             Padding="4"
                             BoxShadow="0 4 15 0 #40000000">
-                        <ColorView Color="{Binding Value, Converter={StaticResource SysColorConverter}, Mode=TwoWay}"
-                                   Foreground="White">
+                        <ColorView Color="{Binding Value, Converter={StaticResource SysColorConverter}, Mode=TwoWay}">
                             <ColorView.Styles>
                     
-                                <Style Selector="ColorView Button">
-                                    <Setter Property="Foreground" Value="White" />
-                                </Style>
-                    
-                                <Style Selector="ColorView PathIcon">
-                                    <Setter Property="Foreground" Value="White" />
+                                <Style Selector="ColorView TextBox">
+                                    <Setter Property="Background" Value="{DynamicResource SukiAlternativeBackground}" />
                                 </Style>
 
-                                <Style Selector="ColorView TextBox">
-                                    <Setter Property="Foreground" Value="White" />
-                                </Style>
-                    
                             </ColorView.Styles>
                         </ColorView>
 

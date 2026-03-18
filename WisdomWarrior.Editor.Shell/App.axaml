@@ -3,6 +3,52 @@
              xmlns:suki="https://github.com/kikipoulet/SukiUI"
              x:Class="WisdomWarrior.Editor.Shell.App">
 
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.ThemeDictionaries>
+                <ResourceDictionary x:Key="Light">
+                    <SolidColorBrush x:Key="EditorPopupBackgroundBrush" Color="#FFF7F7F7" />
+                    <SolidColorBrush x:Key="EditorPopupBorderBrush" Color="#FFD8D8D8" />
+                    <SolidColorBrush x:Key="EditorPopupItemForegroundBrush" Color="#FF111111" />
+                    <SolidColorBrush x:Key="EditorPopupItemHoverBackgroundBrush" Color="#FFDCEBFF" />
+                    <SolidColorBrush x:Key="EditorPopupItemHoverForegroundBrush" Color="#FF0F172A" />
+                    <SolidColorBrush x:Key="EditorTreeTextBrush" Color="#FF111111" />
+                    <SolidColorBrush x:Key="EditorTreeSelectionBackgroundBrush" Color="#FFDCEBFF" />
+                    <SolidColorBrush x:Key="EditorTreeSelectionForegroundBrush" Color="#FF0F172A" />
+                    <SolidColorBrush x:Key="EditorTreeHoverBackgroundBrush" Color="#FFEEF5FF" />
+                    <SolidColorBrush x:Key="EditorInspectorLabelBrush" Color="#FF2B2B2B" />
+                    <SolidColorBrush x:Key="EditorInspectorValueBrush" Color="#FF111111" />
+                </ResourceDictionary>
+                <ResourceDictionary x:Key="Dark">
+                    <SolidColorBrush x:Key="EditorPopupBackgroundBrush" Color="#FF232428" />
+                    <SolidColorBrush x:Key="EditorPopupBorderBrush" Color="#FF3D4047" />
+                    <SolidColorBrush x:Key="EditorPopupItemForegroundBrush" Color="#FFF0F0F0" />
+                    <SolidColorBrush x:Key="EditorPopupItemHoverBackgroundBrush" Color="#FF35577C" />
+                    <SolidColorBrush x:Key="EditorPopupItemHoverForegroundBrush" Color="#FFFFFFFF" />
+                    <SolidColorBrush x:Key="EditorTreeTextBrush" Color="#FFE6E6E6" />
+                    <SolidColorBrush x:Key="EditorTreeSelectionBackgroundBrush" Color="#FF2D4A6A" />
+                    <SolidColorBrush x:Key="EditorTreeSelectionForegroundBrush" Color="#FFF7FAFF" />
+                    <SolidColorBrush x:Key="EditorTreeHoverBackgroundBrush" Color="#FF273240" />
+                    <SolidColorBrush x:Key="EditorInspectorLabelBrush" Color="#FFD7D7D7" />
+                    <SolidColorBrush x:Key="EditorInspectorValueBrush" Color="#FFF0F0F0" />
+                </ResourceDictionary>
+                <ResourceDictionary x:Key="Default">
+                    <SolidColorBrush x:Key="EditorPopupBackgroundBrush" Color="#FF232428" />
+                    <SolidColorBrush x:Key="EditorPopupBorderBrush" Color="#FF3D4047" />
+                    <SolidColorBrush x:Key="EditorPopupItemForegroundBrush" Color="#FFF0F0F0" />
+                    <SolidColorBrush x:Key="EditorPopupItemHoverBackgroundBrush" Color="#FF35577C" />
+                    <SolidColorBrush x:Key="EditorPopupItemHoverForegroundBrush" Color="#FFFFFFFF" />
+                    <SolidColorBrush x:Key="EditorTreeTextBrush" Color="#FFE6E6E6" />
+                    <SolidColorBrush x:Key="EditorTreeSelectionBackgroundBrush" Color="#FF2D4A6A" />
+                    <SolidColorBrush x:Key="EditorTreeSelectionForegroundBrush" Color="#FFF7FAFF" />
+                    <SolidColorBrush x:Key="EditorTreeHoverBackgroundBrush" Color="#FF273240" />
+                    <SolidColorBrush x:Key="EditorInspectorLabelBrush" Color="#FFD7D7D7" />
+                    <SolidColorBrush x:Key="EditorInspectorValueBrush" Color="#FFF0F0F0" />
+                </ResourceDictionary>
+            </ResourceDictionary.ThemeDictionaries>
+        </ResourceDictionary>
+    </Application.Resources>
+
     <Application.Styles>
         <suki:SukiTheme Locale="en-GB" ThemeColor="Blue" />
         <StyleInclude Source="avares://IconPacks.Avalonia.Material/Material.axaml" />

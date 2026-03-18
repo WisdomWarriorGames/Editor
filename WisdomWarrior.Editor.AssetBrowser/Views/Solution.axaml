@@ -29,12 +29,37 @@
             <TreeView.Styles>
                 <Style Selector="TreeViewItem">
                     <Setter Property="IsExpanded" Value="True" />
+                    <Setter Property="Background" Value="Transparent" />
+                    <Setter Property="Foreground" Value="{DynamicResource EditorTreeTextBrush}" />
+                </Style>
+
+                <Style Selector="TreeViewItem:pointerover /template/ ContentPresenter">
+                    <Setter Property="Background" Value="Transparent" />
+                </Style>
+
+                <Style Selector="TreeViewItem:selected /template/ ContentPresenter">
+                    <Setter Property="Background" Value="Transparent" />
+                </Style>
+
+                <Style Selector="TreeViewItem:pointerover Border#NodeContainer">
+                    <Setter Property="Background" Value="{DynamicResource EditorTreeHoverBackgroundBrush}" />
+                </Style>
+
+                <Style Selector="TreeViewItem:selected Border#NodeContainer">
+                    <Setter Property="Background" Value="{DynamicResource EditorTreeSelectionBackgroundBrush}" />
+                </Style>
+
+                <Style Selector="TreeViewItem:selected TextBlock#NodeText">
+                    <Setter Property="Foreground" Value="{DynamicResource EditorTreeSelectionForegroundBrush}" />
                 </Style>
             </TreeView.Styles>
 
             <TreeView.DataTemplates>
                 <TreeDataTemplate DataType="models:FileSystemNode" ItemsSource="{Binding Folders}">
-                    <Border Background="Transparent">
+                    <Border x:Name="NodeContainer"
+                            Background="Transparent"
+                            CornerRadius="4"
+                            Padding="4,2">
                         <Border.ContextMenu>
                             <ContextMenu>
                                 <MenuItem Header="Copy"
@@ -46,7 +71,10 @@
                             </ContextMenu>
                         </Border.ContextMenu>
 
-                        <TextBlock FontSize="10" Text="{Binding Name}" />
+                        <TextBlock x:Name="NodeText"
+                                   FontSize="10"
+                                   Foreground="{DynamicResource EditorTreeTextBrush}"
+                                   Text="{Binding Name}" />
                     </Border>
                 </TreeDataTemplate>
             </TreeView.DataTemplates>
