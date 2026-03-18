@@ -11,7 +11,7 @@ public partial class SolutionViewModel : ObservableObject
 {
     private readonly WorkspaceService _workspaceService;
     private readonly IAssetClipboardActionService _clipboardActionService;
-    private FileSystemRegistry _registry = null!;
+    private FileSystemRegistry? _registry;
 
     [ObservableProperty] private FileSystemNode? _selectedNode;
 
@@ -29,7 +29,7 @@ public partial class SolutionViewModel : ObservableObject
 
     protected override void OnPropertyChanged(PropertyChangedEventArgs e)
     {
-        if (e.PropertyName == nameof(SelectedNode) && SelectedNode != null)
+        if (e.PropertyName == nameof(SelectedNode) && SelectedNode != null && _registry != null)
         {
             _registry.SetCurrentNode(SelectedNode.FullPath);
         }
@@ -39,11 +39,28 @@ public partial class SolutionViewModel : ObservableObject
 
     private void OnWorkspaceInitialized(FileSystemRegistry registry)
     {
+        BindRegistry(registry);
+
+        SelectedNode = registry.CurrentNode;
+        OnPropertyChanged(nameof(FileSystemRoot));
+    }
+
+    private void BindRegistry(FileSystemRegistry registry)
+    {
+        if (ReferenceEquals(_registry, registry))
+        {
+            return;
+        }
+
+        if (_registry != null)
+        {
+            _registry.CurrentNodeChanged -= OnCurrentNodeChanged;
+            _registry.FileSystemChanged -= OnFileSystemChanged;
+        }
+
         _registry = registry;
         _registry.CurrentNodeChanged += OnCurrentNodeChanged;
         _registry.FileSystemChanged += OnFileSystemChanged;
-
-        OnPropertyChanged(nameof(FileSystemRoot));
     }
 
     private void OnFileSystemChanged()

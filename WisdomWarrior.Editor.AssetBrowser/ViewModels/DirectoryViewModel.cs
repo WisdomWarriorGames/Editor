@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Threading;
 using Avalonia.Platform.Storage;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -9,6 +10,7 @@ using WisdomWarrior.Editor.Core.Helpers;
 using WisdomWarrior.Editor.Core.Services;
 using WisdomWarrior.Editor.FileSystem;
 using WisdomWarrior.Editor.FileSystem.Helpers;
+using WisdomWarrior.Editor.FileSystem.Models;
 
 namespace WisdomWarrior.Editor.AssetBrowser.ViewModels;
 
@@ -19,7 +21,8 @@ public partial class DirectoryViewModel : ObservableObject
     private readonly FileSystemService _fileSystemService;
     private readonly IAssetClipboardActionService _clipboardActionService;
     private readonly SelectionManager _selectionManager;
-    private FileSystemRegistry _registry = null!;
+    private FileSystemRegistry? _registry;
+    private int _refreshVersion;
 
     [ObservableProperty] private string _rootDir = "Assets";
 
@@ -39,16 +42,18 @@ public partial class DirectoryViewModel : ObservableObject
 
     public void Initialize(FileSystemRegistry registry)
     {
-        _registry = registry;
+        BindRegistry(registry);
         RootDir = registry.RootName;
+        SelectedItems.Clear();
+        Assets.Clear();
+        Breadcrumbs.Clear();
 
-        _registry.RegistryUpdated += OnRegistryUpdated;
         Refresh();
     }
 
     public void Navigate(AssetViewModel asset)
     {
-        if (!asset.IsFolder)
+        if (!asset.IsFolder || _registry == null)
         {
             return;
         }
@@ -63,19 +68,32 @@ public partial class DirectoryViewModel : ObservableObject
 
     private void OnRegistryUpdated()
     {
+        if (Dispatcher.UIThread.CheckAccess())
+        {
+            Refresh();
+            return;
+        }
+
         Dispatcher.UIThread.InvokeAsync(Refresh);
     }
 
     private async void Refresh()
     {
-        var activeNode = _registry.CurrentNode;
+        if (_registry?.CurrentNode == null)
+        {
+            return;
+        }
+
+        var registry = _registry;
+        var activeNode = registry.CurrentNode;
         if (activeNode == null)
         {
             return;
         }
 
+        var refreshVersion = Interlocked.Increment(ref _refreshVersion);
         Assets.Clear();
-        SetupBreadcrumbs();
+        SetupBreadcrumbs(activeNode, registry);
 
         await Task.Run(() =>
         {
@@ -89,7 +107,9 @@ public partial class DirectoryViewModel : ObservableObject
                 var vm = new AssetViewModel(child, _fileSystemService, _clipboardActionService, _selectionManager);
                 Dispatcher.UIThread.Post(() =>
                 {
-                    if (_registry.CurrentNode == activeNode)
+                    if (refreshVersion == Volatile.Read(ref _refreshVersion)
+                        && ReferenceEquals(_registry, registry)
+                        && _registry.CurrentNode == activeNode)
                     {
                         Assets.Add(vm);
                     }
@@ -98,25 +118,35 @@ public partial class DirectoryViewModel : ObservableObject
         });
     }
 
-    private void SetupBreadcrumbs()
+    private void BindRegistry(FileSystemRegistry registry)
     {
-        var activeNode = _registry.CurrentNode;
-        if (activeNode == null)
+        if (ReferenceEquals(_registry, registry))
         {
             return;
         }
 
+        if (_registry != null)
+        {
+            _registry.RegistryUpdated -= OnRegistryUpdated;
+        }
+
+        _registry = registry;
+        _registry.RegistryUpdated += OnRegistryUpdated;
+    }
+
+    private void SetupBreadcrumbs(FileSystemNode activeNode, FileSystemRegistry registry)
+    {
         Breadcrumbs.Clear();
 
         var breadcrumbs = new List<BreadcrumbViewModel>
         {
-            new(activeNode.Name, activeNode.FullPath, _fileSystemService, _clipboardActionService, _registry)
+            new(activeNode.Name, activeNode.FullPath, _fileSystemService, _clipboardActionService, registry)
         };
 
         while (activeNode.Parent != null)
         {
             activeNode = activeNode.Parent;
-            breadcrumbs.Add(new BreadcrumbViewModel(activeNode.Name, activeNode.FullPath, _fileSystemService, _clipboardActionService, _registry));
+            breadcrumbs.Add(new BreadcrumbViewModel(activeNode.Name, activeNode.FullPath, _fileSystemService, _clipboardActionService, registry));
         }
 
         breadcrumbs.Reverse();
@@ -131,7 +161,7 @@ public partial class DirectoryViewModel : ObservableObject
         }
 
         Breadcrumbs.Add(breadcrumbs[0]);
-        Breadcrumbs.Add(new BreadcrumbViewModel("...", breadcrumbs[^3].FullPath, _fileSystemService, _clipboardActionService, _registry));
+        Breadcrumbs.Add(new BreadcrumbViewModel("...", breadcrumbs[^3].FullPath, _fileSystemService, _clipboardActionService, registry));
 
         for (var index = breadcrumbs.Count - (MaxBreadcrumbs - 1); index < breadcrumbs.Count; index++)
         {
@@ -147,6 +177,11 @@ public partial class DirectoryViewModel : ObservableObject
     [RelayCommand(CanExecute = nameof(CanAcceptDrop))]
     private void AcceptDrop(object? droppedItem)
     {
+        if (_registry?.CurrentNode == null)
+        {
+            return;
+        }
+
         droppedItem.ProcessFileSystemDropAsync(_registry.CurrentNode.FullPath, _fileSystemService);
     }
 
