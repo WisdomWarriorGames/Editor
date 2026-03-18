@@ -17,10 +17,10 @@
             </Button.Background>
 
             <Button.Flyout>
-                <Flyout>
+                <Flyout ShowMode="Standard">
 
-                    <Border Background="{DynamicResource SukiBackground}"
-                            BorderBrush="{DynamicResource SukiBorderBrush}"
+                    <Border Background="{DynamicResource EditorColourValueBrush}"
+                            BorderBrush="{DynamicResource EditorPopupBorderBrush}"
                             BorderThickness="1"
                             CornerRadius="2"
                             Padding="4"
@@ -30,6 +30,15 @@
                     
                                 <Style Selector="ColorView TextBox">
                                     <Setter Property="Background" Value="{DynamicResource SukiAlternativeBackground}" />
+                                    <Setter Property="Foreground" Value="{DynamicResource EditorInspectorValueBrush}" />
+                                </Style>
+
+                                <Style Selector="ColorView TextBlock">
+                                    <Setter Property="Foreground" Value="{DynamicResource EditorInspectorValueBrush}" />
+                                </Style>
+
+                                <Style Selector="ColorView Slider">
+                                    <Setter Property="Foreground" Value="{DynamicResource EditorInspectorValueBrush}" />
                                 </Style>
 
                             </ColorView.Styles>

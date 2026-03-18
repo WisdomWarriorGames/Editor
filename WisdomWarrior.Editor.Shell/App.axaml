@@ -18,6 +18,7 @@
                     <SolidColorBrush x:Key="EditorTreeHoverBackgroundBrush" Color="#FFEEF5FF" />
                     <SolidColorBrush x:Key="EditorInspectorLabelBrush" Color="#FF2B2B2B" />
                     <SolidColorBrush x:Key="EditorInspectorValueBrush" Color="#FF111111" />
+                    <SolidColorBrush x:Key="EditorColourValueBrush" Color="#FFF0F0F0" />
                 </ResourceDictionary>
                 <ResourceDictionary x:Key="Dark">
                     <SolidColorBrush x:Key="EditorPopupBackgroundBrush" Color="#FF232428" />
@@ -31,6 +32,7 @@
                     <SolidColorBrush x:Key="EditorTreeHoverBackgroundBrush" Color="#FF273240" />
                     <SolidColorBrush x:Key="EditorInspectorLabelBrush" Color="#FFD7D7D7" />
                     <SolidColorBrush x:Key="EditorInspectorValueBrush" Color="#FFF0F0F0" />
+                    <SolidColorBrush x:Key="EditorColourValueBrush" Color="#FFF0F0F0" />
                 </ResourceDictionary>
                 <ResourceDictionary x:Key="Default">
                     <SolidColorBrush x:Key="EditorPopupBackgroundBrush" Color="#FF232428" />
@@ -44,6 +46,7 @@
                     <SolidColorBrush x:Key="EditorTreeHoverBackgroundBrush" Color="#FF273240" />
                     <SolidColorBrush x:Key="EditorInspectorLabelBrush" Color="#FFD7D7D7" />
                     <SolidColorBrush x:Key="EditorInspectorValueBrush" Color="#FFF0F0F0" />
+                    <SolidColorBrush x:Key="EditorColourValueBrush" Color="#FFF0F0F0" />
                 </ResourceDictionary>
             </ResourceDictionary.ThemeDictionaries>
         </ResourceDictionary>

@@ -9,6 +9,7 @@ namespace WisdomWarrior.Editor.Inspector.Views;
 public partial class ComponentEditor : UserControl
 {
     private readonly List<TrackerInspectorProperty> _rootProperties = [];
+    private string[] _visiblePropertySignature = [];
 
     public ComponentEditor()
     {
@@ -22,6 +23,7 @@ public partial class ComponentEditor : UserControl
 
         DisposeRootProperties();
         PropertiesStack.Children.Clear();
+        _visiblePropertySignature = [];
 
         if (DataContext is not IInspectableObjectTracker tracker)
         {
@@ -40,14 +42,36 @@ public partial class ComponentEditor : UserControl
 
     private void HandleRootPropertyChanged(object? _)
     {
-        Dispatcher.UIThread.Post(RebuildPropertyRows);
+        Dispatcher.UIThread.Post(RebuildPropertyRowsIfStructureChanged);
     }
 
     private void RebuildPropertyRows()
     {
+        var visibleProperties = InspectorPropertyExpander.ExpandVisibleProperties(_rootProperties);
         PropertiesStack.Children.Clear();
+        _visiblePropertySignature = CreateVisiblePropertySignature(visibleProperties);
 
-        foreach (var visibleProperty in InspectorPropertyExpander.ExpandVisibleProperties(_rootProperties))
+        foreach (var visibleProperty in visibleProperties)
+        {
+            PropertiesStack.Children.Add(CreatePropertyRow(visibleProperty));
+        }
+    }
+
+    private void RebuildPropertyRowsIfStructureChanged()
+    {
+        var visibleProperties = InspectorPropertyExpander.ExpandVisibleProperties(_rootProperties);
+        var updatedSignature = CreateVisiblePropertySignature(visibleProperties);
+
+        if (_visiblePropertySignature.SequenceEqual(updatedSignature))
+        {
+            DisposeTransientVisibleProperties(visibleProperties);
+            return;
+        }
+
+        PropertiesStack.Children.Clear();
+        _visiblePropertySignature = updatedSignature;
+
+        foreach (var visibleProperty in visibleProperties)
         {
             PropertiesStack.Children.Add(CreatePropertyRow(visibleProperty));
         }
@@ -100,5 +124,25 @@ public partial class ComponentEditor : UserControl
         }
 
         _rootProperties.Clear();
+    }
+
+    private static string[] CreateVisiblePropertySignature(IReadOnlyList<VisibleInspectorProperty> visibleProperties)
+    {
+        return visibleProperties
+            .Select(property => $"{property.Property.Name}|{property.Property.PropertyType.FullName}|{property.DisposeWhenDetached}")
+            .ToArray();
+    }
+
+    private static void DisposeTransientVisibleProperties(IEnumerable<VisibleInspectorProperty> visibleProperties)
+    {
+        foreach (var property in visibleProperties)
+        {
+            if (!property.DisposeWhenDetached || property.Property is not IDisposable disposable)
+            {
+                continue;
+            }
+
+            disposable.Dispose();
+        }
     }
 }
