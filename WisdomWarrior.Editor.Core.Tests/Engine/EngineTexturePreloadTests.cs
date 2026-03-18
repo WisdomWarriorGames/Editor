@@ -5,6 +5,7 @@ using WisdomWarrior.Engine.Core.Assets;
 using WisdomWarrior.Engine.Core.Components;
 using WisdomWarrior.Engine.Core.Interfaces;
 using WisdomWarrior.Engine.Core.Rendering;
+using WisdomWarrior.Engine.Core.Systems;
 using EngineSize = WisdomWarrior.Engine.Core.DataTypes.Size;
 
 namespace WisdomWarrior.Editor.Core.Tests.Engine;
@@ -16,14 +17,17 @@ public class EngineTexturePreloadTests
     {
         var sceneName = $"Scene_{Guid.NewGuid():N}";
         var root = new GameEntity { Name = "Root" };
+        root.AddComponent(new Transform());
         root.AddComponent(CreateSprite("Assets/hero.png"));
         root.AddComponent(CreateSprite("Assets/hero.png"));
 
         var child = new GameEntity { Name = "Child" };
+        child.AddComponent(new Transform());
         child.AddComponent(CreateSprite("Assets/weapon.png"));
         root.AddEntity(child);
 
         var scene = new Scene { Name = sceneName };
+        scene.AddSystem(new SpriteRenderSystem());
         scene.AddEntity(root);
 
         SceneManager.AddScene(sceneName, scene);
@@ -59,6 +63,7 @@ public class EngineTexturePreloadTests
     {
         var sceneName = $"Scene_{Guid.NewGuid():N}";
         var root = new GameEntity { Name = "Root" };
+        root.AddComponent(new Transform());
         root.AddComponent(CreateSprite("Assets/initial.png"));
 
         var scene = new Scene { Name = sceneName };
@@ -76,6 +81,7 @@ public class EngineTexturePreloadTests
             Assert.Single(renderService.PreloadBatches);
 
             var runtimeEntity = new GameEntity { Name = "Runtime" };
+            runtimeEntity.AddComponent(new Transform());
             runtimeEntity.AddComponent(CreateSprite("Assets/runtime-added.png"));
             scene.AddEntity(runtimeEntity);
 
@@ -131,6 +137,7 @@ public class EngineTexturePreloadTests
     private static GameEntity CreateEntityWithSprite(string name, string path)
     {
         var entity = new GameEntity { Name = name };
+        entity.AddComponent(new Transform());
         entity.AddComponent(CreateSprite(path));
         return entity;
     }

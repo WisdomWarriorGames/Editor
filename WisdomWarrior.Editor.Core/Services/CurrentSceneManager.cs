@@ -139,7 +139,6 @@ public class CurrentSceneManager
     {
         while (!cancellationToken.IsCancellationRequested)
         {
-            ActiveScene?.ResolveDependencies();
             Tracker.Update();
 
             var delayMs = 1000 / TicksPerSecond;

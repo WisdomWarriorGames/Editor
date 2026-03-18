@@ -7,122 +7,34 @@ namespace WisdomWarrior.Editor.Core.Tests.Engine;
 public class AttachmentDependencyTests
 {
     [Fact]
-    public void AddComponent_AutoAttachesRequiredComponent_AndMaintainsEntityCacheAndParent()
+    public void AddComponent_DoesNotAutoAttachRequiredComponentsOrSystems()
     {
         var scene = new Scene { Name = "AttachmentScene" };
         var entity = new GameEntity { Name = "Player" };
         scene.AddEntity(entity);
 
-        entity.AddComponent(new RequiresSiblingComponent());
+        entity.AddComponent(new RequiresComponentAndSystemComponent());
 
-        var requiredComponent = Assert.Single(entity.Components.OfType<SiblingDependencyComponent>());
-        Assert.Same(entity, requiredComponent.Parent);
-        Assert.Single(scene.GetEntitiesWith<SiblingDependencyComponent>());
-        Assert.Same(entity, scene.GetEntitiesWith<SiblingDependencyComponent>().Single());
+        Assert.Single(entity.Components.OfType<RequiresComponentAndSystemComponent>());
+        Assert.Empty(entity.Components.OfType<SiblingDependencyComponent>());
+        Assert.Empty(scene.Systems.OfType<FirstRequiredSystem>());
+        Assert.Empty(scene.GetEntitiesWith<SiblingDependencyComponent>());
     }
 
     [Fact]
-    public void AddComponent_AutoAttachesRequiredSystems_AndSupportsMultipleDependencies()
-    {
-        var scene = new Scene { Name = "SystemDependencyScene" };
-        var entity = new GameEntity { Name = "Player" };
-        scene.AddEntity(entity);
-
-        entity.AddComponent(new RequiresMultipleSystemsComponent());
-
-        Assert.Contains(scene.Systems, system => system.GetType() == typeof(FirstRequiredSystem));
-        Assert.Contains(scene.Systems, system => system.GetType() == typeof(SecondRequiredSystem));
-        Assert.All(scene.Systems, system => Assert.Same(scene, system.Scene));
-    }
-
-    [Fact]
-    public void AddSystem_AutoAttachesRequiredSystems_AndUpdatesTypedCaches()
+    public void AddSystem_DoesNotAutoAttachRequiredSystems()
     {
         var scene = new Scene { Name = "SceneSystems" };
 
         scene.AddSystem(new RequiresBehaviourSystem());
 
-        Assert.Contains(scene.Systems, system => system.GetType() == typeof(RequiredBehaviourSystem));
-        Assert.Contains(scene.BehaviourSystems, system => system.GetType() == typeof(RequiredBehaviourSystem));
-        Assert.All(scene.Systems, system => Assert.Same(scene, system.Scene));
+        Assert.Single(scene.Systems.OfType<RequiresBehaviourSystem>());
+        Assert.Empty(scene.Systems.OfType<RequiredBehaviourSystem>());
+        Assert.Empty(scene.BehaviourSystems.OfType<RequiredBehaviourSystem>());
     }
 
     [Fact]
-    public void ResolveDependencies_ResolvesNestedDependencyChains_ToAStableGraph()
-    {
-        var scene = new Scene { Name = "ChainScene" };
-        var entity = new GameEntity { Name = "Player" };
-        scene.AddEntity(entity);
-
-        entity.AddComponent(new RootChainComponent());
-        scene.AddSystem(new RootChainSystem());
-
-        Assert.Single(entity.Components.OfType<MidChainComponent>());
-        Assert.Single(entity.Components.OfType<LeafChainComponent>());
-        Assert.Contains(scene.Systems, system => system.GetType() == typeof(MidChainSystem));
-        Assert.Contains(scene.Systems, system => system.GetType() == typeof(LeafChainSystem));
-    }
-
-    [Fact]
-    public void ResolveDependencies_CyclicDependencies_DoNotCreateDuplicates()
-    {
-        var scene = new Scene { Name = "CycleScene" };
-        var entity = new GameEntity { Name = "Player" };
-        scene.AddEntity(entity);
-
-        entity.AddComponent(new ComponentCycleA());
-        scene.AddSystem(new SystemCycleA());
-        scene.ResolveDependencies();
-
-        Assert.Single(entity.Components.OfType<ComponentCycleA>());
-        Assert.Single(entity.Components.OfType<ComponentCycleB>());
-        Assert.Single(scene.Systems.Where(system => system.GetType() == typeof(SystemCycleA)));
-        Assert.Single(scene.Systems.Where(system => system.GetType() == typeof(SystemCycleB)));
-    }
-
-    [Fact]
-    public void ResolveDependencies_UsesExactTypeMatching_WhenCheckingExistingComponents()
-    {
-        var scene = new Scene { Name = "ExactTypeScene" };
-        var entity = new GameEntity { Name = "Player" };
-        scene.AddEntity(entity);
-
-        entity.AddComponent(new DerivedDependencyComponent());
-        entity.AddComponent(new RequiresBaseDependencyComponent());
-
-        Assert.Single(entity.Components.Where(component => component.GetType() == typeof(BaseDependencyComponent)));
-        Assert.Single(entity.Components.Where(component => component.GetType() == typeof(DerivedDependencyComponent)));
-    }
-
-    [Fact]
-    public void ResolveDependencies_IgnoresRequireComponentAppliedToSystems()
-    {
-        var scene = new Scene { Name = "IgnoredComponentAttributeScene" };
-
-        scene.AddSystem(new SystemWithIgnoredComponentRequirement());
-
-        Assert.Single(scene.Systems);
-        Assert.Empty(scene.Entities);
-    }
-
-    [Fact]
-    public void ResolveDependencies_IgnoresInvalidDependencyTargets()
-    {
-        var scene = new Scene { Name = "InvalidDependencyScene" };
-        var entity = new GameEntity { Name = "Player" };
-        scene.AddEntity(entity);
-
-        var addComponentError = Record.Exception(() => entity.AddComponent(new ComponentWithInvalidDependencies()));
-        var addSystemError = Record.Exception(() => scene.AddSystem(new SystemWithInvalidDependencies()));
-
-        Assert.Null(addComponentError);
-        Assert.Null(addSystemError);
-        Assert.Single(entity.Components.OfType<ComponentWithInvalidDependencies>());
-        Assert.Single(scene.Systems.OfType<SystemWithInvalidDependencies>());
-    }
-
-    [Fact]
-    public void SceneInitialize_ResolvesDependenciesForExistingAttachments()
+    public void SceneInitialize_DoesNotResolveDependenciesForExistingAttachments()
     {
         var entity = new GameEntity
         {
@@ -138,13 +50,13 @@ public class AttachmentDependencyTests
 
         scene.Initialize();
 
-        var requiredComponent = Assert.Single(entity.Components.OfType<SiblingDependencyComponent>());
-        Assert.Same(entity, requiredComponent.Parent);
-        Assert.Contains(scene.Systems, system => system.GetType() == typeof(FirstRequiredSystem));
+        Assert.Single(entity.Components.OfType<RequiresComponentAndSystemComponent>());
+        Assert.Empty(entity.Components.OfType<SiblingDependencyComponent>());
+        Assert.Empty(scene.Systems.OfType<FirstRequiredSystem>());
     }
 
     [Fact]
-    public void SceneUpdate_ResolvesDependenciesForExistingAttachmentsAddedOutsideAttachApi()
+    public void SceneUpdate_DoesNotResolveDependenciesForAttachmentsAddedOutsideAttachApi()
     {
         var scene = new Scene { Name = "UpdateScene" };
         var entity = new GameEntity { Name = "Player" };
@@ -154,9 +66,10 @@ public class AttachmentDependencyTests
         entity.Components.Add(new RequiresComponentAndSystemComponent());
         scene.Update();
 
-        Assert.Single(entity.Components.OfType<SiblingDependencyComponent>());
-        Assert.Contains(scene.Systems, system => system.GetType() == typeof(FirstRequiredSystem));
-        Assert.Single(scene.GetEntitiesWith<SiblingDependencyComponent>());
+        Assert.Single(entity.Components.OfType<RequiresComponentAndSystemComponent>());
+        Assert.Empty(entity.Components.OfType<SiblingDependencyComponent>());
+        Assert.Empty(scene.Systems.OfType<FirstRequiredSystem>());
+        Assert.Empty(scene.GetEntitiesWith<SiblingDependencyComponent>());
     }
 
     [Fact]
@@ -204,83 +117,19 @@ public class AttachmentDependencyTests
     }
 
     [Fact]
-    public void SceneInitialize_LimitToOne_RemovesExistingDuplicateComponentsAndSystems_KeepingFirst()
+    public void AddingTypesWithDependencyAttributes_DoesNotThrow_AndLeavesOriginalAttachmentsOnly()
     {
-        var firstComponent = new LimitedComponent { Name = "First" };
-        var secondComponent = new LimitedComponent { Name = "Second" };
-        var firstSystem = new LimitedSystem { Name = "FirstSystem" };
-        var secondSystem = new LimitedSystem { Name = "SecondSystem" };
-
-        var entity = new GameEntity
-        {
-            Name = "Player",
-            Components = [firstComponent, secondComponent]
-        };
-
-        var scene = new Scene
-        {
-            Name = "InitializeLimitScene",
-            Entities = [entity],
-            Systems = [firstSystem, secondSystem]
-        };
-
-        scene.Initialize();
-
-        var keptComponent = Assert.Single(entity.Components.OfType<LimitedComponent>());
-        var keptSystem = Assert.Single(scene.Systems.OfType<LimitedSystem>());
-
-        Assert.Same(firstComponent, keptComponent);
-        Assert.Same(firstSystem, keptSystem);
-        Assert.Same(entity, keptComponent.Parent);
-        Assert.Null(secondComponent.Parent);
-        Assert.Same(scene, keptSystem.Scene);
-        Assert.Null(secondSystem.Scene);
-        Assert.Single(scene.GetEntitiesWith<LimitedComponent>());
-        Assert.Same(entity, scene.GetEntitiesWith<LimitedComponent>().Single());
-        Assert.Single(scene.BehaviourSystems.OfType<LimitedSystem>());
-    }
-
-    [Fact]
-    public void SceneUpdate_LimitToOne_RemovesDuplicatesAddedOutsideAttachApi_AndRepairsCache()
-    {
-        var scene = new Scene { Name = "LimitUpdateScene" };
+        var scene = new Scene { Name = "InvalidDependencyScene" };
         var entity = new GameEntity { Name = "Player" };
         scene.AddEntity(entity);
-        scene.Initialize();
 
-        var firstComponent = new LimitedComponent { Name = "First" };
-        var secondComponent = new LimitedComponent { Name = "Second" };
-        entity.Components.Add(firstComponent);
-        entity.Components.Add(secondComponent);
-        scene.Systems.Add(new LimitedSystem { Name = "FirstSystem" });
-        scene.Systems.Add(new LimitedSystem { Name = "SecondSystem" });
+        var addComponentError = Record.Exception(() => entity.AddComponent(new ComponentWithInvalidDependencies()));
+        var addSystemError = Record.Exception(() => scene.AddSystem(new SystemWithInvalidDependencies()));
 
-        scene.Update();
-
-        var keptComponent = Assert.Single(entity.Components.OfType<LimitedComponent>());
-        var keptSystem = Assert.Single(scene.Systems.OfType<LimitedSystem>());
-
-        Assert.Same(firstComponent, keptComponent);
-        Assert.Same(entity, keptComponent.Parent);
-        Assert.Single(scene.GetEntitiesWith<LimitedComponent>());
-        Assert.Same(entity, scene.GetEntitiesWith<LimitedComponent>().Single());
-        Assert.Same(scene, keptSystem.Scene);
-        Assert.Single(scene.BehaviourSystems.OfType<LimitedSystem>());
-    }
-
-    [Fact]
-    public void ResolveDependencies_WithLimitToOneRequiredType_DoesNotCreateDuplicates()
-    {
-        var scene = new Scene { Name = "LimitedDependencyScene" };
-        var entity = new GameEntity { Name = "Player" };
-        scene.AddEntity(entity);
-        entity.AddComponent(new LimitedDependencyComponent());
-
-        entity.AddComponent(new RequiresLimitedComponent());
-        scene.AddSystem(new RequiresLimitedSystem());
-
-        Assert.Single(entity.Components.OfType<LimitedDependencyComponent>());
-        Assert.Single(scene.Systems.OfType<LimitedSystem>());
+        Assert.Null(addComponentError);
+        Assert.Null(addSystemError);
+        Assert.Single(entity.Components.OfType<ComponentWithInvalidDependencies>());
+        Assert.Single(scene.Systems.OfType<SystemWithInvalidDependencies>());
     }
 
     [RequireComponent(typeof(SiblingDependencyComponent))]

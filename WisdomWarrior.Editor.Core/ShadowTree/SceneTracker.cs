@@ -65,6 +65,7 @@ public class SceneTracker
         lock (_syncRoot)
         {
             _activeScene = scene;
+            SceneDependencyStabilizer.Stabilize(scene);
             _lastName = scene.Name;
             SyncRoots();
             SyncSystems();
@@ -137,6 +138,11 @@ public class SceneTracker
         lock (_syncRoot)
         {
             if (_activeScene == null) return;
+
+            if (SceneDependencyStabilizer.Stabilize(_activeScene))
+            {
+                detectedChanges = true;
+            }
 
             if (_activeScene.Name != _lastName)
             {
